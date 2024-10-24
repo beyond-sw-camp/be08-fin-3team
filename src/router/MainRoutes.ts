@@ -593,6 +593,24 @@ const MainRoutes = {
             path: '/icons/tabler',
             component: () => import('@/views/icons/TablerIcons.vue')
         }
+
+        ,   {
+            name: 'MyPage',
+            path: '/apps/user/mypage',
+            component: () => import('@/views/apps/user/MyPage.vue')
+        },
+
+        {
+            name: 'MyCustomers',
+            path: '/apps/user/mypage/customers',
+            component: () => import('@/views/apps/user/MyCustomers.vue')
+        },
+        {
+            name: 'MyPCustomers',
+            path: '/apps/user/mypage/pcustomers',
+           component: () => import('@/views/apps/user/MyPCustomers.vue')
+        },
+
     ]
 };
 
