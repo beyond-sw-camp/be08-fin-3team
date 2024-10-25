@@ -19,13 +19,8 @@ const getfollowers: any = computed(() => {
     return store.followers;
 });
 const searchValue = ref('');
-// dropdown data
-const actionDD = ref([
-    { title: 'Favorite', icon: HeartIcon },
-    { title: 'Edit Friend List', icon: UsersIcon },
-    { title: 'Remove', icon: TrashIcon }
-]);
-const page = ref({ title: 'Social Profile' });
+
+
 
 const filteredCards = computed(() => {
     return getfollowers.value.filter((card: any) => {
@@ -33,19 +28,19 @@ const filteredCards = computed(() => {
     });
 });
 
+const page = ref({ title: '내 정보' });
 const breadcrumbs = ref([
     {
-        text: 'Dashboard',
+        text: '메인',
         disabled: false,
         href: '/'
     },
     {
-        text: 'Social Profile',
+        text: '내 정보',
         disabled: true,
         href: '#'
     }
 ]);
-
 </script>
 
 <template>
