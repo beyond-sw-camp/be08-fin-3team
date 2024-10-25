@@ -34,9 +34,9 @@ onMounted(()=>{
 const fetchCustomers=async()=>{
     try{
         const res = await api.get('/pcustomers');
-        console.log(res);
+     //   console.log(res);
         if(res.data.code==200) {
-            console.log(res.data.result);
+    //        console.log(res.data.result);
             pcustomers.value = res.data.result;
         }
     }catch(err){
@@ -52,7 +52,7 @@ const handleFilter =(filterValues)=>{
 const fetchpCustomersByFilterAPI =async()=>{
     try{
         const response = await api.post("/pcustomers",filters.value);
-        console.log(response);
+ //       console.log(response);
         if(response.data.code==200){
             pcustomers.value = response.data.result;
         }
