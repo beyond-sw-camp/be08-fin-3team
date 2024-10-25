@@ -44,9 +44,9 @@ const breadcrumbs = ref([
 </script>
 
 <template>
-    <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
+     <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
     <MyProfileBanner />
-    <v-row class="justify-content-end mt-5">
+    <!-- <v-row class="justify-content-end mt-5">
         <v-col cols="12">
             <div class="d-sm-flex align-center mb-5">
                 <h3 class="text-h3">
@@ -93,5 +93,5 @@ const breadcrumbs = ref([
                 </v-col>
             </v-row>
         </v-col>
-    </v-row>
+    </v-row>  -->
 </template>
