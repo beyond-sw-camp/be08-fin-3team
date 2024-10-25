@@ -20,9 +20,9 @@ const { mdAndUp } = useDisplay();
 
 <template>
     <template v-if="mdAndUp">
-        <div class="horizontalMenu  border-bottom bg-surface position-relative">
-            <div :class="customizer.boxed ? 'maxWidth' : 'px-6'">
-                <ul class="gap-1 horizontal-navbar mx-lg-0 mx-3">
+        <div class="horizontalMenu border-bottom bg-surface position-relative">
+            <div :class="customizer.boxed ? 'maxWidth' : 'px-12'">
+                <ul class="gap-1 horizontal-navbar d-flex justify-content-center">
                     <!---Menu Loop -->
                     <li v-for="(item, i) in sidebarMenu" :key="i" class="navItem">
                         <!---If Has Child -->
@@ -35,8 +35,9 @@ const { mdAndUp } = useDisplay();
             </div>    
         </div>
     </template>
-    <div v-else class="mobile-menu">
-        <VerticalSidebar />
-    </div>
 </template>
-<style lang="scss"></style>
+<style lang="scss">
+.horizontal-navbar {
+    display: flex;
+    justify-content: center;
+}</style>
