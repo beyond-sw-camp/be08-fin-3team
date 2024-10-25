@@ -12,6 +12,8 @@ const alertColor = ref('');
 const canAddTargetSale = ref(false);
 const userNames = ref([]);
 const productNames = ref([]);
+const formValid = ref(false);
+const isEditMode = ref(false);
 
 const currentYear = new Date().getFullYear();
 const yearRange = ref([]);
@@ -37,17 +39,17 @@ const headers = ref([
   { title: '액션', align: 'start' },
 ]);
 
-const groupDataByProduct = (data) => {
+function groupDataByProduct(data) {
   const groupedData = [];
-  
+
   data.forEach(item => {
     let existingProduct = groupedData.find(prod => prod.prodName === item.prodName);
-    
+
     if (!existingProduct) {
       existingProduct = {
         prodName: item.prodName,
-        month01: '', month02: '', month03: '', month04: '', 
-        month05: '', month06: '', month07: '', month08: '', 
+        month01: '', month02: '', month03: '', month04: '',
+        month05: '', month06: '', month07: '', month08: '',
         month09: '', month10: '', month11: '', month12: '',
         sum: 0
       };
@@ -56,48 +58,37 @@ const groupDataByProduct = (data) => {
 
     const monthKey = `month${String(item.month).padStart(2, '0')}`;
     existingProduct[monthKey] = item.monthTarget;
-
     existingProduct.sum += item.monthTarget;
   });
 
   return groupedData;
-};
+}
 
-const fetchUsers = async () => {
-  try{
-    const response = await api.get('/users')
-    console.log(response);
-
+async function fetchUsers() {
+  try {
+    const response = await api.get('/users');
     userNames.value = response.data.result.map(user => user.userName);
-
-    console.log(userNames.value);
-  }catch(error){
+  } catch (error) {
     console.error('Error:', error.message || error);
   }
 }
 
-const fetchProducts = async () => {
-  try{
-    const response = await api.get('/admin/products')
-    console.log(response);
-
+async function fetchProducts() {
+  try {
+    const response = await api.get('/admin/products');
     productNames.value = response.data.result.map(product => product.name);
-
-    console.log(ProductNames.value);
-  }catch{
+  } catch (error) {
     console.error('Error:', error.message || error);
   }
 }
 
-const fetchTargetSales = async () => {
+async function fetchTargetSales() {
   try {
     const response = await api.get(`/admin/targetsales/${searchSalesperson.value}`, {
       params: {
         year: searchYear.value,
       },
     });
-
-    console.log(response.data.code);
 
     if (response.data.code === 200) {
       if (Array.isArray(response.data.result)) {
@@ -107,7 +98,6 @@ const fetchTargetSales = async () => {
       }
     } else {
       canAddTargetSale.value = false;
-
       alertMessage.value = '년도와 영업사원을 선택해주세요.';
       alertColor.value = 'error';
       showAlert.value = true;
@@ -117,7 +107,7 @@ const fetchTargetSales = async () => {
   } catch (error) {
     console.error('Error adding target sale:', error.message || error);
   }
-};
+}
 
 const dialog = ref(false);
 const newTargetSale = ref({
@@ -126,27 +116,55 @@ const newTargetSale = ref({
   sum: 0,
   year: '',
   monthTargets: Array(12).fill(0),
-});
+})
 
-const openDialog = () => {
+function openDialog() {
   newTargetSale.value.userName = searchSalesperson.value;
   newTargetSale.value.year = searchYear.value;
+  isEditMode.value = false;
   dialog.value = true;
-};
+}
 
-const addTargetSale = async () => {
+async function saveTargetSale() {
+  validateForm();
+  if (!formValid.value) return;
   try {
-    await api.post('/admin/targetsales', newTargetSale.value);
-    console.log('Target Sale Added successfully');
+    const response = await api.post('/admin/targetsales', newTargetSale.value);
     dialog.value = false;
     fetchTargetSales();
     closeDialog();
+    console.log(response);
   } catch (error) {
     console.error('Error adding target sale:', error.message || error);
   }
-};
+}
 
-const closeDialog = () => {
+function editTargetSale(item) {
+  newTargetSale.value = {
+    userName: searchSalesperson.value,
+    prodName: item.prodName,
+    sum: item.sum,
+    year: searchYear.value,
+    monthTargets: [
+      item.month01,
+      item.month02,
+      item.month03,
+      item.month04,
+      item.month05,
+      item.month06,
+      item.month07,
+      item.month08,
+      item.month09,
+      item.month10,
+      item.month11,
+      item.month12,
+    ],
+  };
+  isEditMode.value = true;
+  dialog.value = true;
+}
+
+function closeDialog() {
   dialog.value = false;
   newTargetSale.value = {
     userName: '',
@@ -155,7 +173,11 @@ const closeDialog = () => {
     year: '',
     monthTargets: Array(12).fill(0),
   };
-};
+}
+
+function validateForm() {
+  formValid.value = !!newTargetSale.value.prodName;
+}
 
 const search = () => {
   fetchTargetSales();
@@ -217,7 +239,7 @@ onMounted(() => {
               <td>{{ item.month11 }}</td>
               <td>{{ item.month12 }}</td>
               <td>
-                <v-icon color="info" size="small" class="me-2" @click.stop="">
+                <v-icon color="info" size="small" class="me-2" @click.stop="editTargetSale(item)">
                   mdi-pencil
                 </v-icon>
               </td>
@@ -244,36 +266,33 @@ onMounted(() => {
 
   <v-dialog v-model="dialog" max-width="600px">
     <v-card>
-      <v-card-title>New Target Sale</v-card-title>
+      <v-card-title>{{ isEditMode ? 'Update TargetSales' : 'Add TargetSales' }}</v-card-title>
       <v-card-text>
         <v-container>
-          <v-row>
-            <v-col cols="12">
-              <v-select
-                v-model="newTargetSale.prodName"
-                :items="productNames"
-                label="Select product"
-              ></v-select>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field v-model="newTargetSale.sum" label="합계" type="number" />
-            </v-col>
-            <v-col cols="4" v-for="(month, index) in 12" :key="index">
-              <v-text-field v-model="newTargetSale.monthTargets[index]" :label="`${index + 1}월`" type="number" />
-            </v-col>
-          </v-row>
+          <v-form v-model="formValid">
+            <v-row>
+              <v-col cols="12">
+                <v-select
+                  v-model="newTargetSale.prodName"
+                  :items="productNames"
+                  label="제품 이름"
+                  :rules="[v => !!v || '상품명은 필수 입력입니다.']"
+                ></v-select>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field v-model="newTargetSale.sum" label="합계" type="number" />
+              </v-col>
+              <v-col cols="4" v-for="(month, index) in 12" :key="index">
+                <v-text-field v-model="newTargetSale.monthTargets[index]" :label="`${index + 1}월`" type="number" />
+              </v-col>
+            </v-row>
+          </v-form>
         </v-container>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="primary" @click="addTargetSale">Save</v-btn>
+        <v-btn color="primary" @click="saveTargetSale()" :disabled="!formValid">Save</v-btn>
         <v-btn @click="closeDialog">Cancel</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
-
-<style>
-.v-toolbar {
-  margin-bottom: 2rem;
-}
-</style>
