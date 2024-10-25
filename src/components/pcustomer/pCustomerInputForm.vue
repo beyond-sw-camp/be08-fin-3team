@@ -21,7 +21,7 @@ const note = ref('');
 const cls = ref('');
 const clsOptions = ref(['자사홈페이지','인터넷검색','지인소개','제품설명회','세미나','전화(인바운드)','채팅','매일','기타']);
 const contact = ref('');
-const contactOptions = ref(['미접촉','접촉시도','접촉중','접촉금지','고객전환','기존고객'])
+const contactOptions = ref(['미접촉','접촉시도','접촉중','접촉금지','기존고객'])
 const address = ref('');
 
 const router = useRouter();
