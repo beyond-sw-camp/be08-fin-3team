@@ -66,7 +66,7 @@ const fetchCustomersByFilterAPI = async()=>{
         }
 
     }catch(err){
-        console.log(`[ERROR 몌세지] : ${err}`);
+        console.log(`[ERROR] : ${err}`);
     }
 }
 
