@@ -9,7 +9,7 @@ const headers1 = ref([
     { title: '성공 확률(%)', align: 'start', key: 'successRate' },
     { title: '내용', align: 'start', key: 'description' },
     { title: '예상 소요 기간(일)', align: 'start', key: 'expectedDuration' },
-    { title: '액션', align: 'start' },
+    { title: 'Actions', align: 'start' },
 ]);
 
 const headers2 = ref([
@@ -17,7 +17,7 @@ const headers2 = ref([
     { title: '기본 프로세스', key: 'isDefault' },
     { title: '내용', key: 'description' },
     { title: '예상 소요기간', key: 'expectedDuration' },
-    { title: '액션', align: 'start' },
+    { title: 'Actions', align: 'start' },
 ]);
 
 const dialog = ref(false);
@@ -98,37 +98,40 @@ async function saveParentProcess() {
     try {
         if (dialogMode.value === 'add-parent') {
             const response = await api.post(`/admin/processes`, editedItem.value);
-            console.log('Parent process Add successful:', response.data);
+            console.log('Parent process 추가 성공:', response.data);
+        } else if (dialogMode.value === 'edit-parent') {
+            const response = await api.patch(`/admin/processes/${editedItem.value.processNo}`, editedItem.value);
+            console.log('Parent process 수정 성공:', response.data);
         }
         dialog.value = false;
         await fetchProcesses();
     } catch (error) {
-        console.error('Error saving parent process:', error.message || error);
+        console.error('상위 프로세스 저장 중 오류:', error.message || error);
     }
 }
 
 // 하위 프로세스 저장 함수
 async function saveSubProcess() {
     if (!formValid.value) return;
-
     try {
-        if (selectedProcess.value && selectedProcess.value.processNo) {
-            editedItem.value.processNo = selectedProcess.value.processNo;
+        if (dialogMode.value === 'add-sub') {
             const response = await api.post(`/admin/subprocesses`, editedItem.value);
-            console.log('Subprocess Add successful:', response.data);
-
-            dialog.value = false;
-
-            await fetchSubProcesses(selectedProcess.value.processName);
-            fetchProcesses();
-        } else {
-            console.error('No parent process selected for adding sub process.');
-            alert('상위 프로세스를 선택한 후 하위 프로세스를 추가하세요.');
+            console.log('Subprocess 추가 성공:', response.data);
+        } else if (dialogMode.value === 'edit-sub') {
+            console.log("hihi");
+            const response = await api.patch(`/admin/subprocesses/${editedItem.value.subProcessNo}`, editedItem.value);
+            console.log('Subprocess 수정 성공:', response.data);
         }
+
+        dialog.value = false;
+
+        await fetchSubProcesses(selectedProcess.value.processName);
+        fetchProcesses();
     } catch (error) {
-        console.error('Error saving sub process:', error.message || error);
+        console.error('하위 프로세스 저장 중 오류:', error.message || error);
     }
 }
+
 
 // 항목 삭제
 function deleteItem(item, type) {
@@ -139,9 +142,9 @@ function deleteItem(item, type) {
 
 // 폼 유효성 검사 함수
 function validateForm() {
-    if (dialogMode.value === 'add-parent') {
+    if (dialogMode.value === 'add-parent' || dialogMode.value === 'edit-parent') {
         formValid.value = !!editedItem.value.processName;
-    } else if (dialogMode.value === 'add-sub') {
+    } else if (dialogMode.value === 'add-sub' || dialogMode.value === 'edit-sub') {
         formValid.value = !!(
             editedItem.value.subProcessName &&
             editedItem.value.progressStep &&
@@ -172,6 +175,14 @@ async function confirmDelete() {
     }
 }
 
+// 항목 수정 함수
+function editItem(item, type) {
+    editedItem.value = { ...item };
+    dialogMode.value = `edit-${type}`;
+    dialog.value = true;
+    validateForm();
+}
+
 // 초기 데이터 로드
 onMounted(() => {
     fetchProcesses();
@@ -189,9 +200,14 @@ onMounted(() => {
                     item-value="processNo"
                 >
                     <template v-slot:item="{ item }">
-                        <tr @click="selectRow(item)">
+                        <tr @click="selectRow(item)" style="cursor: pointer;">
                             <td>{{ item.processName }}</td>
-                            <td>{{ item.isDefault }}</td>
+                            <td>
+                                <i
+                                    class="mr-2 mdi text-h5 mdi-bookmark-check"
+                                    :style="{ color: item.isDefault ? '#4CAF50' : 'inherit' }"
+                                ></i>
+                            </td>
                             <td>{{ item.description }}</td>
                             <td>{{ item.expectedDuration }}</td>
                             <td>
@@ -252,13 +268,19 @@ onMounted(() => {
             <v-card-title class="text-h5">
                 {{ dialogMode.includes('edit') ? 'Edit Item' : dialogMode === 'add-parent' ? 'Add Parent Process' : 'Add Sub Process' }}
             </v-card-title>
+
             <v-card-text>
                 <v-container>
-                    <v-row v-if="dialogMode === 'add-parent'">
+                    <v-row v-if="dialogMode === 'add-parent' || dialogMode === 'edit-parent'">
+                        <v-col cols="12">
+                            <v-switch label="프로세스 기본 여부" color="primary" v-model="editedItem.isDefault"></v-switch>
+                        </v-col>
                         <v-col cols="12">
                             <v-text-field v-model="editedItem.processName" label="Process Name"
                                 :rules="[v => !!v || '프로세스 명은 필수 입니다.']"
                                 @input="validateForm"/>
+                        </v-col>
+                        <v-col cols="12">
                             <v-text-field v-model="editedItem.description" label="Description" />
                         </v-col>
                     </v-row>
@@ -280,7 +302,7 @@ onMounted(() => {
                 </v-container>
             </v-card-text>
             <v-card-actions>
-                <v-btn v-if="dialogMode === 'add-parent'" color="primary" @click="saveParentProcess" :disabled="!formValid">Save Parent Process</v-btn>
+                <v-btn v-if="dialogMode === 'add-parent' || dialogMode === 'edit-parent'" color="primary" @click="saveParentProcess" :disabled="!formValid">Save Parent Process</v-btn>
                 <v-btn v-else color="primary" @click="saveSubProcess" :disabled="!formValid">Save Sub Process</v-btn>
                 <v-btn @click="dialog = false">Cancel</v-btn>
             </v-card-actions>
