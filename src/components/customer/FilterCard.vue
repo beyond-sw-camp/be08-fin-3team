@@ -62,8 +62,8 @@ const getPersonInChargeList=async()=>{
         const response = await api.get("/users");
         
         const data = response.data;
-        console.log(data);
-        console.log(data.result)
+        // console.log(data);
+        // console.log(data.result)
      
         if(data.code==200){
                 userOptions.value = data.result.map((user:UserDepartmentDto)=>({
@@ -71,7 +71,7 @@ const getPersonInChargeList=async()=>{
                 displayName: `${user.userName} (${user.userDeptName})`
             }));
     
-            console.log(userOptions.value);
+            // console.log(userOptions.value);
         }
 
     }catch(err){

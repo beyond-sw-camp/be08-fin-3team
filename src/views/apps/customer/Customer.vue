@@ -47,7 +47,7 @@ const fetchCustomers=async()=>{
     try{
         const res = await api.get('/customers');
         if(res.data.code==200) {
-            console.log(res.data.result);
+       //     console.log(res.data.result);
             customers.value = res.data.result;
         }
     }catch(err){
@@ -60,7 +60,7 @@ const fetchCustomersByFilterAPI = async()=>{
 
     try{
         const response = await api.post('/customers',filters.value);
-        console.log(response);
+      //  console.log(response);
         if(response.data.code==200){
             customers.value = response.data.result;
         }
