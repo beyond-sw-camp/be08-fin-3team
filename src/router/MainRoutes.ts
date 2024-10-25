@@ -402,14 +402,24 @@ const MainRoutes = {
             component: () => import('@/components/proposal/ProposalList.vue')
         },
         {
+            name: 'CreateProposal',
+            path: '/proposals/create',
+            component: () => import('@/components/proposal/CreateProposal.vue')
+        },
+        {
             name: 'EstimateList',
             path: '/estimates',
-            component: () => import('@/components/estimate/EstimateList.vue')
+            component: () => import('@/components/estimate/ListEstimate.vue')
         },
         {
             name: 'CreateEstimate',
             path: '/estimates/create',
             component: () => import('@/components/estimate/CreateEstimate.vue')
+        },
+        {
+            name: 'DetailEstimate',
+            path: '/estimates/form/:estNo',
+            component: () => import('@/components/estimate/DetailEstimate.vue')
         },
         {
             name: 'Gallery Lightbox',
