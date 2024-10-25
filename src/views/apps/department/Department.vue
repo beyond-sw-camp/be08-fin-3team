@@ -1,87 +1,81 @@
 <template>
     <div class="container">
-        <div class="customer_container">
-            <v-card>
-                <v-card-title class="custom-card-title">
-                    Department
-                </v-card-title>
-
-                <v-row class="pa-4" justify="space-between">
-                    <v-col cols="5">
-                        <v-treeview
-                            v-model:activated="active"
-                            v-model:opened="open"
-                            :items="items"
-                            color="warning"
-                            density="compact"
-                            item-title="name"
-                            item-value="no"
-                            activatable
-                        >
-                            <template v-slot:prepend="{ item }">
-                                <v-icon v-if="!item.children">
-                                    mdi-domain
-                                </v-icon>
-                            </template>
-                        </v-treeview>
-                    </v-col>
-
-                    <v-col>
-                        <v-scroll-y-transition>
-                            <div>
-                                <v-card>
-                                    <v-row class="text-right">
-                                        <v-col class="text-sm-left">
-                                            <span class="font-weight-black custom-margin">정보</span>
-                                        </v-col>
-                                        <v-col>
-                                            <v-btn color="primary" @click="addItem">신규</v-btn>
-                                            <v-btn color="primary" @click="">저장</v-btn>
-                                            <v-btn color="primary" @click.stop="deleteItem(selected)">삭제</v-btn>
-                                        </v-col>
-                                    </v-row>
-
-                                    <v-card-text>
-                                        <v-col>
-                                            <v-row class="align-center">
-                                                <v-col cols="4">
-                                                    <span class="font-weight-black">상위 부서</span>
-                                                    <v-text-field dense :value="selected ? selected.upperDeptName : ''"></v-text-field>
-                                                </v-col>
-                                                <v-col cols="4">
-                                                    <span class="font-weight-black">부서 코드</span>
-                                                    <v-text-field dense :value="selected ? selected.deptCode : ''"></v-text-field>
-                                                </v-col>
-                                                <v-col cols="4">
-                                                    <span class="font-weight-black">부서명</span>
-                                                    <v-text-field dense :value="selected ? selected.name : ''"></v-text-field>
-                                                </v-col>
-                                            </v-row>
-
-                                            <v-row class="align-center">
-                                                <v-col cols="4">
-                                                    <span class="font-weight-black">영문 부서명</span>
-                                                    <v-text-field dense :value="selected ? selected.engName : ''"></v-text-field>
-                                                </v-col>
-                                                <v-col cols="4">
-                                                    <span class="font-weight-black">부서장</span>
-                                                    <v-text-field dense :value="selected ? selected.deptHead : ''"></v-text-field>
-                                                </v-col>
-                                            </v-row>
-                                        </v-col>
-                                    </v-card-text>
-                                </v-card>
-                            </div>
-                        </v-scroll-y-transition>
-                    </v-col>
-                </v-row>
-            </v-card>
-        </div>
+        <v-card>
+            <v-card-title class="custom-card-title">
+                Department
+            </v-card-title>
+            <v-row class="pa-4" justify="space-between">
+                <v-col cols="5">
+                    <v-treeview
+                        v-model:activated="active"
+                        v-model:opened="open"
+                        :items="items"
+                        color="warning"
+                        density="compact"
+                        item-title="name"
+                        item-value="no"
+                        activatable
+                    >
+                        <template v-slot:prepend="{ item }">
+                            <v-icon v-if="!item.children">
+                                mdi-domain
+                            </v-icon>
+                        </template>
+                    </v-treeview>
+                </v-col>
+                <v-col>
+                    <v-scroll-y-transition>
+                        <div>
+                            <v-card>
+                                <v-row class="text-right">
+                                    <v-col class="text-sm-left">
+                                        <span class="font-weight-black custom-margin">정보</span>
+                                    </v-col>
+                                    <v-col>
+                                        <v-btn color="primary" @click="addItem">add</v-btn>
+                                        <v-btn color="primary" @click="updateItem(selected)" :disabled="!selected">Update</v-btn>
+                                        <v-btn color="primary" @click.stop="deleteItem(selected)" :disabled="!selected">Delete</v-btn>
+                                    </v-col>
+                                </v-row>
+                                <v-card-text>
+                                    <v-col>
+                                        <v-row class="align-center">
+                                            <v-col cols="4">
+                                                <span class="font-weight-black">상위 부서</span>
+                                                <v-text-field dense :value="selected ? selected.upperDeptName : ''"></v-text-field>
+                                            </v-col>
+                                            <v-col cols="4">
+                                                <span class="font-weight-black">부서 코드</span>
+                                                <v-text-field dense :value="selected ? selected.deptCode : ''"></v-text-field>
+                                            </v-col>
+                                            <v-col cols="4">
+                                                <span class="font-weight-black">부서명</span>
+                                                <v-text-field dense :value="selected ? selected.name : ''"></v-text-field>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row class="align-center">
+                                            <v-col cols="4">
+                                                <span class="font-weight-black">영문 부서명</span>
+                                                <v-text-field dense :value="selected ? selected.engName : ''"></v-text-field>
+                                            </v-col>
+                                            <v-col cols="4">
+                                                <span class="font-weight-black">부서장</span>
+                                                <v-text-field dense :value="selected ? selected.deptHead : ''"></v-text-field>
+                                            </v-col>
+                                        </v-row>
+                                    </v-col>
+                                </v-card-text>
+                            </v-card>
+                        </div>
+                    </v-scroll-y-transition>
+                </v-col>
+            </v-row>
+        </v-card>
     </div>
 
-    <v-dialog v-model="dialogAdd" max-width="500px">
+    <v-dialog v-model="dialog" max-width="500px">
         <v-card>
-            <v-card-title class="text-h5">Add Department</v-card-title>
+            <v-card-title class="text-h5">{{ isEdit ? 'Update Department' : 'Add Department' }}</v-card-title>
             <v-card-text>
                 <v-container>
                     <v-row>
@@ -130,8 +124,10 @@
                 </v-container>
             </v-card-text>
             <v-card-actions>
-                <v-btn :disabled="!formValid" color="primary" @click="saveDepartment">Save</v-btn>
-                <v-btn @click="dialogAdd = false">Cancel</v-btn>
+                <v-btn :disabled="!formValid" color="primary" @click="isEdit ? updateDepartment() : saveDepartment()">
+                    Save
+                </v-btn>
+                <v-btn @click="dialog = false">Cancel</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
@@ -167,8 +163,9 @@ export default {
         departmentNames: [],
         userNames: [],
         dialogDelete: false,
-        dialogAdd: false,
+        dialog: false,
         formValid: false,
+        isEdit: false,
         department: {
             deptCode : '',
             deptName : '',
@@ -214,13 +211,9 @@ export default {
     methods: {
         async fetchusers(){
             try{
-                const response = await api.get('/users')
-                console.log(response);
-
+                const response = await api.get('/users');
                 const userNames = response.data.result.map(user => user.userName);
                 this.userNames = userNames;
-
-                console.log(userNames);
             } catch(error){
                 console.error("유저 목록을 가져오는 중 오류 발생:", error);
             }
@@ -229,10 +222,8 @@ export default {
             try {
                 const response = await api.get('/admin/departments');
                 const departments = response.data.result;
-
                 const departmentNames = response.data.result.map(department => department.name);
                 this.departmentNames = departmentNames;
-
 
                 if (departments) {
                     this.departments = departments.map(department => ({
@@ -271,7 +262,7 @@ export default {
                 const response = await api.delete(apiUrl);
                 console.log('Delete successful:', response.data);
 
-                this.selected = {};
+                this.clearForm();
                 await this.fetchDepartments();
             } catch (error) {
                 console.error('Error deleting item:', error.message || error);
@@ -283,26 +274,59 @@ export default {
                 const response = await api.post('/admin/departments', this.department);
                 console.log('부서 저장 성공:', response.data);
 
-                // 폼 초기화
                 this.clearForm();
-                this.dialogAdd = false;
+                this.dialog = false;
 
-                // 부서 목록 갱신
                 await this.fetchDepartments();
             } catch (error) {
                 console.error('부서 저장 중 오류 발생:', error);
             }
         },
 
-        // 항목 삭제
+        async updateDepartment() {
+            try {
+                if (!this.selected || !this.selected.no) {
+                    console.error('수정할 부서가 선택되지 않았습니다.');
+                    return;
+                }
+
+                console.log("수정할 데이터:", this.department);
+                this.dialog = false;
+
+                const apiUrl = `/admin/departments/${this.selected.no}`;
+                const response = await api.patch(apiUrl, this.department);
+                console.log('부서 업데이트 성공:', response.data);
+
+                this.clearForm();
+                await this.fetchDepartments();
+            } catch (error) {
+                console.error('부서 업데이트 중 오류 발생:', error);
+            }
+        },
+
+        updateItem(item) {
+            if (!item) return;
+            console.log('Selected item for update:', item);
+            this.isEdit = true;
+            this.department = { 
+                deptCode: item.deptCode,
+                deptName: item.name,
+                engName: item.engName,
+                deptHead: item.deptHead,
+                upperDeptName: item.upperDeptName,
+            };
+            this.dialog = true;
+        },
+
         deleteItem(item) {
             this.selectedItem = item;
             this.dialogDelete = true;
         },
 
         addItem(){
+            this.isEdit = false;
             this.clearForm();
-            this.dialogAdd = true;
+            this.dialog = true;
         },
 
     },
@@ -333,10 +357,7 @@ export default {
 .v-card {
     margin-top: 1rem;
 }
-.container {
-    display: flex;
-    flex-direction: row;
-}
+
 .filter_container {
     background-color: white;
     margin-right: 30px;
@@ -345,5 +366,9 @@ export default {
 .customer_container {
     background-color: white;
     width: 80%;
+}
+
+.v-alert{
+    margin-top: 0.5rem
 }
 </style>
