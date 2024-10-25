@@ -38,7 +38,7 @@ const monthAchievement = ref(0);
 
 const fetchDept = async () => {
     try {
-        const response = await api.get(`/departments`);
+        const response = await api.get(`/admin/departments`);
 
         state.departments = [{ no: 0, name: '전체' }, ...response.data.result];
         fetchUser(0);
@@ -75,7 +75,7 @@ const fetchData = async () => {
             api.post('/leads/status/main', searchCond),
             api.post('/acts/status/main', searchCond),
             api.post('/sales/status/main', searchCond),
-            api.post('/targetsales/status/main', searchCond)
+            api.post('/admin/targetsales/status/main', searchCond)
         ]);
         customerCount.value = customerResponse.data.result;
         potenCustomerCount.value = potenCustomerResponse.data.result;
@@ -131,8 +131,12 @@ const fetchData = async () => {
         } else {
             monthResult.value = '0';
         }
-        yearAchievement.value = (salesResponse.data.result.yearSales * 100) / targetSalesResponse.data.result.yearTargetSales;
-        monthAchievement.value = (salesResponse.data.result.monthSales * 100) / targetSalesResponse.data.result.monthTargetSales;
+        yearAchievement.value = parseFloat(
+            ((salesResponse.data.result.yearSales * 100) / targetSalesResponse.data.result.yearTargetSales).toFixed(2)
+        );
+        monthAchievement.value = parseFloat(
+            ((salesResponse.data.result.monthSales * 100) / targetSalesResponse.data.result.monthTargetSales).toFixed(2)
+        );
     } catch (error) {
         console.error('Error fetching data:', error);
     }
