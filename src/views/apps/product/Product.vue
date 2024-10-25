@@ -60,7 +60,7 @@ const defaultItem = ref({
 
 async function fetchDepartments(){
     try{
-        const response = await api.get('/admin/department')
+        const response = await api.get('/admin/departments')
         console.log(response);
 
         departmentNames.value = response.data.result.map(department => department.name);
