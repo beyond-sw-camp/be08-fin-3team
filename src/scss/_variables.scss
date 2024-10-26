@@ -10,7 +10,8 @@ $white: #fff !default;
 // cards
 $card-title-size: 18px !default;
 
-$body-font-family: 'Poppins', sans-serif !default;
+$body-font-family: 'Nanum Gothic', 'Poppins', sans-serif !default;
+
 $border-radius-root: 7px;
 $btn-font-weight: 400 !default;
 $btn-letter-spacing: 0 !default;
@@ -44,7 +45,7 @@ $box-shadow: rgba(145 158 171 / 30%) 0px 0px 2px 0px, rgba(145 158 171 / 12%) 0p
             ),
             'h3': (
                 'size': 1.5rem,
-                'weight': 500,
+                'weight': 700,
                 'line-height': 2rem,
                 'font-family': inherit
             ),
@@ -104,7 +105,7 @@ $box-shadow: rgba(145 158 171 / 30%) 0px 0px 2px 0px, rgba(145 158 171 / 12%) 0p
                 'weight': 500,
                 'font-family': inherit,
                 'text-transform': uppercase
-            )
+            ),
         )
         !default,
     // 👉 Button
