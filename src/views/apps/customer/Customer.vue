@@ -90,8 +90,9 @@ const fetchCustomersByFilterAPI = async()=>{
 .filter_container {
     background-color: white;
     margin-right: 30px;
-    width: 25%;
+    width: 16%;
     height: 100%;
+    border-radius: 8px;
 }
 
 .customer_container {

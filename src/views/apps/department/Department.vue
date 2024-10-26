@@ -5,7 +5,7 @@
                 Department
             </v-card-title>
             <v-row class="pa-4" justify="space-between">
-                <v-col cols="5">
+                <v-col cols="12" md="3">
                     <v-treeview
                         v-model:activated="active"
                         v-model:opened="open"
@@ -23,7 +23,7 @@
                         </template>
                     </v-treeview>
                 </v-col>
-                <v-col>
+                <v-col cols="12" md="9">
                     <v-scroll-y-transition>
                         <div>
                             <v-card>
