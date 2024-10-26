@@ -168,7 +168,7 @@ onMounted(() => {
 <template>
     <v-container fluid>
         <v-row>
-            <v-col cols="12" md="3">
+            <v-col cols="12" md="2">
                 <v-card elevation="0" class="pa-4">
                     <v-card-title class="title font-weight-bold">검색 조건</v-card-title>
                     <v-text-field label="날짜" v-model="searchDate" type="date" outlined></v-text-field>
@@ -193,7 +193,7 @@ onMounted(() => {
                     <v-btn class="search_btn" color="primary" variant="flat" @click="fetchData">검색</v-btn>
                 </v-card>
             </v-col>
-            <v-col cols="12" md="9">
+            <v-col cols="12" md="10">
                 <v-card elevation="0" class="pa-4">
                     <v-card-title class="title font-weight-bold">종합현황</v-card-title>
                     <v-divider :thickness="3" class="border-opacity-50 mb-5" color="primary"></v-divider>

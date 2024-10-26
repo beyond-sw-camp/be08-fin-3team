@@ -16,6 +16,13 @@
     }
 }
 
+.v-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 2rem;
+    font-family: inherit;
+}
+
 .v-card {
     width: 100%;
     overflow: visible;
@@ -24,7 +31,7 @@
     }
     .feature-card {
         .v-responsive__content {
-            height: 100%;
+            height: 90%;
         }
     }
     .v-timeline-divider__before,.v-timeline-divider__after {

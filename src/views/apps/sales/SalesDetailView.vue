@@ -14,7 +14,7 @@
         <div class="divider"></div>
 
         <v-row>
-            <v-col v-for="(sale, index) in paginatedSales" :key="index" cols="12" md="6">
+            <v-col v-for="(sale, index) in paginatedSales" :key="index" cols="12" md="4">
                 <v-card @click="openSalesInfo(sale)" class="sales-card">
                     <v-card-title class="sales-title">{{ sale.salesCls }}</v-card-title>
                     <v-card-subtitle class="sales-subtitle">매출 번호: {{ sale.salesNo }}</v-card-subtitle>
@@ -62,7 +62,7 @@ export default {
         return {
             sales: [], // 전체 매출 목록
             currentPage: 1, // 현재 페이지
-            itemsPerPage: 10, // 페이지당 항목 수
+            itemsPerPage: 12, // 페이지당 항목 수
             totalItems: 0, // 전체 항목 수
             showModal: false,
             editedSale: {

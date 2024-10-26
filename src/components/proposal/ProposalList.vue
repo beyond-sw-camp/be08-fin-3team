@@ -211,7 +211,7 @@ const warningAlert = ref(false);
     <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
     <v-row>
         <!-- 검색 -->
-        <v-col cols="12" md="3">
+        <v-col cols="12" md="2">
             <v-card elevation="0" class="pa-4">
                 <v-card-title class="title font-weight-bold">검색 조건</v-card-title>
                 <v-text-field color="primary" variant="outlined" type="text" placeholder="제안명" hide-details class="mb-4"></v-text-field>
@@ -232,7 +232,7 @@ const warningAlert = ref(false);
             </v-card>
         </v-col>
 
-        <v-col cols="12" md="9">
+        <v-col cols="12" md="10">
             <UiParentCard title="">
                 <v-data-table
                     :headers="headers"
