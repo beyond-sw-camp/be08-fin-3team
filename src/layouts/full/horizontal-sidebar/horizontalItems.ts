@@ -67,6 +67,7 @@ import {
     FileDescriptionIcon,
     BrandAirtableIcon
 } from 'vue-tabler-icons';
+import type { boolean } from 'yup';
 
 export interface menu {
     header?: string;
@@ -84,6 +85,7 @@ export interface menu {
     class?: string;
     extraclass?: string;
     type?: string;
+    adminOnly?:boolean;
 }
 
 const horizontalItems: menu[] = [
@@ -169,33 +171,7 @@ const horizontalItems: menu[] = [
             },
         ]
     },
-    {
-        title: '관리자',
-        icon: SocialIcon,
-        to: '/',
-        children: [
-            {
-                title: '부서',
-                icon: CircleDotIcon,
-                to: '/sales/departments'
-            },
-            {
-                title: '제품',
-                icon: CircleDotIcon,
-                to: '/sales/products'
-            },
-            {
-                title: '프로세스',
-                icon: CircleDotIcon,
-                to: '/sales/processes'
-            },
-            {
-                title: '목표 매출',
-                icon: CircleDotIcon,
-                to: '/sales/targetsales'
-            }
-        ]
-    },
+   
     {
         title: '영업도구',
         icon: ToolIcon,
@@ -245,6 +221,35 @@ const horizontalItems: menu[] = [
                 icon: CircleDotIcon,
                 to: '/apps/chart/act'
             },
+        ]
+    },
+
+    {
+        title: '관리자',
+        icon: SocialIcon,
+        to: '/',
+        adminOnly:true,
+        children: [
+            {
+                title: '부서',
+                icon: CircleDotIcon,
+                to: '/admin/departments'
+            },
+            {
+                title: '제품',
+                icon: CircleDotIcon,
+                to: '/admin/products'
+            },
+            {
+                title: '프로세스',
+                icon: CircleDotIcon,
+                to: '/admin/processes'
+            },
+            {
+                title: '목표 매출',
+                icon: CircleDotIcon,
+                to: '/admin/targetsales'
+            }
         ]
     },
 ];
