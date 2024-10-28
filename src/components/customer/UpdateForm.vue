@@ -88,7 +88,8 @@ const updateCustomerAPI = async(id)=>{
             //     router.push({ name: "Customer" });
             // }, 2000); 
         }else{
-            triggerAlert(response.data.result,'warning');
+            triggerAlert(response.data.message,'warning');
+            showEditConfirmDialog.value = false; 
         }
 
     }catch(err){
@@ -108,7 +109,8 @@ const deleteCustoemrAPI = async(id)=>{
                 router.push({ name: "Customer" });
             }, 2000); 
         }else{
-            triggerAlert(response.data.result,'warning');
+            triggerAlert(response.data.message,'warning');
+            showDeleteConfirmDialog.value = false; 
         }
 
     }catch(err){
