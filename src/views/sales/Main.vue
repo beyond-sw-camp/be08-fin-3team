@@ -77,6 +77,7 @@ const fetchData = async () => {
             api.post('/sales/status/main', searchCond),
             api.post('/admin/targetsales/status/main', searchCond)
         ]);
+
         customerCount.value = customerResponse.data.result;
         potenCustomerCount.value = potenCustomerResponse.data.result;
 
@@ -131,12 +132,22 @@ const fetchData = async () => {
         } else {
             monthResult.value = '0';
         }
-        yearAchievement.value = parseFloat(
-            ((salesResponse.data.result.yearSales * 100) / targetSalesResponse.data.result.yearTargetSales).toFixed(2)
-        );
-        monthAchievement.value = parseFloat(
-            ((salesResponse.data.result.monthSales * 100) / targetSalesResponse.data.result.monthTargetSales).toFixed(2)
-        );
+
+        if (salesResponse.data.result.yearSales > 0) {
+            yearAchievement.value = parseFloat(
+                ((salesResponse.data.result.yearSales * 100) / targetSalesResponse.data.result.yearTargetSales).toFixed(2)
+            );
+        } else {
+            yearAchievement.value = 0;
+        }
+
+        if (salesResponse.data.result.monthSales > 0) {
+            monthAchievement.value = parseFloat(
+                ((salesResponse.data.result.monthSales * 100) / targetSalesResponse.data.result.monthTargetSales).toFixed(2)
+            );
+        } else {
+            monthAchievement.value = 0;
+        }
     } catch (error) {
         console.error('Error fetching data:', error);
     }
