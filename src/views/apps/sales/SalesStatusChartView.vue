@@ -9,17 +9,17 @@ const yearOptions = ref<number[]>([]);
 
 const breadcrumbs = ref([
     {
-        text: 'Sales Chart',
+        text: '매출 차트',
         disabled: false,
         href: 'sales status chart'
     },
     {
-        text: 'Sales Chart',
+        text: '매출 현황 차트',
         disabled: true,
         href: '#'
     }
 ]);
-const page = ref({ title: 'Chart' });
+const page = ref({ title: '차트' });
 
 for (let i = selectedYear.value - 9; i <= selectedYear.value; i++) {
     yearOptions.value.push(i);

@@ -4,16 +4,24 @@ import { useRouter } from 'vue-router';
 import api from '@/api/axiosinterceptor';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
+import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
+import { de } from 'date-fns/locale';
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
 
-const page = ref({ title: '' });
-// const breadcrumbs = ref([
-//     { text: '영업관리', disabled: false, href: '#' },
-//     { text: '제안', disabled: true, href: '#' }
-// ]);
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
-const dialogDelete = ref(false);
+const showConfirmDialogs = ref(false); // 열림 상태 관리
+
+const page = ref({ title: '제안 목록' });
+const breadcrumbs = ref([
+    { text: '영업관리', disabled: false, href: '#' },
+    { text: '제안', disabled: true, href: '#' }
+]);
+
+// const dialogDelete = ref(false);
 const proposals = ref([]);
-const leads = ref([]);
+// const leads = ref([]);
 const dialogEdit = ref(false);
 const editedIndex = ref(-1);
 
@@ -62,7 +70,7 @@ const headers = ref([
     { title: '', key: 'actions', sortable: false }
 ]);
 
-const formTitle = computed(() => (editedIndex.value === -1 ? '추가' : '수정'));
+const formTitle = computed(() => (editedIndex.value === -1 ? '제안 추가' : '제안 수정'));
 
 const router = useRouter();
 
@@ -83,17 +91,19 @@ const submitProposalApi = async () => {
         const res = await api.post('/proposals', editedItem.value);
         console.log(res);
         if (res.status === 200) {
-            successAlert.value = true;
-            alertDialog.value = true;
-
-            setTimeout(() => router.push('proposals'), 1500);
+            triggerAlert('제안이 추가되었습니다.', 'success', 2000,'/proposals');
+            // successAlert.value = true;
+            // alertDialog.value = true;
+            // setTimeout(() => router.push('proposals'), 1500);
             await initialize();
             resetForm();
+            dialogEdit.value = false;
         }
     } catch (error) {
         console.error('등록 실패:', error);
-        errorAlert.value = true;
-        alertDialog.value = true;
+        triggerAlert('제안 수정에 실패했습니다.', 'error');
+        // errorAlert.value = true;
+        // alertDialog.value = true;
     }
 };
 
@@ -101,34 +111,39 @@ const updateProposalApi = async () => {
     try {
         const res = await api.patch(`/proposals/${editedItem.value.propNo}`, editedItem.value);
         if (res.status === 200) {
-            successAlert.value = true;
-            alertDialog.value = true;
-
-            setTimeout(() => router.push('proposals'), 1500);
-            await initialize();
-            resetForm();
+            triggerAlert('제안이 수정되었습니다.', 'success');
+            // successAlert.value = true;
+            // alertDialog.value = true;
+            // setTimeout(() => router.push('proposals'), 1500);
+            // await initialize();
+            // resetForm();
             dialogEdit.value = false;
         }
     } catch (error) {
         console.error('수정 실패:', error);
-        errorAlert.value = true;
-        alertDialog.value = true;
+        triggerAlert('제안 수정에 실패했습니다.', 'error');
+        // errorAlert.value = true;
+        // alertDialog.value = true;
     }
 };
 
 const deleteProposalApi = async () => {
     try {
         await api.delete(`/proposals/${editedItem.value.propNo}`);
-        successAlert.value = true;
-        alertDialog.value = true;
+        triggerAlert('제안이 삭제되었습니다.', 'success');
+        // successAlert.value = true;
+        // alertDialog.value = true;
         setTimeout(() => router.push('/proposals'), 1500);
         proposals.value.splice(editedIndex.value, 1);
         resetForm();
         router.push('/proposals');
     } catch (error) {
         console.error('삭제 실패:', error);
-        errorAlert.value = true;
-        alertDialog.value = true;
+        triggerAlert('제안 삭제에 실패했습니다.', 'error');
+        // errorAlert.value = true;
+        // alertDialog.value = true;
+    } finally {
+        showConfirmDialogs.value = false;
     }
     close();
 };
@@ -145,17 +160,20 @@ const createNewProposal = () => {
 
 const confirmDelete = async () => {
     await deleteProposalApi();
-    dialogDelete.value = false;
+    // dialogDelete.value = false;
+    showConfirmDialogs.value = false;
 };
 
 const deleteItem = (item) => {
     editedItem.value = { ...item };
     editedIndex.value = proposals.value.indexOf(item);
-    dialogDelete.value = true;
+    // dialogDelete.value = true;
+    showConfirmDialogs.value = true;
 };
 
 const closeDeleteDialog = () => {
-    dialogDelete.value = false;
+    // dialogDelete.value = false;
+    showConfirmDialogs.value = false;
 };
 
 const navigateToCreate = () => {
@@ -187,6 +205,9 @@ const warningAlert = ref(false);
 </script>
 
 <template>
+    <ConfirmDialogs :dialog="showConfirmDialogs" @agree="deleteProposalApi" @disagree="() => (showConfirmDialogs = false)"/>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
+    
     <v-dialog v-model="alertDialog" max-width="500" class="dialog-mw">
         <v-card>
             <v-card-text>
@@ -233,7 +254,7 @@ const warningAlert = ref(false);
         </v-col>
 
         <v-col cols="12" md="10">
-            <UiParentCard title="">
+            <UiParentCard title="제안">
                 <v-data-table
                     :headers="headers"
                     :items="displayedProposals"
@@ -244,22 +265,30 @@ const warningAlert = ref(false);
                     <template v-slot:top>
                         <v-toolbar class="bg-lightsecondary" flat>
                             <v-toolbar-title></v-toolbar-title>
-                            <v-spacer></v-spacer>
-                            <v-col cols="auto">
-                                <v-btn color="primary" variant="flat" class="mr-2 mdi text-h6 mdi-plus-outline" @click="navigateToCreate"
-                                    >새로운 제안 등록</v-btn
-                                >
-                            </v-col>
+                                <v-row justify="end">
+                                    <v-col cols="auto">
+                                    <v-spacer></v-spacer>
+                                    <v-btn color="primary" variant="tonal" class="mr-2" @click="navigateToCreate">제안 생성</v-btn>
+                                </v-col>
+                            </v-row>
                         </v-toolbar>
                     </template>
 
                     <template v-slot:item.actions="{ item }">
-                        <v-icon color="info" size="small" class="me-2" @click="editItem(item)" role="button" aria-label="Edit Proposal">
-                            mdi-tooltip-edit
-                        </v-icon>
-                        <v-icon color="error" size="small" @click="deleteItem(item)" role="button" aria-label="Delete Proposal">
-                            mdi-delete-empty
-                        </v-icon>
+                        <EditIcon
+                            height="20"
+                            width="20"
+                            class="mr-2 text-primary cursor-pointer"
+                            size="small"
+                            @click="editItem(item)"
+                        />
+                        <TrashIcon
+                            height="20"
+                            width="20"
+                            class="text-error cursor-pointer"
+                            size="small"
+                            @click="deleteItem(item)"
+                        />
                     </template>
                 </v-data-table>
             </UiParentCard>
@@ -268,7 +297,7 @@ const warningAlert = ref(false);
 
     <v-dialog v-model="dialogEdit" max-width="500px">
         <v-card>
-            <v-card-title class="text-h5 text-center py-6">{{ formTitle }}</v-card-title>
+            <v-card-title>{{ formTitle }}</v-card-title>
             <v-card-text>
                 <v-form>
                     <v-text-field v-model="editedItem.leadName" label="영업기회명" disabled></v-text-field>
@@ -283,21 +312,8 @@ const warningAlert = ref(false);
             </v-card-text>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="error" variant="flat" @click="closeEditDialog">Cancel</v-btn>
-                <v-btn color="success" variant="flat" @click="save">Save</v-btn>
-                <v-spacer></v-spacer>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
-
-    <v-dialog v-model="dialogDelete" max-width="500px">
-        <v-card>
-            <v-card-title class="text-h5 text-center py-6">선택한 제안을 정말 삭제하시겠습니까?</v-card-title>
-            <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="error" variant="flat" @click="closeDeleteDialog">삭제</v-btn>
-                <v-btn color="success" variant="flat" @click="confirmDelete">취소</v-btn>
-                <v-spacer></v-spacer>
+                <v-btn color="primary" variant="outlined" style="font-size: 15px; font-weight: 600;" @click="save">수정</v-btn>
+                <v-btn color="close" variant="plain" style="font-size: 15px; font-weight: 600;" @click="closeEditDialog">닫기</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>

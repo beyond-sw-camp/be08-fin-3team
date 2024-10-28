@@ -4,6 +4,13 @@ import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import { useRouter } from 'vue-router';
 import api from '@/api/axiosinterceptor';
+import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
+const showConfirmDialogs = ref(false); // 열림 상태 관리
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
+
 
 const page = ref({ title: '' });
 
@@ -79,17 +86,18 @@ const deleteEstimateApi = async () => {
     try {
         await api.delete(`/estimates/${editedItem.value.estNo}`);
 
-        successAlert.value = true;
-        alertDialog.value = true;
+        // successAlert.value = true;
+        // alertDialog.value = true;
 
-        setTimeout(() => router.push('/estimates'), 1500);
+        triggerAlert('견적이 삭제되었습니다.', 'success', 2000,'/estimates');
 
         estimates.value.splice(editedIndex.value, 1);
         resetForm();
-        router.push('/estimates');
+        // router.push('/estimates');
     } catch (error) {
-        errorAlert.value = true;
-        alertDialog.value = true;
+        // errorAlert.value = true;
+        // alertDialog.value = true;
+    triggerAlert('견적 삭제를 실패했습니다.', 'error', 2000);
     }
 };
 
@@ -101,16 +109,19 @@ const resetForm = () => {
 const deleteItem = (item) => {
     editedItem.value = { ...item };
     editedIndex.value = estimates.value.indexOf(item);
-    dialogDelete.value = true;
+    // dialogDelete.value = true;
+    showConfirmDialogs.value = true;
 };
 
 const confirmDelete = async () => {
     await deleteEstimateApi();
-    dialogDelete.value = false;
+    // dialogDelete.value = false;
+    showConfirmDialogs.value = false;
 };
 
 const closeDeleteDialog = () => {
-    dialogDelete.value = false;
+    // dialogDelete.value = false;
+    showConfirmDialogs.value = false;
 };
 
 initialize();
@@ -122,27 +133,8 @@ const warningAlert = ref(false);
 </script>
 
 <template>
-    <v-dialog v-model="alertDialog" max-width="500" class="dialog-mw">
-        <v-card>
-            <v-card-text>
-                <v-alert v-if="successAlert" type="success" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Success</h5>
-                    <div>견적이 성공적으로 삭제되었습니다.</div>
-                </v-alert>
-                <v-alert v-if="errorAlert" type="error" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Error</h5>
-                    <div>견적 삭제에 실패했습니다. 다시 시도해주세요.</div>
-                </v-alert>
-                <v-alert v-if="warningAlert" type="warning" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Warning</h5>
-                    <div>필수 항목을 입력해주세요.</div>
-                </v-alert>
-            </v-card-text>
-            <v-card-actions>
-                <v-btn color="primary" block @click="alertDialog = false" flat>Close</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
     <v-row>
         <!-- 검색 -->
@@ -177,9 +169,7 @@ const warningAlert = ref(false);
                     </v-col>
                     <v-spacer></v-spacer>
                     <v-col cols="auto">
-                        <v-btn color="primary" variant="flat" class="mr-2 mdi text-h6 mdi-plus-outline" @click="navigateToCreate"
-                            >새로운 견적 등록</v-btn
-                        >
+                        <v-btn color="primary" variant="flat" class="mr-2" @click="navigateToCreate">견적 생성</v-btn>
                     </v-col>
                 </v-row>
 
@@ -193,36 +183,27 @@ const warningAlert = ref(false);
                     show-actions
                 >
                     <template v-slot:item.actions="{ item }">
-                        <v-icon
-                            color="info"
+                        <EditIcon
+                            height="20"
+                            width="20"
+                            class="mr-2 text-primary cursor-pointer"
                             size="small"
-                            class="me-2"
                             @click="goToDetailEstimate(item.estNo)"
-                            role="button"
-                            aria-label="Edit Estimate"
-                        >
-                            mdi-pencil
-                        </v-icon>
-                        <v-icon color="error" size="small" @click="deleteItem(item)" role="button" aria-label="Delete Estimate">
-                            mdi-delete
-                        </v-icon>
+                        />
+                        <TrashIcon
+                            height="20"
+                            width="20"
+                            class="text-error cursor-pointer"
+                            size="small"
+                            @click="deleteItem(item)"
+                        />
                     </template>
                 </v-data-table>
             </v-card>
         </v-col>
     </v-row>
 
-    <v-dialog v-model="dialogDelete" max-width="500px">
-        <v-card>
-            <v-card-title class="text-h5 text-center py-6">선택한 견적을 정말 삭제하시겠습니까?</v-card-title>
-            <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="warning" variant="flat" @click="closeDeleteDialog">취소</v-btn>
-                <v-btn color="success" variant="flat" @click="confirmDelete">삭제</v-btn>
-                <v-spacer></v-spacer>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    <ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="closeDeleteDialog" />
 </template>
 
 <style>

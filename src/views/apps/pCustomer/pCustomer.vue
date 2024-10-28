@@ -8,7 +8,7 @@
         <div class="customer_container">
             <div class="header">
                 <div class="result_count">(검색결과: {{ dataSize }}건)</div>   
-                <v-btn variant="tonal" color="primary" to="/sales/prospect/add">잠재고객 추가</v-btn>
+                <v-btn variant="tonal" color="primary" to="/sales/prospect/add">잠재고객 생성</v-btn>
             </div>
          
             <hr  class="divider"></hr>

@@ -6,7 +6,7 @@
 				<v-form @submit.prevent="addTodo" lazy-validation>
 					<div>
 						<v-alert v-if="showAlert" type="warning" variant="tonal" class="warn-alert">
-							<h5 class="text-h6 text-capitalize">warning</h5>
+							<h5 class="text-h5 text-capitalize">warning</h5>
 							<div>{{ alertMessage }}</div>
 						</v-alert>
 					</div>
@@ -38,11 +38,11 @@
 			</v-card-text>
 			<ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="cancleDelete" />
 			<v-card-actions>
+				<v-btn v-if="mode === 'edit'" color="primary" variant="outlined" @click="updateTodo" flat style="font-size: 15px; font-weight: 600;">수정</v-btn>
+				<v-btn v-if="mode === 'edit'" color="error" variant="outlined" @click="deleteTodo" flat style="font-size: 15px; font-weight: 600;">삭제</v-btn>
 				<v-spacer></v-spacer>
-				<v-btn color="close" @click="closeModal">Close</v-btn>
-				<v-btn v-if="mode === 'add'" color="success" variant="text" @click="addTodo" flat>Save</v-btn>
-				<v-btn v-else-if="mode === 'edit'" color="success" variant="text" @click="updateTodo" flat>Update</v-btn>
-				<v-btn v-if="mode === 'edit'" color="error" variant="text" @click="deleteTodo" flat>Delete</v-btn>
+				<v-btn v-if="mode === 'add'" color="primary"@click="addTodo" flat style="font-size: 15px; font-weight: 600;">저장</v-btn>
+				<v-btn color="close" @click="closeModal" style="font-size: 15px; font-weight: 600;">닫기</v-btn>
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
@@ -50,7 +50,7 @@
 
 <script>
 import '@/views/apps/calendar/calendar.css'
-import ConfirmDialogs from './ConfirmDialogs.vue';
+import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
 import api from '@/api/axiosinterceptor';
 
 export default {

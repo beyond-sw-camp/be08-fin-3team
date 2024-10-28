@@ -22,18 +22,24 @@
         </v-form>
       </v-card-text>
       <v-card-actions>
-        <v-btn @click="saveSale">저장</v-btn>
-        <v-btn @click="handleClose">취소</v-btn>
-        <v-btn color="red" @click="deleteSale" v-if="sale.salesNo">삭제</v-btn> 
+        <v-btn color="primary" variant="outlined" @click="saveSale" flat style="font-size: 15px; font-weight: 600;">저장</v-btn>
+        <v-btn color="error" variant="outlined" @click="openDeleteDialog" v-if="sale.salesNo" flat style="font-size: 15px; font-weight: 600;">삭제</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn color="close" @click="handleClose" style="font-size: 15px; font-weight: 600;">닫기</v-btn>
+
       </v-card-actions>
     </v-card>
+    <ConfirmDialogs :dialog.sync="showConfirmDialog" @agree="deleteSale" @disagree="showConfirmDialog = false"
+    />
   </v-dialog>
 </template>
 
 <script>
 import api from '@/api/axiosinterceptor';
+import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
 
 export default {
+  components: { ConfirmDialogs },
   props: {
     value: Boolean,
     sale: {
@@ -44,6 +50,7 @@ export default {
   data() {
     return {
       valid: false,
+      showConfirmDialog : false
     };
   },
   computed: {
@@ -72,16 +79,19 @@ export default {
       this.isOpen = false;
       this.$emit('close');
     },
+    openDeleteDialog() {
+      this.showConfirmDialog = true;
+    },
     async deleteSale() {
-      if (confirm('정말로 이 매출을 삭제하시겠습니까?')) {
-        try {
-          await api.delete(`sales/${this.sale.salesNo}`);
-          this.$emit('deleted', this.sale.salesNo);
-          this.handleClose(); // 삭제 후 창 닫기
-        } catch (error) {
-          console.error('매출 삭제에 실패했습니다:', error);
-          alert('매출 삭제에 실패했습니다.');
-        }
+      try {
+        await api.delete(`sales/${this.sale.salesNo}`);
+        this.$emit('deleted', this.sale.salesNo);
+        this.handleClose();
+      } catch (error) {
+        console.error('매출 삭제에 실패했습니다:', error);
+        // alert('매출 삭제에 실패했습니다.');
+      } finally {
+        this.showConfirmDialog = false;
       }
     },
     calculateTaxAndPrice() {

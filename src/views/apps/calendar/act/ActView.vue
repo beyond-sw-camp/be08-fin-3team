@@ -1,11 +1,11 @@
 <template>
     <div>
       <v-alert v-if="showSuccessAlert" type="success" variant="tonal" class="alert">
-        <h5 class="text-h6 text-capitalize">Success</h5>
+        <h5 class="text-h5 text-capitalize">Success</h5>
         <div>{{ alertMessage }}</div>
       </v-alert>
       <v-alert v-else-if="showAlert" type="warning" variant="tonal" class="alert">
-        <h5 class="text-h6 text-capitalize">Warning</h5>
+        <h5 class="text-h5 text-capitalize">Warning</h5>
         <div>{{ alertMessage }}</div>
       </v-alert>
     </div>
@@ -139,7 +139,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import api from '@/api/axiosinterceptor';
 import { actStatus } from '@/utils/ActStatusMappings';
-import ConfirmDialogs from '@/components/modal/ConfirmDialogs.vue';
+import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
 import './Act.css'
 
 export default {

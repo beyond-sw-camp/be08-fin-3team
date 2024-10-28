@@ -6,14 +6,18 @@ import UiParentCard from '@/components/shared/UiParentCard.vue';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import api from '@/api/axiosinterceptor';
 import { reverseActStatus, actStatus } from '@/utils/ActStatusMappings';
-import ConfirmDialogs from '@/components/modal/ConfirmDialogs.vue';
+import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
 const page = ref({ title: '영업활동 목록' });
 const breadcrumbs = ref([
 {
-	text: '영업도구',
+	text: '일정관리',
 	disabled: false,
-	to: '/'
+	to: '#'
 },
 {
 	text: '영업활동',
@@ -38,9 +42,7 @@ const editedItem = ref(null);
 
 async function initialize() {
 try {
-  console.log('초기화!')
   const response = await api.get('/acts');
-  console.log('response!',response)
   actList.value = response.data.result;
   } catch (error) {
   console.error(error);
@@ -48,22 +50,18 @@ try {
 }
 
 function deleteItem(item) {
-  console.log('editedItem.value.actNo',item.actNo)
   editedItem.value = item;
-  console.log('editedItem.value',editedItem.value)
   dialogDelete.value = true;
-  console.log('dialogDelete.value',dialogDelete.value)
 }
 
 async function confirmDelete() {
-  console.log('confirmDelete 함수 호출됨');
-  console.log('editedItem.value.actNo2', editedItem.value);
   if (editedItem.value) {
     try {
       await api.delete(`/acts/${editedItem.value.actNo}`);
       actList.value = actList.value.filter(act => act.actNo !== editedItem.value.actNo);
       dialogDelete.value = false;
       editedItem.value = null;
+      triggerAlert('삭제가 완료되었습니다.', 'success', 2000, '/apps/act/list');
     } catch (error) {
       console.error('삭제 실패:', error);
     }
@@ -100,9 +98,10 @@ onMounted(() => {
 </script>
 <template>
   <BaseBreadcrumb :title="page.title" class="" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
+  <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
   <v-row>
     <v-col cols="12">
-      <UiParentCard title="Act List">
+      <UiParentCard title="영업활동">
         <v-data-table
           class="rounded-md datatabels actlist"
           :headers="headers"
@@ -163,12 +162,12 @@ onMounted(() => {
                 class="mb-md-0 mb-3"
               />
               <v-spacer></v-spacer>
-              <v-btn color="primary" @click="goToAddAct">Add New</v-btn>
+              <v-btn color="primary" variant="tonal" @click="goToAddAct">영업활동 생성</v-btn>
             </v-toolbar>
           </template>
 
           <template v-slot:no-data>
-            <v-btn color="primary" @click="resetSearch"> Reset </v-btn>
+            <v-btn color="primary" variant="tonal" @click="resetSearch"> 초기화 </v-btn>
           </template>
         </v-data-table>
         <ConfirmDialogs :dialog="dialogDelete" @agree="confirmDelete" @disagree="cancleDelete" />
@@ -176,3 +175,17 @@ onMounted(() => {
     </v-col>
   </v-row>
 </template>
+
+<style>
+
+.alert {
+  position: fixed;
+  top: 16%;
+  left: 90%;
+  transform: translateX(-50%);
+  z-index: 3000;
+  width: 100%;
+  max-width: 14%;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+</style>

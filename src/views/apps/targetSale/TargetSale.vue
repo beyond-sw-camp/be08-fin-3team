@@ -3,12 +3,17 @@ import { ref, onMounted } from 'vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import api from '@/api/axiosinterceptor';
 
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
+
 const searchYear = ref('');
 const searchSalesperson = ref('');
 const targetSales = ref([]);
-const showAlert = ref(false);
-const alertMessage = ref('');
-const alertColor = ref('');
+// const showAlert = ref(false);
+// const alertMessage = ref('');
+// const alertColor = ref('');
 const canAddTargetSale = ref(false);
 const userNames = ref([]);
 const productNames = ref([]);
@@ -93,14 +98,16 @@ async function fetchTargetSales() {
     if (response.data.code === 200) {
       if (Array.isArray(response.data.result)) {
         targetSales.value = groupDataByProduct(response.data.result);
-        showAlert.value = false;
+        // showAlert.value = false;
         canAddTargetSale.value = true;
       }
     } else {
       canAddTargetSale.value = false;
-      alertMessage.value = '년도와 영업사원을 선택해주세요.';
-      alertColor.value = 'error';
-      showAlert.value = true;
+      
+      triggerAlert('년도와 영업사원을 선택해주세요.', 'warning', 2000);
+      // alertMessage.value = '년도와 영업사원을 선택해주세요.';
+      // alertColor.value = 'error';
+      // showAlert.value = true;
       targetSales.value = [];
       canAddTargetSale.value = false;
     }
@@ -134,8 +141,10 @@ async function saveTargetSale() {
     fetchTargetSales();
     closeDialog();
     console.log(response);
+    triggerAlert('목표매출이 등록되었습니다.', 'success', 2000);
   } catch (error) {
-    console.error('Error adding target sale:', error.message || error);
+    // console.error('Error adding target sale:', error.message || error);
+    triggerAlert('목표매출 등록에 실패했습니다.', 'error', 2000);
   }
 }
 
@@ -190,13 +199,14 @@ onMounted(() => {
 </script>
 
 <template>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
   <v-row>
     <v-col cols="12">
-      <UiParentCard title="Target sales management">
+      <UiParentCard title="목표 매출 관리">
         <v-row class="mb-5">
           <v-col cols="4" sm="4">
             <v-select
-              label="Select Year"
+              label="년도 선택"
               v-model="searchYear"
               :items="yearRange"
               hide-details
@@ -206,7 +216,7 @@ onMounted(() => {
             <v-select
               v-model="searchSalesperson"
               :items="userNames"
-              label="Select Salesperson"
+              label="영업사원 선택"
             ></v-select>
           </v-col>
           <v-col cols="4">
@@ -214,9 +224,9 @@ onMounted(() => {
           </v-col>
         </v-row>
 
-        <v-alert v-if="showAlert" class="mb-3" :color="alertColor" variant="tonal">
+        <!-- <v-alert v-if="showAlert" class="mb-3" :color="alertColor" variant="tonal">
           {{ alertMessage }}
-        </v-alert>
+        </v-alert> -->
 
         <v-data-table
           class="border rounded-md" 
@@ -239,23 +249,28 @@ onMounted(() => {
               <td>{{ item.month11 }}</td>
               <td>{{ item.month12 }}</td>
               <td>
-                <v-icon color="info" size="small" class="me-2" @click.stop="editTargetSale(item)">
-                  mdi-pencil
-                </v-icon>
+                <EditIcon
+                    height="20"
+                    width="20"
+                    class="mr-2 text-primary cursor-pointer"
+                    size="small"
+                    @click.stop="editTargetSale(item)"
+                />
               </td>
             </tr>
           </template>
           <template v-slot:top>
             <v-toolbar class="bg-lightsecondary" flat>
-              <v-toolbar-title>Target Sale</v-toolbar-title>
+              <v-toolbar-title>목표 매출</v-toolbar-title>
               <v-spacer></v-spacer>
               <v-btn 
+                class="mr-3"
                 v-if="canAddTargetSale" 
                 color="primary" 
-                variant="flat" 
+                variant="tonal" 
                 dark 
                 @click.stop="openDialog">
-                Add New TargetSale
+                목표 매출 생성
               </v-btn>
             </v-toolbar>
           </template>
@@ -266,7 +281,7 @@ onMounted(() => {
 
   <v-dialog v-model="dialog" max-width="600px">
     <v-card>
-      <v-card-title>{{ isEditMode ? 'Update TargetSales' : 'Add TargetSales' }}</v-card-title>
+      <v-card-title>{{ isEditMode ? '목표매출 수정' : '목표매출 등록' }}</v-card-title>
       <v-card-text>
         <v-container>
           <v-form v-model="formValid">
@@ -290,8 +305,8 @@ onMounted(() => {
         </v-container>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="primary" @click="saveTargetSale()" :disabled="!formValid">Save</v-btn>
-        <v-btn @click="closeDialog">Cancel</v-btn>
+        <v-btn color="primary" flat style="font-size: 15px; font-weight: 600;" @click="saveTargetSale()" :disabled="!formValid">저장</v-btn>
+        <v-btn color="close" flat style="font-size: 15px; font-weight: 600;" @click="closeDialog">닫기</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

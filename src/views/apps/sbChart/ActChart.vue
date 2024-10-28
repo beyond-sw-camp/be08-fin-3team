@@ -7,10 +7,10 @@ import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import ActChartClsCount from './ActChartClsCount.vue';
 
-const page = ref({ title: 'Chart' });
+const page = ref({ title: '차트' });
 const breadcrumbs = ref([
-    { text: 'Chart', disabled: false, href: '#' },
-    { text: 'Act Chart', disabled: true, href: '#' }
+    { text: '차트', disabled: false, href: '#' },
+    { text: '활동 차트', disabled: true, href: '#' }
 ]);
 </script>
 

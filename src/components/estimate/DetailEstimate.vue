@@ -4,12 +4,16 @@ import { useRouter, useRoute } from 'vue-router';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import api from '@/api/axiosinterceptor';
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
 const router = useRouter();
 const route = useRoute();
 
 const breadcrumbs = ref([
-    { text: '견적 리스트', disabled: false, href: '/estimates' },
+    { text: '견적 목록', disabled: false, href: '/estimates' },
     { text: '견적 상세페이지', disabled: true, href: '/estimates/form' }
 ]);
 
@@ -213,10 +217,10 @@ const save = async () => {
 
         await api.patch('/estProducts', productsToSave);
 
-        successAlert.value = true;
-        alertDialog.value = true;
-
-        setTimeout(() => router.push('/estimates'), 1500);
+        triggerAlert('견적이 수정되었습니다.', 'success', 2000,'/estimates');
+        // successAlert.value = true;
+        // alertDialog.value = true;
+        // setTimeout(() => router.push('/estimates'), 1500);
     } catch (error) {
         console.error('Failed to update estimate:', error.response ? error.response.data : error.message);
 
@@ -236,27 +240,7 @@ const warningAlert = ref(false);
 </script>
 
 <template>
-    <v-dialog v-model="alertDialog" max-width="500" class="dialog-mw">
-        <v-card>
-            <v-card-text>
-                <v-alert v-if="successAlert" type="success" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Success</h5>
-                    <div>견적이 성공적으로 수정되었습니다.</div>
-                </v-alert>
-                <v-alert v-if="errorAlert" type="error" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Error</h5>
-                    <div>견적 수정에 실패했습니다. 다시 시도해주세요.</div>
-                </v-alert>
-                <v-alert v-if="warningAlert" type="warning" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Warning</h5>
-                    <div>필수 항목을 입력해주세요.</div>
-                </v-alert>
-            </v-card-text>
-            <v-card-actions>
-                <v-btn color="primary" block @click="alertDialog = false" flat>Close</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <div>
         <BaseBreadcrumb :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
 
@@ -307,7 +291,7 @@ const warningAlert = ref(false);
                                 <v-dialog v-model="proposalModal" max-width="600px">
                                     <v-card>
                                         <v-card-title class="d-flex justify-space-between">
-                                            <span>제안 리스트</span>
+                                            <span>제안 목록</span>
                                             <v-btn icon @click="closeProposalModal">
                                                 <v-icon>mdi-close</v-icon>
                                             </v-btn>
@@ -539,10 +523,8 @@ const warningAlert = ref(false);
 
         <!-- 제출 -->
         <v-row justify="end">
-            <v-col cols="2" sm="2">
-                <v-btn color="success" class="mr-3" flat @click="cancel">취소</v-btn>
-                <v-btn color="info" class="mr-3" flat @click="save">저장</v-btn>
-            </v-col>
+            <v-btn class="mr-2 mt-2" color="primary" variant="flat" style="font-size: 15px; font-weight: 600;" @click="save">저장</v-btn>
+            <v-btn class="mr-7 mt-2" color="primary" variant="outlined" style="font-size: 15px; font-weight: 600;" @click="cancel">목록으로 돌아가기</v-btn>
         </v-row>
     </div>
 </template>

@@ -6,7 +6,7 @@
 				<v-form @submit.prevent="submitPlan" lazy-validation>
 					<div>
 						<v-alert v-if="showAlert" type="warning" variant="tonal" class="warn-alert">
-							<h5 class="text-h6 text-capitalize">warning</h5>
+							<h5 class="text-h5 text-capitalize">warning</h5>
 							<div>{{ alertMessage }}</div>
 						</v-alert>
 					</div>
@@ -73,11 +73,12 @@
 			</v-card-text>
 			<ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="cancleDelete" />
 			<v-card-actions>
+					<v-btn v-if="mode === 'edit'" color="primary" variant="outlined" @click="updatePlan" flat style="font-size: 15px; font-weight: 600;">수정</v-btn>
+					<v-btn v-if="mode === 'edit'" color="error" variant="outlined" @click="deletePlan" flat style="font-size: 15px; font-weight: 600;">삭제</v-btn>
 				<v-spacer></v-spacer>
-					<v-btn color="close" @click="closeModal">Close</v-btn>
-					<v-btn v-if="mode === 'add'" color="success" variant="text" @click="submitPlan" flat>Save</v-btn>
-					<v-btn v-else-if="mode === 'edit'" color="success" variant="text" @click="updatePlan" flat>Update</v-btn>
-					<v-btn v-if="mode === 'edit'" color="error" variant="text" @click="deletePlan" flat>Delete</v-btn>
+					<v-btn v-if="mode === 'add'" color="primary"@click="addTodo" flat style="font-size: 15px; font-weight: 600;">저장</v-btn>
+					<v-btn color="close" @click="closeModal" style="font-size: 15px; font-weight: 600;">닫기</v-btn>
+
 					<ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="cancleDelete" />
 			</v-card-actions>
 		</v-card>
@@ -115,7 +116,7 @@
 <script>
 import '@/views/apps/calendar/calendar.css';
 import api from '@/api/axiosinterceptor';
-import ConfirmDialogs from './ConfirmDialogs.vue';
+import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
 import {planClsMapping, categoryColors} from '@/utils/PlanMappings'
 
 export default {
@@ -339,6 +340,7 @@ export default {
 	transform: translateX(-50%);
 	z-index: 3000;
 	width: 60%;
+	font-size: 16px;
 }
 .headline {
 	padding-top: 20px;

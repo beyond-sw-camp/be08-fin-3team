@@ -4,11 +4,17 @@ import { useRouter } from 'vue-router';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import api from '@/api/axiosinterceptor';
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
+
 
 const router = useRouter();
 
+const page = ref({ title: '제안 등록' });
 const breadcrumbs = ref([
-    { text: '제안 리스트', disabled: false, href: '/proposals' },
+    { text: '제안 목록', disabled: false, href: '/proposals' },
     { text: '제안 등록', disabled: true, href: '/proposals/create' }
 ]);
 
@@ -71,7 +77,7 @@ const save = async () => {
     if (form.value) {
         const isValid = await form.value.validate();
         if (!isValid) {
-            alert('폼에 오류가 있습니다. 모든 필드를 올바르게 입력해주세요.');
+            triggerAlert('유효한 값을 입력해주세요.', 'error');
             return;
         }
     }
@@ -82,13 +88,14 @@ const save = async () => {
     try {
         const res = await api.post('/proposals', editedItem.value);
         if (res.status === 200 || res.status === 201) {
-            successAlert.value = true;
-            alertDialog.value = true;
-
-            setTimeout(() => router.push('/estimates'), 1500);
+            triggerAlert('제안이 추가되었습니다.', 'success', 2000,'/proposals');
+            // successAlert.value = true;
+            // alertDialog.value = true;
+            // setTimeout(() => router.push('/proposals'), 1500);
         }
     } catch (error) {
         console.error('등록 실패:', error);
+        triggerAlert('제안 등록에 실패했습니다.', 'success');
         errorAlert.value = true;
         alertDialog.value = true;
     } finally {
@@ -106,29 +113,9 @@ const errorAlert = ref(false);
 const warningAlert = ref(false);
 </script>
 <template>
-    <v-dialog v-model="alertDialog" max-width="500" class="dialog-mw">
-        <v-card>
-            <v-card-text>
-                <v-alert v-if="successAlert" type="success" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Success</h5>
-                    <div>견적이 성공적으로 삭제되었습니다.</div>
-                </v-alert>
-                <v-alert v-if="errorAlert" type="error" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Error</h5>
-                    <div>견적 삭제에 실패했습니다. 다시 시도해주세요.</div>
-                </v-alert>
-                <v-alert v-if="warningAlert" type="warning" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Warning</h5>
-                    <div>필수 항목을 입력해주세요.</div>
-                </v-alert>
-            </v-card-text>
-            <v-card-actions>
-                <v-btn color="primary" block @click="alertDialog = false" flat>Close</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <div>
-        <BaseBreadcrumb :title="''" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
+        <BaseBreadcrumb :title="page.title" class="" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
 
         <v-container>
             <UiParentCard title="">
@@ -161,20 +148,28 @@ const warningAlert = ref(false);
                     </v-col>
 
                     <!-- 영업기회 -->
-                    <v-col cols="12" sm="6">
-                        <v-text-field
+                    <v-row>
+                        <v-col class="ml-3" cols="5" md="2">
+                            <v-text-field
                             v-model="editedItem.leadName"
                             :items="leads"
                             item-text="name"
                             :rules="[(v) => !!v || '영업기회 버튼을 눌러 선택해주세요']"
                             readonly
                             outlined
-                        ></v-text-field>
+                            ></v-text-field>
+                        </v-col>
 
-                        <v-btn color="primary" variant="flat" class="mr-2 mdi text-h6 mdi-note-plus-outline" @click="openLeadModal"
-                            >영업기회 선택</v-btn
-                        >
-                    </v-col>
+                        <v-col class="mt-1" cols="3" md="3">
+                            <v-btn
+                            variant="flat"
+                            class="cus-btn"
+                            @click="openLeadModal"
+                            >
+                            <v-icon small class="mr-1">mdi-plus</v-icon>영업기회 가져오기
+                            </v-btn>
+                        </v-col>
+                    </v-row>
 
                     <v-dialog v-model="leadModal" max-width="600px">
                         <v-card>
@@ -236,12 +231,12 @@ const warningAlert = ref(false);
                     </v-col>
 
                     <v-row>
-                        <v-col cols="12" class="text-right">
-                            <v-btn color="primary" class="mr-3" flat type="submit" :disabled="!valid || loading">
+                        <v-col cols="12">
+                            <v-btn color="primary" flat type="submit" :disabled="!valid || loading">
                                 <v-progress-circular v-if="loading" indeterminate color="white" size="20"></v-progress-circular>
                                 저장
                             </v-btn>
-                            <v-btn color="error" class="mr-3" flat @click="cancel">취소</v-btn>
+                            <v-btn class="ml-2"  variant="outlined" color="primary" flat @click="cancel">목록으로 돌아가기</v-btn>
                         </v-col>
                     </v-row>
                 </v-form>
@@ -250,4 +245,18 @@ const warningAlert = ref(false);
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+
+.cus-btn {
+    background-color: #3f99f3;
+    color: white;
+    margin-left: 20px;
+    margin-bottom: 8px;
+    height: 30px;
+    line-height: 30px;
+    padding: 2px 10px 30px 5px;
+    border-radius: 8px;
+    transition: background-color 0.3s, color 0.3s;
+    box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.1);
+}
+</style>

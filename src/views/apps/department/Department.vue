@@ -1,8 +1,10 @@
 <template>
+
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <div class="container">
         <v-card>
             <v-card-title class="custom-card-title">
-                Department
+                부서 관리
             </v-card-title>
             <v-row class="pa-4" justify="space-between">
                 <v-col cols="12" md="3">
@@ -29,12 +31,12 @@
                             <v-card>
                                 <v-row class="text-right">
                                     <v-col class="text-sm-left">
-                                        <span class="font-weight-black custom-margin">정보</span>
+                                        <span class="font-weight-black custom-margin">부서 정보</span>
                                     </v-col>
                                     <v-col>
-                                        <v-btn color="primary" @click="addItem">add</v-btn>
-                                        <v-btn color="primary" @click="updateItem(selected)" :disabled="!selected">Update</v-btn>
-                                        <v-btn color="primary" @click.stop="deleteItem(selected)" :disabled="!selected">Delete</v-btn>
+                                        <v-btn color="primary" variant="tonal" @click="addItem" :disabled="selected">생성</v-btn>
+                                        <v-btn color="primary" variant="tonal" @click="updateItem(selected)" :disabled="!selected">수정</v-btn>
+                                        <v-btn class="mr-3" color="error" variant="tonal" @click.stop="deleteItem(selected)" :disabled="!selected">삭제</v-btn>
                                     </v-col>
                                 </v-row>
                                 <v-card-text>
@@ -75,7 +77,7 @@
 
     <v-dialog v-model="dialog" max-width="500px">
         <v-card>
-            <v-card-title class="text-h5">{{ isEdit ? 'Update Department' : 'Add Department' }}</v-card-title>
+            <v-card-title class="text-h5">{{ isEdit ? '부서 정보 수정' : '부서 생성' }}</v-card-title>
             <v-card-text>
                 <v-container>
                     <v-row>
@@ -124,36 +126,32 @@
                 </v-container>
             </v-card-text>
             <v-card-actions>
-                <v-btn :disabled="!formValid" color="primary" @click="isEdit ? updateDepartment() : saveDepartment()">
-                    Save
+                <v-btn color="primary" variant="plain" flat style="font-size: 15px; font-weight: 600;" @click="isEdit ? updateDepartment() : saveDepartment()">
+                    저장
                 </v-btn>
-                <v-btn @click="dialog = false">Cancel</v-btn>
+                <v-btn color="close" flat style="font-size: 15px; font-weight: 600;" @click="dialog = false">닫기</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
 
+    <ConfirmDialogs :dialog.sync="showConfirmDialog" @agree="confirmDelete" @disagree="showConfirmDialog = false" />
 
-    <v-dialog v-model="dialogDelete" max-width="400px">
-        <v-card>
-            <v-card-title class="text-h5">Delete Confirmation</v-card-title>
-            <v-card-text>Are you sure you want to delete this item?</v-card-text>
-            <v-card-actions>
-                <v-btn color="error" @click="confirmDelete">Delete</v-btn>
-                <v-btn @click="dialogDelete = false">Cancel</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
 </template>
 
 <script>
 import { VTreeview } from 'vuetify/labs/VTreeview';
 import api from '@/api/axiosinterceptor';
 import FilterCard from '@/components/customer/FilterCard.vue';
+import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
 
 export default {
     components: {
         VTreeview,
         FilterCard,
+        ConfirmDialogs,
+        AlertComponent
     },
 
     data: () => ({
@@ -162,10 +160,11 @@ export default {
         departments: [],
         departmentNames: [],
         userNames: [],
-        dialogDelete: false,
+        // dialogDelete: false,
         dialog: false,
         formValid: false,
         isEdit: false,
+        showConfirmDialog: false,
         department: {
             deptCode : '',
             deptName : '',
@@ -179,7 +178,7 @@ export default {
         items() {
             return [
                 {
-                    name: 'Departments',
+                    name: '부서',
                     children: this.departments,
                 },
             ];
@@ -257,15 +256,18 @@ export default {
         
         async confirmDelete() {
             try {
-                this.dialogDelete = false;
+                // this.dialogDelete = false;
                 const apiUrl = `/admin/departments/${this.selected.no}`;
                 const response = await api.delete(apiUrl);
                 console.log('Delete successful:', response.data);
+                this.triggerAlert('부서가 삭제되었습니다.', 'success', 2000);
 
                 this.clearForm();
                 await this.fetchDepartments();
             } catch (error) {
                 console.error('Error deleting item:', error.message || error);
+            }finally{
+                this.showConfirmDialog = false;
             }
         },
 
@@ -273,6 +275,7 @@ export default {
             try {
                 const response = await api.post('/admin/departments', this.department);
                 console.log('부서 저장 성공:', response.data);
+                this.triggerAlert('부서를 등록하였습니다.', 'success', 2000);
 
                 this.clearForm();
                 this.dialog = false;
@@ -280,6 +283,7 @@ export default {
                 await this.fetchDepartments();
             } catch (error) {
                 console.error('부서 저장 중 오류 발생:', error);
+                this.triggerAlert('부서 삭제에 실패했습니다.', 'error', 2000);
             }
         },
 
@@ -296,6 +300,7 @@ export default {
                 const apiUrl = `/admin/departments/${this.selected.no}`;
                 const response = await api.patch(apiUrl, this.department);
                 console.log('부서 업데이트 성공:', response.data);
+                this.triggerAlert('부서 정보를 수정하였습니다.', 'success', 2000);
 
                 this.clearForm();
                 await this.fetchDepartments();
@@ -320,7 +325,8 @@ export default {
 
         deleteItem(item) {
             this.selectedItem = item;
-            this.dialogDelete = true;
+            // this.dialogDelete = true;
+            this.showConfirmDialog = true;
         },
 
         addItem(){
@@ -329,6 +335,10 @@ export default {
             this.dialog = true;
         },
 
+    },
+    setup() {
+        const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
+        return { alertMessage, alertType, showAlert, triggerAlert };
     },
 
     mounted() {

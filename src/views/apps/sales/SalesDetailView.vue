@@ -1,12 +1,12 @@
 <template>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <div>
         <v-row>
             <v-col>
                 <div>총 매출 개수: {{ totalItems }}개</div>
             </v-col>
             <v-col cols="12" class="text-right">
-                <v-btn color="primary" @click="openModal" flat>
-                    <v-icon class="mr-2">mdi-account</v-icon>매출 추가
+                <v-btn color="primary" variant="tonal"  @click="openModal" flat> 매출 추가
                 </v-btn>
             </v-col>
         </v-row>
@@ -55,9 +55,11 @@
 <script>
 import SalesModal from './SalesModal.vue';
 import api from '@/api/axiosinterceptor';
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
 
 export default {
-    components: { SalesModal },
+    components: { SalesModal, AlertComponent },
     data() {
         return {
             sales: [], // 전체 매출 목록
@@ -83,6 +85,10 @@ export default {
             },
             search: '',
         };
+    },
+    setup() {
+        const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
+        return { alertMessage, alertType, showAlert, triggerAlert };
     },
     mounted() {
         this.fetchSales();
@@ -166,13 +172,16 @@ export default {
             try {
                 if (sale.salesNo) {
                     await api.patch(`/sales/${sale.salesNo}`, sale);
+                    this.triggerAlert('매출이 수정되었습니다.', 'success', 2000);
                 } else {
                     await api.post('/sales', sale);
+                    this.triggerAlert('매출이 등록되었습니다.', 'success', 2000);
                 }
                 this.fetchSales();
                 this.closeModal();
             } catch (error) {
                 console.error('매출 저장에 실패했습니다:', error);
+                this.triggerAlert('매출 저장에 실패했습니다.', 'error', 2000);
             }
         },
     }

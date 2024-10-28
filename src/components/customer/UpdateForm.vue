@@ -2,7 +2,12 @@
 import { computed, onMounted, ref ,nextTick } from 'vue';
 import api from '@/api/axiosinterceptor';
 import { useRouter ,useRoute} from 'vue-router';
-import { mask } from 'maska';  
+import { mask } from 'maska'; 
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+import EditConfirmDialog from '../../components/shared/EditConfirmDialog.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
 const userName = ref();
 const grades = ref(['S등급', 'A등급','B등급','C등급','D등급']);
@@ -16,6 +21,8 @@ const tel = ref(null);
 const grade = ref(null);
 const isKeyMan = ref(false);
 
+const showEditConfirmDialog = ref(false);
+
 const router = useRouter();
 const route = useRoute();
 
@@ -23,9 +30,11 @@ onMounted(()=>{
     getCustomerInfoAPI(route.params.id);
 })
 const updateCustomer = ()=>{
-    if(confirm("고객정보를 수정하시겠습니까?")){
-        updateCustomerAPI(route.params.id);
-    }
+
+    showEditConfirmDialog.value = true; 
+//     if(confirm("고객정보를 수정하시겠습니까?")){
+//         updateCustomerAPI(route.params.id);
+//     }
 }
 
 const getCustomerInfoAPI = async(id: string | string[])=>{
@@ -50,7 +59,7 @@ const getCustomerInfoAPI = async(id: string | string[])=>{
         
         }
     }catch(err){
-        console.log(`[ERROR 몌세지] : ${err}`);
+        console.log(`[ERROR 메세지] : ${err}`);
     }
 }
 
@@ -69,12 +78,16 @@ const updateCustomerAPI = async(id:string|string[])=>{
         })
         console.log(response.data);
         if(response.data.code==200){
-            alert(response.data.result);
-            getCustomerInfoAPI(route.params.id);
+            triggerAlert('수정이 완료되었습니다.', 'success');
+            // getCustomerInfoAPI(route.params.id);
+            showEditConfirmDialog.value = false; 
+            setTimeout(() => {
+                router.push({ name: "Customer" });
+            }, 2000); 
         }
 
     }catch(err){
-        console.log(`[ERROR 몌세지] : ${err}`);
+        console.log(`[ERROR 메세지] : ${err}`);
     }
 
 }
@@ -104,6 +117,7 @@ const formIsValid = computed(()=>{
 
 </script>
 <template>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <v-row>
         <v-col cols="6">
             <v-label class="font-weight-medium mb-2">고객명</v-label><span class="require">*</span>
@@ -163,9 +177,17 @@ const formIsValid = computed(()=>{
         </v-col>
 
     </v-row>
-    <div class="d-flex gap-3 mt-5 justify-content flex-column flex-wrap flex-xl-nowrap flex-sm-row fill-height"> 
-            <v-btn color="info" variant="outlined" to="/sales/contact">목록</v-btn>
-            <v-btn color="primary" variant="outlined" @click="updateCustomer" :disabled="!formIsValid">고객 정보 수정</v-btn>
+
+    <EditConfirmDialog
+        :dialog="showEditConfirmDialog"
+        message="고객정보를 수정하시겠습니까?"
+        @confirm="updateCustomerAPI(route.params.id)"
+        @close="showEditConfirmDialog = false"
+    />
+
+    <div class="d-flex gap-2 mt-5 justify-content flex-column flex-wrap flex-xl-nowrap flex-sm-row fill-height"> 
+        <v-btn color="primary" variant="flat" @click="updateCustomer" :disabled="!formIsValid">수정</v-btn>
+        <v-btn color="info" variant="outlined" to="/sales/contact">목록으로 돌아가기</v-btn>
     </div>   
 </template>
 <style scoped>
