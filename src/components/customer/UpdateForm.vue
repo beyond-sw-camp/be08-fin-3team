@@ -1,11 +1,11 @@
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, ref ,nextTick } from 'vue';
 import api from '@/api/axiosinterceptor';
 import { useRouter ,useRoute} from 'vue-router';
-import { mask } from 'maska'; 
 import { useAlert } from '@/utils/useAlert';
 import AlertComponent from '@/components/shared/AlertComponent.vue';
 import EditConfirmDialog from '../../components/shared/EditConfirmDialog.vue';
+import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
 
 const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
@@ -20,8 +20,11 @@ const phone = ref(null);
 const tel = ref(null);
 const grade = ref(null);
 const isKeyMan = ref(false);
+const userEmail = ref();
+const loggedInUserEmail = ref(localStorage.getItem("loginUserEmail"));
 
 const showEditConfirmDialog = ref(false);
+const showDeleteConfirmDialog = ref(false);
 
 const router = useRouter();
 const route = useRoute();
@@ -30,14 +33,13 @@ onMounted(()=>{
     getCustomerInfoAPI(route.params.id);
 })
 const updateCustomer = ()=>{
-
     showEditConfirmDialog.value = true; 
-//     if(confirm("고객정보를 수정하시겠습니까?")){
-//         updateCustomerAPI(route.params.id);
-//     }
+}
+const deleteCustomer =()=>{
+    showDeleteConfirmDialog.value = true;
 }
 
-const getCustomerInfoAPI = async(id: string | string[])=>{
+const getCustomerInfoAPI = async(id)=>{
     try{
         const res = await api.get(`/customers/${id}`);
         if(res.data.code==200){
@@ -51,6 +53,8 @@ const getCustomerInfoAPI = async(id: string | string[])=>{
             company.value = info.company;
             grade.value = info.grade;
             isKeyMan.value = info.keyMan;
+            userEmail.value = info.userEmail;
+
 
             await nextTick();
 
@@ -63,7 +67,7 @@ const getCustomerInfoAPI = async(id: string | string[])=>{
     }
 }
 
-const updateCustomerAPI = async(id:string|string[])=>{
+const updateCustomerAPI = async(id)=>{
     try{
         const response = await api.patch(`/customers/${id}`,{
             name:customerName.value,
@@ -79,11 +83,13 @@ const updateCustomerAPI = async(id:string|string[])=>{
         console.log(response.data);
         if(response.data.code==200){
             triggerAlert('수정이 완료되었습니다.', 'success');
-            // getCustomerInfoAPI(route.params.id);
             showEditConfirmDialog.value = false; 
-            setTimeout(() => {
-                router.push({ name: "Customer" });
-            }, 2000); 
+            // setTimeout(() => {
+            //     router.push({ name: "Customer" });
+            // }, 2000); 
+        }else{
+            triggerAlert(response.data.message,'warning');
+            showEditConfirmDialog.value = false; 
         }
 
     }catch(err){
@@ -92,28 +98,51 @@ const updateCustomerAPI = async(id:string|string[])=>{
 
 }
 
+const deleteCustoemrAPI = async(id)=>{
+    try{
+        const response = await api.delete(`/customers/${id}`);
+        console.log(response);
+        if(response.data.code == 200){
+            triggerAlert(response.data.message,'success');
+            showDeleteConfirmDialog.result = false;
+            setTimeout(() => {
+                router.push({ name: "Customer" });
+            }, 2000); 
+        }else{
+            triggerAlert(response.data.message,'warning');
+            showDeleteConfirmDialog.value = false; 
+        }
+
+    }catch(err){
+        console.log(`[ERROR 메세지] : ${err}`);
+    }
+
+}
+
+
 const confirmName = ref([
-    (s:string)=> !! s|| '고객명을 입력해주세요'
+    (s)=> !! s|| '고객명을 입력해주세요'
 ]);
 
 // 휴대폰 번호
 const confirmPhone = ref([
-    (s:string) => !!s|| '휴대폰 번호를 입력해주세요'
+    (s) => !!s|| '휴대폰 번호를 입력해주세요'
 ])
 // 등급
 const confirmGrade = ref([
-(v: string) => !!v || '등급을 선택해주세요'
+(v) => !!v || '등급을 선택해주세요'
 ]);
 
 
 // 이메일
-const confirmEmail = ref([(v: string) => !!v || '이메일을 입력해주세요', (v: string) => /.+@.+\..+/.test(v) || '이메일 형식으로 입력해주세요']);
+const confirmEmail = ref([(v) => !!v || '이메일을 입력해주세요', (v) => /.+@.+\..+/.test(v) || '이메일 형식으로 입력해주세요']);
 
 
 const formIsValid = computed(()=>{
     return customerName.value && email.value && grade.value && phone.value;
 })
 
+const isAssignedUser = computed(()=> userEmail.value === loggedInUserEmail.value);
 
 </script>
 <template>
@@ -185,8 +214,16 @@ const formIsValid = computed(()=>{
         @close="showEditConfirmDialog = false"
     />
 
+    <ConfirmDialogs
+        :dialog="showDeleteConfirmDialog"
+        message="고객정보를 삭제하시겠습니까?"
+        @agree="deleteCustoemrAPI(route.params.id)"
+        @disagree="showDeleteConfirmDialog = false"
+    />
+
     <div class="d-flex gap-2 mt-5 justify-content flex-column flex-wrap flex-xl-nowrap flex-sm-row fill-height"> 
-        <v-btn color="primary" variant="flat" @click="updateCustomer" :disabled="!formIsValid">수정</v-btn>
+        <v-btn v-if="isAssignedUser"  color="primary" variant="flat" @click="updateCustomer" :disabled="!formIsValid">수정</v-btn>
+        <v-btn v-if="isAssignedUser" color="error" class="mr-2"  @click="deleteCustomer">삭제</v-btn>
         <v-btn color="info" variant="outlined" to="/sales/contact">목록으로 돌아가기</v-btn>
     </div>   
 </template>
