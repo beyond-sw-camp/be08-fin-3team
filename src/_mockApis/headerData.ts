@@ -53,21 +53,21 @@ import proUser3 from '@/assets/images/svgs/icon-tasks.svg';
 const profileDD: profileType[] = [
     {
         avatar: proUser1,
-        title: 'My Profile',
-        subtitle: 'Account settings',
-        href: '/apps/user/profile'
+        title: '내 정보 관리',
+        subtitle: '내 개인 정보',
+        href: '/apps/user/mypage'
     },
     {
         avatar: proUser2,
-        title: 'My Notes',
-        subtitle: 'My Daily Notes',
-        href: '/apps/notes'
+        title: '고객 관리',
+        subtitle: '담당 고객 정보',
+        href: '/apps/user/mypage/customers'
     },
     {
         avatar: proUser3,
-        title: 'My Tasks',
-        subtitle: 'To-do and Daily tasks',
-        href: '/apps/kanban'
+        title: '잠재고객 관리',
+        subtitle: '담당 잠재고객 정보',
+        href: '/apps/user/mypage/pcustomers'
     }
 ];
 

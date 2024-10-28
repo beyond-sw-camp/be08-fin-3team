@@ -1,10 +1,19 @@
-<script setup lang="ts">
-import { MailIcon } from 'vue-tabler-icons';
+<script setup>
+import { MailIcon ,UserIcon} from 'vue-tabler-icons';
 import { profileDD } from '@/_mockApis/headerData';
 
 import { useAuthStore } from '@/stores/auth';
+import { onMounted, ref } from 'vue'
 
 const authStore = useAuthStore();
+const name = ref('');
+const email = ref('');
+
+onMounted(()=>{
+    name.value = authStore.name;
+    email.value = authStore.email;
+    
+})
 </script>
 
 <template>
@@ -14,24 +23,21 @@ const authStore = useAuthStore();
     <v-menu :close-on-content-click="false" class="profile_popup">
         <template v-slot:activator="{ props }">
             <v-btn class="custom-hover-primary" variant="text" v-bind="props" icon>
-                <v-avatar size="35">
-                    <img src="@/assets/images/profile/user2.jpg" width="35" alt="Julia" />
-                </v-avatar>
+                <i class="mr-2 mdi text-h1 mdi-account-circle"></i>
             </v-btn>
         </template>
         <v-sheet rounded="md" width="360" elevation="10">
             <div class="px-8 pt-6">
-                <h6 class="text-h5 font-weight-medium">User Profile</h6>
+                <h6 class="text-h6 font-weight-medium">내 정보</h6>
                 <div class="d-flex align-center mt-4 pb-6">
-                    <v-avatar size="80">
-                        <img src="@/assets/images/profile/user2.jpg" width="80" />
-                    </v-avatar>
                     <div class="ml-3">
-                        <h6 class="text-h6 mb-n1">Julia Roberts</h6>
-                        <span class="text-subtitle-1 font-weight-regular textSecondary">Designer</span>
+                        <div class="d-flex align-center mt-1">
+                            <UserIcon size="18" stroke-width="1.5" />
+                            <span class="text-subtitle-1 font-weight-regular textSecondary ml-2">{{ name }}</span>
+                        </div>
                         <div class="d-flex align-center mt-1">
                             <MailIcon size="18" stroke-width="1.5" />
-                            <span class="text-subtitle-1 font-weight-regular textSecondary ml-2">info@materialpro.com</span>
+                            <span class="text-subtitle-1 font-weight-regular textSecondary ml-2">{{ email }}</span>
                         </div>
                     </div>
                 </div>
@@ -52,7 +58,7 @@ const authStore = useAuthStore();
                     </v-list-item>
                 </v-list>
             </perfect-scrollbar>
-            <div class="px-8 py-3">
+            <!-- <div class="px-8 py-3">
                 <div class="bg-lightprimary rounded-md pa-5 overflow-hidden position-relative">
                     <h5 class="text-h6">
                         Unlimited<br />
@@ -61,9 +67,9 @@ const authStore = useAuthStore();
                     <v-btn variant="flat" color="primary" class="mt-3">Upgrade</v-btn>
                     <img src="@/assets/images/backgrounds/unlimited-bg.png" alt="bg-img" class="right-pos-img" />
                 </div>
-            </div>
+            </div> -->
             <div class="pt-4 pb-6 px-8 text-center">
-                <v-btn color="primary" variant="outlined" block @click="authStore.logout()">Logout</v-btn>
+                <v-btn color="primary" variant="outlined" block @click="authStore.logout()">로그아웃</v-btn>
             </div>
         </v-sheet>
     </v-menu>

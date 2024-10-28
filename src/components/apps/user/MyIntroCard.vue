@@ -13,10 +13,8 @@ const props = defineProps({
         <v-col cols="12">
             <v-card variant="outlined" class="bg-surface">
                 <v-card-item>
-                    <h4 class="text-h4">Introduction</h4>
-                    <p class="my-5 text-subtitle-1 lh-md">
-                        안녕, 내이름은 {{ name }}. 나는 영업하는걸 좋아해. 앞으로 더 많은 고객들에게 영업을 할 수 있는 기회를 얻고싶어. 다들 잘부탁해.
-                    </p>
+                    <!-- <h4 class="text-h4">Introduction</h4> -->
+                
                     <div class="d-flex gap-3 mb-5">
                         <BriefcaseIcon size="21" />
                         <span class="text-h6">부서 : {{ dept }}</span>
