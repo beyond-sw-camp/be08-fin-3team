@@ -204,10 +204,6 @@ const fetchSubProcesses = async (processNo) => {
 const requiredRule = (value) => !!value || '필수 입력 항목입니다.';
 
 const leadFormValid = ref(false);
-const alertDialog = ref(false);
-const successAlert = ref(false);
-const errorAlert = ref(false);
-const warningAlert = ref(false);
 
 const submitForm = async () => {
     if (leadFormValid.value) {
@@ -251,32 +247,25 @@ const submitForm = async () => {
                     custNo: leadResponseDto.customerNo
                 });
                 console.log('PATCH response:', response.data);
-                console.log("triggerAlert 호출 전"); // 로그 추가
+                console.log('triggerAlert 호출 전');
                 triggerAlert('수정이 완료되었습니다.', 'success');
+                return router.go(0);
             }
 
             if (response.data.isSuccess) {
-                successAlert.value = true;
-                alertDialog.value = true;
-
                 if (leadResponseDto.leadNo == null || leadResponseDto.leadNo == '') {
                     leadResponseDto.leadNo = response.data.result.leadNo;
+                    router.push(`/sales/lead/detail/${leadResponseDto.leadNo}`);
                 }
             } else {
                 console.error('데이터 전송 중 오류가 발생했습니다:', error);
-                // errorAlert.value = true;
-                // alertDialog.value = true;
             }
         } catch (error) {
             console.error('데이터 전송 중 오류가 발생했습니다:', error);
             triggerAlert('저장에 실패했습니다.', 'error');
-            // errorAlert.value = true;
-            // alertDialog.value = true;
         }
     } else {
         console.log('입력 값이 정상적이지 않습니다.');
-        // warningAlert.value = true;
-        // alertDialog.value = true;
         triggerAlert('필수값이 입력되지 않았습니다.', 'warning');
     }
 };
@@ -285,14 +274,13 @@ const deleteDialog = ref(false);
 
 const deleteLead = async () => {
     const leadNo = leadResponseDto.leadNo;
-    // deleteDialog.value = false;
     showConfirmDialogs.value = false;
     if (leadNo) {
         try {
             await api.delete(`/leads/${leadNo}`);
             console.log(`리드 ${leadNo}가 성공적으로 삭제되었습니다.`);
 
-            triggerAlert('삭제가 완료되었습니다.', 'success', 2000, '/sales/lead');
+            triggerAlert('삭제가 완료되었습니다.', 'success', 1000, '/sales/lead');
         } catch (error) {
             console.error('삭제 중 오류가 발생했습니다:', error);
             triggerAlert('삭제에 실패했습니다.', 'error');
@@ -378,7 +366,7 @@ watch(
     () => leadResponseDto.expSales,
     (newVal) => {
         if (isMounted.value) {
-            leadResponseDto.expProfit = (newVal * leadResponseDto.expMargin) / 100;
+            leadResponseDto.expProfit = Math.floor((newVal * leadResponseDto.expMargin) / 100);
         }
         expSalesDisplay.value = formatNumber(newVal);
     }
@@ -388,7 +376,7 @@ watch(
     () => leadResponseDto.expMargin,
     (newVal) => {
         if (isMounted.value) {
-            leadResponseDto.expProfit = (newVal * leadResponseDto.expSales) / 100;
+            leadResponseDto.expProfit = Math.floor((newVal * leadResponseDto.expSales) / 100);
         }
         expMarginDisplay.value = formatNumber(newVal);
     }
@@ -409,29 +397,6 @@ watch(
         } else {
             searchCond.searchQuery = '';
             selectedCustomer.value = null;
-        }
-    }
-);
-
-watch(
-    () => alertDialog.value,
-    (newVal) => {
-        if (!newVal) {
-            if (successAlert.value) {
-                successAlert.value = false;
-                if (route.path == `/sales/lead/detail/${leadResponseDto.leadNo}`) {
-                    return router.go(0);
-                }
-                router.push(`/sales/lead/detail/${leadResponseDto.leadNo}`);
-            }
-
-            if (errorAlert.value) {
-                errorAlert.value = false;
-            }
-
-            if (warningAlert) {
-                warningAlert.value = false;
-            }
         }
     }
 );
@@ -534,6 +499,7 @@ onMounted(() => {
                                     v-model="expSalesDisplay"
                                     variant="outlined"
                                     color="primary"
+                                    maxlength="14"
                                     @input="updateExpSales"
                                 ></v-text-field>
                                 <v-label class="mb-2 font-weight-medium">예상이익금액</v-label>
@@ -630,7 +596,7 @@ onMounted(() => {
                             <v-text-field variant="outlined" color="primary" placeholder="상세 주소"></v-text-field>
                         </div>
                         <v-btn color="primary" class="mr-2" flat @click="submitForm">{{ saveBtn }}</v-btn>
-                        <v-btn v-if="saveBtn == '수정'" color="error" class="mr-2"  @click="showConfirmDialogs = true">삭제</v-btn>
+                        <v-btn v-if="saveBtn == '수정'" color="error" class="mr-2" @click="showConfirmDialogs = true">삭제</v-btn>
                         <v-btn class="ml-" variant="outlined" color="primary" to="/sales/lead">목록으로 돌아가기</v-btn>
                     </v-col>
                     <v-col cols="12" md="6">
