@@ -1,21 +1,36 @@
-<script setup lang="ts">
-import { ref, shallowRef } from 'vue';
+<script setup>
+import { computed, onMounted, shallowRef,watch,ref } from 'vue';
 import { useDisplay } from 'vuetify';
 import { useCustomizerStore } from '@/stores/customizer';
+import { useAuthStore } from '@/stores/auth';
 import HorizontalItems from './horizontalItems';
 import NavItem from './NavItem/Index.vue';
 import NavCollapse from './NavCollapse/Index.vue';
-import VerticalSidebar from '../vertical-sidebar/VerticalSidebar.vue';
 
 const customizer = useCustomizerStore();
-const sidebarMenu = shallowRef(HorizontalItems);
+const originMenu = shallowRef(HorizontalItems);
 const { mdAndUp } = useDisplay();
-// function subIsActive(input: any) {
-//     const paths = Array.isArray(input) ? input : [input];
-//     return paths.some((path) => {
-//         return; //$route.path.indexOf(path) === 0; // current path starts with this path string
-//     });
-// }
+const userStore = useAuthStore();
+const sidebarMenu = ref();
+
+// const sidebarMenu = computed(()=>{
+//     if(userStore.role ==="ADMIN"){
+//         return originMenu.value;
+//     }
+//     return originMenu.value.filter((item)=>!item.adminOnly);
+// });
+
+const changeMenu=()=>{
+    if(localStorage.getItem("loginUserRole") ==="ADMIN"){
+        sidebarMenu.value =  originMenu.value;
+    }else{
+        sidebarMenu.value =  originMenu.value.filter((item)=>!item.adminOnly);
+    }
+}
+
+onMounted(()=>{
+    changeMenu();
+})
 </script>
 
 <template>

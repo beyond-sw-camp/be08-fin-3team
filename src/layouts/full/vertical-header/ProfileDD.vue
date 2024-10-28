@@ -10,8 +10,10 @@ const name = ref('');
 const email = ref('');
 
 onMounted(()=>{
-    name.value = authStore.name;
-    email.value = authStore.email;
+    // name.value = authStore.name;
+    // email.value = authStore.email;
+    name.value = localStorage.getItem("loginUserName");
+    email.value = localStorage.getItem("loginUserEmail");
     
 })
 </script>

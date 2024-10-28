@@ -63,6 +63,7 @@ const saveLocalStorage=(result:any)=>{
         localStorage.setItem('loginUserName', result.name);
         localStorage.setItem('loginUserEmail', result.email);
         localStorage.setItem('accessToken',result.accessToken);
+        localStorage.setItem('loginUserRole',result.role);
 }
 </script>
 
