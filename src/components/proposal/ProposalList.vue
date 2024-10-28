@@ -6,6 +6,10 @@ import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
 import { de } from 'date-fns/locale';
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
 const showConfirmDialogs = ref(false); // 열림 상태 관리
 
@@ -15,9 +19,9 @@ const breadcrumbs = ref([
     { text: '제안', disabled: true, href: '#' }
 ]);
 
-const dialogDelete = ref(false);
+// const dialogDelete = ref(false);
 const proposals = ref([]);
-const leads = ref([]);
+// const leads = ref([]);
 const dialogEdit = ref(false);
 const editedIndex = ref(-1);
 
@@ -87,17 +91,19 @@ const submitProposalApi = async () => {
         const res = await api.post('/proposals', editedItem.value);
         console.log(res);
         if (res.status === 200) {
-            successAlert.value = true;
-            alertDialog.value = true;
-
-            setTimeout(() => router.push('proposals'), 1500);
+            triggerAlert('제안이 추가되었습니다.', 'success', 2000,'/proposals');
+            // successAlert.value = true;
+            // alertDialog.value = true;
+            // setTimeout(() => router.push('proposals'), 1500);
             await initialize();
             resetForm();
+            dialogEdit.value = false;
         }
     } catch (error) {
         console.error('등록 실패:', error);
-        errorAlert.value = true;
-        alertDialog.value = true;
+        triggerAlert('제안 수정에 실패했습니다.', 'error');
+        // errorAlert.value = true;
+        // alertDialog.value = true;
     }
 };
 
@@ -105,34 +111,37 @@ const updateProposalApi = async () => {
     try {
         const res = await api.patch(`/proposals/${editedItem.value.propNo}`, editedItem.value);
         if (res.status === 200) {
-            successAlert.value = true;
-            alertDialog.value = true;
-
-            setTimeout(() => router.push('proposals'), 1500);
-            await initialize();
-            resetForm();
+            triggerAlert('제안이 수정되었습니다.', 'success');
+            // successAlert.value = true;
+            // alertDialog.value = true;
+            // setTimeout(() => router.push('proposals'), 1500);
+            // await initialize();
+            // resetForm();
             dialogEdit.value = false;
         }
     } catch (error) {
         console.error('수정 실패:', error);
-        errorAlert.value = true;
-        alertDialog.value = true;
+        triggerAlert('제안 수정에 실패했습니다.', 'error');
+        // errorAlert.value = true;
+        // alertDialog.value = true;
     }
 };
 
 const deleteProposalApi = async () => {
     try {
         await api.delete(`/proposals/${editedItem.value.propNo}`);
-        successAlert.value = true;
-        alertDialog.value = true;
+        triggerAlert('제안이 삭제되었습니다.', 'success');
+        // successAlert.value = true;
+        // alertDialog.value = true;
         setTimeout(() => router.push('/proposals'), 1500);
         proposals.value.splice(editedIndex.value, 1);
         resetForm();
         router.push('/proposals');
     } catch (error) {
         console.error('삭제 실패:', error);
-        errorAlert.value = true;
-        alertDialog.value = true;
+        triggerAlert('제안 삭제에 실패했습니다.', 'error');
+        // errorAlert.value = true;
+        // alertDialog.value = true;
     } finally {
         showConfirmDialogs.value = false;
     }
@@ -197,6 +206,8 @@ const warningAlert = ref(false);
 
 <template>
     <ConfirmDialogs :dialog="showConfirmDialogs" @agree="deleteProposalApi" @disagree="() => (showConfirmDialogs = false)"/>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
+    
     <v-dialog v-model="alertDialog" max-width="500" class="dialog-mw">
         <v-card>
             <v-card-text>

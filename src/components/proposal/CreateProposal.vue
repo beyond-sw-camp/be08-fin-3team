@@ -4,6 +4,11 @@ import { useRouter } from 'vue-router';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import api from '@/api/axiosinterceptor';
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
+
 
 const router = useRouter();
 
@@ -72,7 +77,7 @@ const save = async () => {
     if (form.value) {
         const isValid = await form.value.validate();
         if (!isValid) {
-            alert('폼에 오류가 있습니다. 모든 필드를 올바르게 입력해주세요.');
+            triggerAlert('유효한 값을 입력해주세요.', 'error');
             return;
         }
     }
@@ -83,13 +88,14 @@ const save = async () => {
     try {
         const res = await api.post('/proposals', editedItem.value);
         if (res.status === 200 || res.status === 201) {
-            successAlert.value = true;
-            alertDialog.value = true;
-
-            setTimeout(() => router.push('/estimates'), 1500);
+            triggerAlert('제안이 추가되었습니다.', 'success', 2000,'/proposals');
+            // successAlert.value = true;
+            // alertDialog.value = true;
+            // setTimeout(() => router.push('/proposals'), 1500);
         }
     } catch (error) {
         console.error('등록 실패:', error);
+        triggerAlert('제안 등록에 실패했습니다.', 'success');
         errorAlert.value = true;
         alertDialog.value = true;
     } finally {
@@ -107,27 +113,7 @@ const errorAlert = ref(false);
 const warningAlert = ref(false);
 </script>
 <template>
-    <v-dialog v-model="alertDialog" max-width="500" class="dialog-mw">
-        <v-card>
-            <v-card-text>
-                <v-alert v-if="successAlert" type="success" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Success</h5>
-                    <div>견적이 성공적으로 삭제되었습니다.</div>
-                </v-alert>
-                <v-alert v-if="errorAlert" type="error" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Error</h5>
-                    <div>견적 삭제에 실패했습니다. 다시 시도해주세요.</div>
-                </v-alert>
-                <v-alert v-if="warningAlert" type="warning" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Warning</h5>
-                    <div>필수 항목을 입력해주세요.</div>
-                </v-alert>
-            </v-card-text>
-            <v-card-actions>
-                <v-btn color="primary" block @click="alertDialog = false" flat>Close</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <div>
         <BaseBreadcrumb :title="page.title" class="" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
 

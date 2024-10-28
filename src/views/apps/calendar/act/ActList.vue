@@ -7,6 +7,10 @@ import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import api from '@/api/axiosinterceptor';
 import { reverseActStatus, actStatus } from '@/utils/ActStatusMappings';
 import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
 const page = ref({ title: '영업활동 목록' });
 const breadcrumbs = ref([
@@ -38,9 +42,7 @@ const editedItem = ref(null);
 
 async function initialize() {
 try {
-  console.log('초기화!')
   const response = await api.get('/acts');
-  console.log('response!',response)
   actList.value = response.data.result;
   } catch (error) {
   console.error(error);
@@ -48,22 +50,18 @@ try {
 }
 
 function deleteItem(item) {
-  console.log('editedItem.value.actNo',item.actNo)
   editedItem.value = item;
-  console.log('editedItem.value',editedItem.value)
   dialogDelete.value = true;
-  console.log('dialogDelete.value',dialogDelete.value)
 }
 
 async function confirmDelete() {
-  console.log('confirmDelete 함수 호출됨');
-  console.log('editedItem.value.actNo2', editedItem.value);
   if (editedItem.value) {
     try {
       await api.delete(`/acts/${editedItem.value.actNo}`);
       actList.value = actList.value.filter(act => act.actNo !== editedItem.value.actNo);
       dialogDelete.value = false;
       editedItem.value = null;
+      triggerAlert('삭제가 완료되었습니다.', 'success', 2000, '/apps/act/list');
     } catch (error) {
       console.error('삭제 실패:', error);
     }
@@ -100,6 +98,7 @@ onMounted(() => {
 </script>
 <template>
   <BaseBreadcrumb :title="page.title" class="" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
+  <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
   <v-row>
     <v-col cols="12">
       <UiParentCard title="영업활동">
@@ -176,3 +175,17 @@ onMounted(() => {
     </v-col>
   </v-row>
 </template>
+
+<style>
+
+.alert {
+  position: fixed;
+  top: 16%;
+  left: 90%;
+  transform: translateX(-50%);
+  z-index: 3000;
+  width: 100%;
+  max-width: 14%;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+</style>

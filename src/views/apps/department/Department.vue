@@ -1,4 +1,6 @@
 <template>
+
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <div class="container">
         <v-card>
             <v-card-title class="custom-card-title">
@@ -124,7 +126,7 @@
                 </v-container>
             </v-card-text>
             <v-card-actions>
-                <v-btn color="primary" variant="plain" flat style="font-size: 15px; font-weight: 600;" :disabled="!formValid" @click="isEdit ? updateDepartment() : saveDepartment()">
+                <v-btn color="primary" variant="plain" flat style="font-size: 15px; font-weight: 600;" @click="isEdit ? updateDepartment() : saveDepartment()">
                     저장
                 </v-btn>
                 <v-btn color="close" flat style="font-size: 15px; font-weight: 600;" @click="dialog = false">닫기</v-btn>
@@ -141,12 +143,15 @@ import { VTreeview } from 'vuetify/labs/VTreeview';
 import api from '@/api/axiosinterceptor';
 import FilterCard from '@/components/customer/FilterCard.vue';
 import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
 
 export default {
     components: {
         VTreeview,
         FilterCard,
         ConfirmDialogs,
+        AlertComponent
     },
 
     data: () => ({
@@ -255,6 +260,7 @@ export default {
                 const apiUrl = `/admin/departments/${this.selected.no}`;
                 const response = await api.delete(apiUrl);
                 console.log('Delete successful:', response.data);
+                this.triggerAlert('부서가 삭제되었습니다.', 'success', 2000);
 
                 this.clearForm();
                 await this.fetchDepartments();
@@ -269,6 +275,7 @@ export default {
             try {
                 const response = await api.post('/admin/departments', this.department);
                 console.log('부서 저장 성공:', response.data);
+                this.triggerAlert('부서를 등록하였습니다.', 'success', 2000);
 
                 this.clearForm();
                 this.dialog = false;
@@ -276,6 +283,7 @@ export default {
                 await this.fetchDepartments();
             } catch (error) {
                 console.error('부서 저장 중 오류 발생:', error);
+                this.triggerAlert('부서 삭제에 실패했습니다.', 'error', 2000);
             }
         },
 
@@ -292,6 +300,7 @@ export default {
                 const apiUrl = `/admin/departments/${this.selected.no}`;
                 const response = await api.patch(apiUrl, this.department);
                 console.log('부서 업데이트 성공:', response.data);
+                this.triggerAlert('부서 정보를 수정하였습니다.', 'success', 2000);
 
                 this.clearForm();
                 await this.fetchDepartments();
@@ -326,6 +335,10 @@ export default {
             this.dialog = true;
         },
 
+    },
+    setup() {
+        const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
+        return { alertMessage, alertType, showAlert, triggerAlert };
     },
 
     mounted() {

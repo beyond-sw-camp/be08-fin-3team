@@ -4,7 +4,10 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { mask } from 'maska';  
 import api from '@/api/axiosinterceptor';
-import BaseButton from '../BaseButton.vue';
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
 const userName = ref();
 const grades = ref(['S등급', 'A등급','B등급','C등급','D등급']);
@@ -39,15 +42,21 @@ const registerAPI = async()=>{
         }
      )
         if(res.data.code==200){
-            alert(res.data.result);
-            router.push({
-                name: "Customer"
-            });
+            triggerAlert(`${res.data.result}`, 'success');
+            
+            setTimeout(() => {
+                router.push({ name: 'Customer' });
+            }, 2000);
+            // alert(res.data.result);
+            // router.push({
+            //     name: "Customer"
+            // });
         }else{
             alert(res.data.result);
         }  
     }catch(err){
         console.log(`[ERROR 메세지] : ${err}`);
+        triggerAlert('등록에 실패했습니다.', 'error');
 
     }
 }
@@ -80,6 +89,7 @@ onMounted(()=>{
 
 </script>
 <template>
+  <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <v-row>
         <v-col cols="6">
             <v-label class="font-weight-medium mb-2">고객명</v-label><span class="require">*</span>

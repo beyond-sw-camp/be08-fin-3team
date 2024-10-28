@@ -4,6 +4,10 @@ import { useRouter, useRoute } from 'vue-router';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import api from '@/api/axiosinterceptor';
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
 const router = useRouter();
 const route = useRoute();
@@ -213,10 +217,10 @@ const save = async () => {
 
         await api.patch('/estProducts', productsToSave);
 
-        successAlert.value = true;
-        alertDialog.value = true;
-
-        setTimeout(() => router.push('/estimates'), 1500);
+        triggerAlert('견적이 수정되었습니다.', 'success', 2000,'/estimates');
+        // successAlert.value = true;
+        // alertDialog.value = true;
+        // setTimeout(() => router.push('/estimates'), 1500);
     } catch (error) {
         console.error('Failed to update estimate:', error.response ? error.response.data : error.message);
 
@@ -236,27 +240,7 @@ const warningAlert = ref(false);
 </script>
 
 <template>
-    <v-dialog v-model="alertDialog" max-width="500" class="dialog-mw">
-        <v-card>
-            <v-card-text>
-                <v-alert v-if="successAlert" type="success" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Success</h5>
-                    <div>견적이 성공적으로 수정되었습니다.</div>
-                </v-alert>
-                <v-alert v-if="errorAlert" type="error" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Error</h5>
-                    <div>견적 수정에 실패했습니다. 다시 시도해주세요.</div>
-                </v-alert>
-                <v-alert v-if="warningAlert" type="warning" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Warning</h5>
-                    <div>필수 항목을 입력해주세요.</div>
-                </v-alert>
-            </v-card-text>
-            <v-card-actions>
-                <v-btn color="primary" block @click="alertDialog = false" flat>Close</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <div>
         <BaseBreadcrumb :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
 

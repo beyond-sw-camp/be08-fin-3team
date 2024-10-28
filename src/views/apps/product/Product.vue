@@ -4,6 +4,11 @@ import api from '@/api/axiosinterceptor';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
 
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
+
 const dialog = ref(false);
 // const dialogDelete = ref(false);
 const showConfirmDialog = ref(false);
@@ -132,14 +137,17 @@ async function save() {
             if (editedIndex.value > -1) {
                 await api.patch(`/admin/products/${editedItem.value.prodNo}`, editedItem.value);
                 Object.assign(items.value[editedIndex.value], editedItem.value);
+                triggerAlert('제품이 수정되었습니다.', 'success', 2000);
             } else {
                 const response = await api.post('/admin/products', editedItem.value);
                 items.value.push(response.data.result);
+                triggerAlert('제품이 등록되었습니다.', 'success', 2000);
             }
             fetchProducts();
             close();
         } catch (error) {
             console.error('저장 중 오류 발생:', error);
+            triggerAlert('제품 등록에  실패했습니다.', 'error', 2000);
         }
     }
 }
@@ -149,9 +157,11 @@ async function deleteItemConfirm() {
         const apiUrl = `/admin/products/${editedItem.value.prodNo}`;
         await api.delete(apiUrl);
         items.value.splice(editedIndex.value, 1);
+        triggerAlert('제품이 삭제되었습니다.', 'success', 2000);
         closeDelete();
     } catch (error) {
         console.error('삭제 중 오류 발생:', error);
+        triggerAlert('제품 삭제에 실패했습니다.', 'error', 2000);
     }
 }
 
@@ -183,6 +193,7 @@ initialize();
 </script>
 
 <template>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <UiParentCard title="관리 제품 목록">
         <v-row class="mb-5">
             <v-col cols="4" sm="4">

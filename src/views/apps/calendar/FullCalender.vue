@@ -486,7 +486,7 @@ export default defineComponent({
       @close="closePlanModal" @add="addPlan" @delete="deletePlan" @update="updatePlan" @show-alert="handleAlert"/>
 
       <v-alert v-if="showSuccessAlert" type="success" variant="tonal" :class="['alert', alertType]">
-        <h5 class="text-h6 text-capitalize">Success</h5>
+        <h5 class="text-h5 text-capitalize">Success</h5>
           {{ alertMessage }}
       </v-alert>
     </div>
@@ -514,12 +514,13 @@ export default defineComponent({
 
 .alert {
   position: fixed;
-  top: 10%;
-  left: 70%;
+  top: 20%;
+  left: 90%;
   transform: translateX(-50%);
   z-index: 3000;
-  width: 90%;
-  max-width: 12%;
+  width: 100%;
+  max-width: 14%;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
 }
 </style>

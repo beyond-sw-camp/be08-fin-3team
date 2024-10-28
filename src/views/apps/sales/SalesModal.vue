@@ -22,7 +22,7 @@
         </v-form>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="primary" variant="outlined" @click="saveSale" flat style="font-size: 15px; font-weight: 600;">수정</v-btn>
+        <v-btn color="primary" variant="outlined" @click="saveSale" flat style="font-size: 15px; font-weight: 600;">저장</v-btn>
         <v-btn color="error" variant="outlined" @click="openDeleteDialog" v-if="sale.salesNo" flat style="font-size: 15px; font-weight: 600;">삭제</v-btn>
         <v-spacer></v-spacer>
         <v-btn color="close" @click="handleClose" style="font-size: 15px; font-weight: 600;">닫기</v-btn>
@@ -89,7 +89,7 @@ export default {
         this.handleClose();
       } catch (error) {
         console.error('매출 삭제에 실패했습니다:', error);
-        alert('매출 삭제에 실패했습니다.');
+        // alert('매출 삭제에 실패했습니다.');
       } finally {
         this.showConfirmDialog = false;
       }

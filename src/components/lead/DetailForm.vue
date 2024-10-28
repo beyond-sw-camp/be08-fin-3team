@@ -3,8 +3,11 @@ import { computed, ref, onMounted, reactive, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '@/api/axiosinterceptor';
 import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '../shared/AlertComponent.vue';
 
 const showConfirmDialogs = ref(false); // 열림 상태 관리
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
 const route = useRoute();
 const router = useRouter();
@@ -12,7 +15,7 @@ const router = useRouter();
 const isMounted = ref(false);
 
 const cardTitle = computed(() => {
-    return route.path === '/sales/lead/new' ? '영업기회 등록' : '영업기회 상세 정보';
+    return route.path === '/sales/lead/new' ? '영업기회 등록' : '영업기회 정보';
 });
 
 const saveBtn = computed(() => {
@@ -230,6 +233,7 @@ const submitForm = async () => {
                     custNo: leadResponseDto.customerNo
                 });
                 console.log('POST response:', response.data);
+                triggerAlert('저장이 완료되었습니다.', 'success');
             } else {
                 response = await api.patch(`/leads/${leadResponseDto.leadNo}`, {
                     name: leadResponseDto.name,
@@ -247,6 +251,8 @@ const submitForm = async () => {
                     custNo: leadResponseDto.customerNo
                 });
                 console.log('PATCH response:', response.data);
+                console.log("triggerAlert 호출 전"); // 로그 추가
+                triggerAlert('수정이 완료되었습니다.', 'success');
             }
 
             if (response.data.isSuccess) {
@@ -258,18 +264,20 @@ const submitForm = async () => {
                 }
             } else {
                 console.error('데이터 전송 중 오류가 발생했습니다:', error);
-                errorAlert.value = true;
-                alertDialog.value = true;
+                // errorAlert.value = true;
+                // alertDialog.value = true;
             }
         } catch (error) {
             console.error('데이터 전송 중 오류가 발생했습니다:', error);
-            errorAlert.value = true;
-            alertDialog.value = true;
+            triggerAlert('저장에 실패했습니다.', 'error');
+            // errorAlert.value = true;
+            // alertDialog.value = true;
         }
     } else {
         console.log('입력 값이 정상적이지 않습니다.');
-        warningAlert.value = true;
-        alertDialog.value = true;
+        // warningAlert.value = true;
+        // alertDialog.value = true;
+        triggerAlert('필수값이 입력되지 않았습니다.', 'warning');
     }
 };
 
@@ -284,9 +292,10 @@ const deleteLead = async () => {
             await api.delete(`/leads/${leadNo}`);
             console.log(`리드 ${leadNo}가 성공적으로 삭제되었습니다.`);
 
-            router.push('/sales/lead');
+            triggerAlert('삭제가 완료되었습니다.', 'success', 2000, '/sales/lead');
         } catch (error) {
             console.error('삭제 중 오류가 발생했습니다:', error);
+            triggerAlert('삭제에 실패했습니다.', 'error');
         }
     } else {
         console.warn('리드 번호가 없습니다. 삭제할 수 없습니다.');
@@ -436,27 +445,8 @@ onMounted(() => {
     <v-card elevation="10">
         <ConfirmDialogs :dialog="showConfirmDialogs" @agree="deleteLead" @disagree="() => (showConfirmDialogs = false)" />
 
-        <v-dialog v-model="alertDialog" max-width="500" class="dialog-mw">
-            <v-card>
-                <v-card-text>
-                    <v-alert v-if="successAlert" type="success" variant="tonal" class="mb-4">
-                        <h5 class="text-h6 text-capitalize">Success</h5>
-                        <div>저장됐습니다.</div>
-                    </v-alert>
-                    <v-alert v-if="errorAlert" type="error" variant="tonal" class="mb-4">
-                        <h5 class="text-h6 text-capitalize">Success</h5>
-                        <div>저장에 실패했습니다.</div>
-                    </v-alert>
-                    <v-alert v-if="warningAlert" type="warning" variant="tonal" class="mb-4">
-                        <h5 class="text-h6 text-capitalize">Success</h5>
-                        <div>필수값이 입력되지 않았습니다.</div>
-                    </v-alert>
-                </v-card-text>
-                <v-card-actions>
-                    <v-btn color="primary" block @click="alertDialog = false" flat>Close</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+        <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
+
         <v-dialog v-model="customerDialog" max-width="800">
             <v-card>
                 <v-card-title class="headline"> 고객 조회 </v-card-title>

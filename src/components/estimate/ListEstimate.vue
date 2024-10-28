@@ -6,6 +6,11 @@ import { useRouter } from 'vue-router';
 import api from '@/api/axiosinterceptor';
 import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
 const showConfirmDialogs = ref(false); // 열림 상태 관리
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
+
 
 const page = ref({ title: '' });
 
@@ -81,17 +86,18 @@ const deleteEstimateApi = async () => {
     try {
         await api.delete(`/estimates/${editedItem.value.estNo}`);
 
-        successAlert.value = true;
-        alertDialog.value = true;
+        // successAlert.value = true;
+        // alertDialog.value = true;
 
-        setTimeout(() => router.push('/estimates'), 1500);
+        triggerAlert('견적이 삭제되었습니다.', 'success', 2000,'/estimates');
 
         estimates.value.splice(editedIndex.value, 1);
         resetForm();
-        router.push('/estimates');
+        // router.push('/estimates');
     } catch (error) {
-        errorAlert.value = true;
-        alertDialog.value = true;
+        // errorAlert.value = true;
+        // alertDialog.value = true;
+    triggerAlert('견적 삭제를 실패했습니다.', 'error', 2000);
     }
 };
 
@@ -127,27 +133,8 @@ const warningAlert = ref(false);
 </script>
 
 <template>
-    <v-dialog v-model="alertDialog" max-width="500" class="dialog-mw">
-        <v-card>
-            <v-card-text>
-                <v-alert v-if="successAlert" type="success" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Success</h5>
-                    <div>견적이 성공적으로 삭제되었습니다.</div>
-                </v-alert>
-                <v-alert v-if="errorAlert" type="error" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Error</h5>
-                    <div>견적 삭제에 실패했습니다. 다시 시도해주세요.</div>
-                </v-alert>
-                <v-alert v-if="warningAlert" type="warning" variant="tonal" class="mb-4">
-                    <h5 class="text-h6 text-capitalize">Warning</h5>
-                    <div>필수 항목을 입력해주세요.</div>
-                </v-alert>
-            </v-card-text>
-            <v-card-actions>
-                <v-btn color="primary" block @click="alertDialog = false" flat>Close</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
     <v-row>
         <!-- 검색 -->

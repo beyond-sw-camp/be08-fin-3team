@@ -6,6 +6,10 @@ import { useRouter } from 'vue-router';
 import api from '@/api/axiosinterceptor';
 import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
 const showConfirmDialogs = ref(false); // 열림 상태 관리
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
 const page = ref({ title: '견적 목록' });
 
@@ -22,10 +26,10 @@ const breadcrumbs = ref([
 	},
 ]);
 const dialogDelete = ref(false);
-const estimates = ref([]);
 const proposals = ref([]);
 const estProducts = ref([]);
 const products = ref([]);
+const estimates = ref([]);
 const dialogEdit = ref(false);
 const editedIndex = ref(-1);
 
@@ -104,14 +108,14 @@ const submitEstimateApi = async () => {
     const res = await api.post('/estimates', editedItem.value);
     console.log(res);
     if (res.status === 200) {
-      alert("견적이 성공적으로 등록되었습니다.");
+      triggerAlert('견적이 등록되었습니다.', 'success', 2000,'/estimates');
       await initialize(); 
       resetForm();
       router.push('/estimates');
     }
   } catch (error) {
     console.error("등록 실패:", error);
-    alert("견적 등록에 실패했습니다.");
+    triggerAlert('견적 등록을 실패했습니다.', 'error', 2000);
   }
 };
 
@@ -119,11 +123,11 @@ const updateEstimateApi = async () => {
     try {
         const res = await api.patch(`/estimates/${editedItem.value.estNo}`, editedItem.value);
         if (res.status === 200) {
-            alert("견적이 성공적으로 수정되었습니다.");
+          triggerAlert('견적이 수정되었습니다.', 'success', 2000,'/estimates');
             // Object.assign(estimates.value[editedIndex.value], res.data);
             await initialize();
             resetForm();
-            router.push('/estimates');
+            // router.push('/estimates');
             dialogEdit.value = false;
         }
     } catch (error) {
@@ -156,13 +160,13 @@ const displayedEstimates = computed(() => estimates.value);
 const deleteEstimateApi = async () => {
     try {
         await api.delete(`/estimates/${editedItem.value.estNo}`);
-        alert("견적이 성공적으로 삭제되었습니다.");
+        triggerAlert('견적이 삭제되었습니다.', 'success', 2000,'/estimates');
         estimates.value.splice(editedIndex.value, 1);
         resetForm();
         router.push('/estimates');
     } catch (error) {
         console.error("삭제 실패:", error);
-        alert("견적 삭제에 실패했습니다.");
+        triggerAlert('견적이 삭제되었습니다.', 'error');
     }
 };
 
@@ -200,6 +204,7 @@ initialize();
 </script>
 
 <template>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
   <BaseBreadcrumb :title="page.title" class="" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
     <v-row>
       <v-col cols="12">

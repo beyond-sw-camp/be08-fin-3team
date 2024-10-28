@@ -4,6 +4,11 @@ import api from '@/api/axiosinterceptor';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
 
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
+
 const headers1 = ref([
     { title: '서브 프로세스', align: 'start', key: 'subProcessName' },
     { title: '진행 단계', align: 'start', key: 'progressStep' },
@@ -77,7 +82,8 @@ function addParentProcess() {
 // 하위 프로세스 추가 함수
 function addSubProcess() {
     if (!selectedProcess.value) {
-        alert('상위 프로세스를 선택한 후 하위 프로세스를 추가하세요.');
+        // alert('상위 프로세스를 선택한 후 하위 프로세스를 추가하세요.');
+        triggerAlert('상위 프로세스를 선택한 후 하위 프로세스를 추가하세요.', 'warning', 2000);
         return;
     }
 
@@ -101,14 +107,17 @@ async function saveParentProcess() {
         if (dialogMode.value === 'add-parent') {
             const response = await api.post(`/admin/processes`, editedItem.value);
             console.log('Parent process 추가 성공:', response.data);
+            triggerAlert('프로세스가 등록되었습니다.', 'success', 2000);
         } else if (dialogMode.value === 'edit-parent') {
             const response = await api.patch(`/admin/processes/${editedItem.value.processNo}`, editedItem.value);
             console.log('Parent process 수정 성공:', response.data);
+            triggerAlert('프로세스가 수정되었습니다.', 'success', 2000);
         }
         dialog.value = false;
         await fetchProcesses();
     } catch (error) {
         console.error('상위 프로세스 저장 중 오류:', error.message || error);
+        triggerAlert('프로세스 등록에 실패했습니다.', 'error', 2000);
     }
 }
 
@@ -119,10 +128,12 @@ async function saveSubProcess() {
         if (dialogMode.value === 'add-sub') {
             const response = await api.post(`/admin/subprocesses`, editedItem.value);
             console.log('Subprocess 추가 성공:', response.data);
+            triggerAlert('하위 프로세스가 등록되었습니다.', 'success', 2000);
         } else if (dialogMode.value === 'edit-sub') {
             console.log("hihi");
             const response = await api.patch(`/admin/subprocesses/${editedItem.value.subProcessNo}`, editedItem.value);
             console.log('Subprocess 수정 성공:', response.data);
+            triggerAlert('하위 프로세스가 수정되었습니다.', 'success', 2000);
         }
 
         dialog.value = false;
@@ -131,6 +142,7 @@ async function saveSubProcess() {
         fetchProcesses();
     } catch (error) {
         console.error('하위 프로세스 저장 중 오류:', error.message || error);
+        triggerAlert('하위 프로세스 등록에 실패했습니다.', 'error', 2000);
     }
 }
 
@@ -166,6 +178,7 @@ async function confirmDelete() {
             : `/admin/subprocesses/${editedItem.value.subProcessNo}`;
         const response = await api.delete(apiUrl);
         console.log('Delete successful:', response.data);
+        triggerAlert('프로세스가 삭제되었습니다.', 'success', 2000);
 
         editedItem.value = null;
 
@@ -176,6 +189,7 @@ async function confirmDelete() {
         }
     } catch (error) {
         console.error('Error deleting item:', error.message || error);
+        triggerAlert('프로세스 삭제에 실패했습니다.', 'error', 2000);
     }
 }
 
@@ -194,6 +208,7 @@ onMounted(() => {
 </script>
 
 <template>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <v-row>
         <v-col cols="12">
             <UiParentCard title="프로세스 관리">

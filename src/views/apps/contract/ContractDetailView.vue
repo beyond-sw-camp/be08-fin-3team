@@ -3,9 +3,12 @@
 import api from '@/api/axiosinterceptor';
 import ContractModal from './ContractModal.vue';
 import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
 
 export default {
-    components: { ContractModal, ConfirmDialogs },
+    components: { ContractModal, ConfirmDialogs,AlertComponent },
     data() {
         return {
             contracts: [],
@@ -44,6 +47,10 @@ export default {
             search: '',
         };
     },
+    setup() {
+        const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
+        return { alertMessage, alertType, showAlert, triggerAlert };
+    },
     mounted() {
         this.fetchContracts();
     },
@@ -59,11 +66,12 @@ export default {
         async confirmDeleteContract() {
             try {
                 await api.delete(`/contract/${this.selectedContractNo}`);
-                this.fetchContracts();
-                alert('계약이 삭제되었습니다.');
+                this.fetchContracts();        
+                this.triggerAlert('계약이 삭제되었습니다.', 'success', 2000);
+
             } catch (error) {
                 console.error('계약 삭제에 실패했습니다:', error);
-                alert('계약 삭제에 실패했습니다.');
+                this.triggerAlert('계약 삭제에 실패했습니다.', 'error', 2000);
             } finally {
                 this.showConfirmDialogs = false;
             }
@@ -113,8 +121,10 @@ export default {
                 }
                 this.fetchContracts(); 
                 this.closeModal();
+                this.triggerAlert('계약이 등록되었습니다.', 'success', 2000);
             } catch (error) {
                 console.error('계약 저장에 실패했습니다:', error);
+                this.triggerAlert('계약 저장에 실패했습니다.', 'error', 2000);
             }
         },
     },
@@ -123,6 +133,7 @@ export default {
 
 
 <template>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <div>
         <v-row>
             <v-col><div >총 견적 개수: {{ contracts.length }}개</div> </v-col>

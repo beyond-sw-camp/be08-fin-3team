@@ -6,7 +6,7 @@
 				<v-form @submit.prevent="addTodo" lazy-validation>
 					<div>
 						<v-alert v-if="showAlert" type="warning" variant="tonal" class="warn-alert">
-							<h5 class="text-h6 text-capitalize">warning</h5>
+							<h5 class="text-h5 text-capitalize">warning</h5>
 							<div>{{ alertMessage }}</div>
 						</v-alert>
 					</div>

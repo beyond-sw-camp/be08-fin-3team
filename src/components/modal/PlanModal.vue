@@ -6,7 +6,7 @@
 				<v-form @submit.prevent="submitPlan" lazy-validation>
 					<div>
 						<v-alert v-if="showAlert" type="warning" variant="tonal" class="warn-alert">
-							<h5 class="text-h6 text-capitalize">warning</h5>
+							<h5 class="text-h5 text-capitalize">warning</h5>
 							<div>{{ alertMessage }}</div>
 						</v-alert>
 					</div>
@@ -340,6 +340,7 @@ export default {
 	transform: translateX(-50%);
 	z-index: 3000;
 	width: 60%;
+	font-size: 16px;
 }
 .headline {
 	padding-top: 20px;
