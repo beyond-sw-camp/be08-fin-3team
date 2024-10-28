@@ -15,18 +15,29 @@ export const router = createRouter({
     ]
 });
 
+
 router.beforeEach(async (to, from, next) => {
-    // redirect to login page if not logged in and trying to access a restricted page
-    const publicPages = ['/auth/login','/auth/register'];
+    // 로그인 필요 여부와 관리자 페이지 여부 확인
+    const publicPages = ['/auth/login', '/auth/register'];
+    const adminPages = ['/admin/departments', '/admin/products', '/admin/processes','/admin/targetsales'];
     const authRequired = !publicPages.includes(to.path);
+    const checkPath = adminPages.includes(to.path);
+    const userRole = localStorage.getItem('loginUserRole');
     const auth: any = useAuthStore();
 
-    if (to.matched.some((record) => record.meta.requiresAuth)) {
-        if (authRequired && (localStorage.getItem('isLoggedIn')!=="true")) {
-            auth.returnUrl = to.fullPath;
-            return next('/auth/login');
-        } else next();
-    } else {
-        next();
+    // 로그인 필수 페이지 처리
+    if (authRequired && !localStorage.getItem('isLoggedIn')) {
+        auth.returnUrl = to.fullPath;
+        return next('/auth/login');
     }
+
+    // 관리자 전용 페이지 처리
+    if (checkPath && userRole !== 'ADMIN') {
+        alert("관리자만 접근 가능합니다");
+        next('/'); // 홈으로 리다이렉트
+        return
+    }
+
+    // 모든 조건 통과 시 페이지 이동 허용
+    next();
 });

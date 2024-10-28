@@ -577,20 +577,23 @@ const MainRoutes = {
             name: "Product",
             path: "/admin/products",
             component: () => import("@/views/apps/product/Product.vue"),
-            props:true
+            props:true,
+            meta:{requiresAdmin:true}
           },
           { // 프로세스
             name: "Process",
             path: "/admin/processes",
             component: () => import("@/views/apps/process/Process.vue"),
-            props:true
+            props:true,
+            meta:{requiresAdmin:true}
           },
           
           { // 목표 매출
             name: "TargetSale",
             path: "/admin/targetsales",
             component: () => import("@/views/apps/targetSale/TargetSale.vue"),
-            props:true
+            props:true,
+            meta:{requiresAdmin:true}
           },
 
         {
