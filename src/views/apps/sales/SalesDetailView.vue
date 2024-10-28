@@ -5,8 +5,7 @@
                 <div>총 매출 개수: {{ totalItems }}개</div>
             </v-col>
             <v-col cols="12" class="text-right">
-                <v-btn color="primary" @click="openModal" flat>
-                    <v-icon class="mr-2">mdi-account</v-icon>매출 추가
+                <v-btn color="primary" variant="tonal"  @click="openModal" flat> 매출 추가
                 </v-btn>
             </v-col>
         </v-row>

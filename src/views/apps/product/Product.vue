@@ -22,7 +22,7 @@ const headers = ref([
     { title: '원가', key: 'supplyPrice' },
     { title: '세율', key: 'taxRate' },
     { title: '가격', key: 'price' },
-    { title: 'Actions', key: 'actions'},
+    { title: '', key: 'actions'},
 ]);
 
 const items = ref([]);
@@ -109,7 +109,7 @@ function initialize() {
 
 }
 
-const formTitle = computed(() => (editedIndex.value === -1 ? 'New Item' : 'Edit Item'));
+const formTitle = computed(() => (editedIndex.value === -1 ? '제품 등록' : '제품 수정'));
 
 function editItem(item) {
     editedIndex.value = items.value.indexOf(item);
@@ -179,7 +179,7 @@ initialize();
 </script>
 
 <template>
-    <UiParentCard title="Products Table">
+    <UiParentCard title="관리 제품 목록">
         <v-row class="mb-5">
             <v-col cols="4" sm="4">
                 <v-text-field v-model="searchProdName"
@@ -198,11 +198,11 @@ initialize();
         >
             <template v-slot:top>
                 <v-toolbar class="bg-lightsecondary" flat>
-                    <v-toolbar-title>Products</v-toolbar-title>
+                    <v-toolbar-title>제품 목록</v-toolbar-title>
                     <v-spacer></v-spacer>
                     <v-dialog v-model="dialog" max-width="600px">
                         <template v-slot:activator="{ props }">
-                            <v-btn color="primary" variant="flat" dark v-bind="props">Add New Product</v-btn>
+                            <v-btn class="mr-2" color="primary" variant="tonal" v-bind="props">제품 생성</v-btn>
                         </template>
                         <v-card>
                             <v-card-title>
@@ -268,8 +268,8 @@ initialize();
                             </v-card-text>
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn color="primary" @click="save" :disabled="!formValid">Save Product</v-btn>
-                                <v-btn @click="close">Cancel</v-btn>
+                                <v-btn flat style="font-size: 15px; font-weight: 600;" color="primary" @click="save" :disabled="!formValid">저장</v-btn>
+                                <v-btn color="close" flat style="font-size: 15px; font-weight: 600;"  @click="close">닫기</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -286,8 +286,20 @@ initialize();
                 </v-toolbar>
             </template>
             <template v-slot:item.actions="{ item }">
-                <v-icon small color="info" class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
-                <v-icon small color="error" @click="deleteItem(item)">mdi-delete</v-icon>
+                <EditIcon
+                    height="20"
+                    width="20"
+                    class="mr-2 text-primary cursor-pointer"
+                    size="small"
+                    @click="editItem(item)"
+                />
+                <TrashIcon
+                    height="20"
+                    width="20"
+                    class="text-error cursor-pointer"
+                    size="small"
+                    @click="deleteItem(item)"
+                />
             </template>
         </v-data-table>
     </UiParentCard>

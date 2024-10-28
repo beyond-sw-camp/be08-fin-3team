@@ -28,8 +28,8 @@
         </v-form>
       </v-card-text>
       <v-card-actions>
-        <v-btn @click="saveContract">저장</v-btn>
-        <v-btn @click="handleClose">취소</v-btn>
+        <v-btn color="primary" variant="outlined" @click="saveContract" flat style="font-size: 15px; font-weight: 600;">저장</v-btn>
+        <v-btn color="close" @click="handleClose" style="font-size: 15px; font-weight: 600;">닫기</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

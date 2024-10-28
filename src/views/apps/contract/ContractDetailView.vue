@@ -13,7 +13,7 @@ export default {
                 { title: '계약 이름', key: 'name' },
                 { title: '시작 날짜', key: 'startDate' },
                 { title: '종료 날짜', key: 'endDate' },
-                { title: '추가 작업', key: 'action', sortable: false },
+                { title: '', key: 'action', sortable: false },
             ],
             showModal: false,
             editedContract: {
@@ -120,16 +120,29 @@ export default {
         <v-row>
             <v-col><div >총 견적 개수: {{ contracts.length }}개</div> </v-col>
             <v-col cols="12" lg="12" md="6" class="text-right">
-                <v-btn color="primary" @click="openModal" flat class="ml-auto">
-                    <v-icon class="mr-2">mdi-account-multiple-plus</v-icon>계약 추가
+                <v-btn color="primary" variant="tonal"  @click="openModal" flat class="ml-auto"> 계약 생성
                 </v-btn>
             </v-col>
         </v-row>
         <v-data-table :headers="headers" :items="contracts" class="elevation-0">
 
             <template v-slot:item.action="{ item }">
-                <v-btn @click="editContract(item)" style="color: slateblue">수정</v-btn>
-                <v-btn @click="deleteContract(item.contractNo)" style="color: crimson">삭제</v-btn>
+                <div class="d-flex gap-2">
+                <EditIcon
+                    height="20"
+                    width="20"
+                    class="text-primary cursor-pointer"
+                    size="small"
+                    @click="editContract(item)"
+                />
+                <TrashIcon
+                    height="20"
+                    width="20"
+                    class="text-error cursor-pointer"
+                    size="small"
+                    @click="deleteContract(item.contractNo)"
+                />
+                </div>
             </template>
 
             <template v-slot:no-data>

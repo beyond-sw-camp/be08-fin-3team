@@ -9,7 +9,7 @@ const router = useRouter();
 const route = useRoute();
 
 const breadcrumbs = ref([
-    { text: '견적 리스트', disabled: false, href: '/estimates' },
+    { text: '견적 목록', disabled: false, href: '/estimates' },
     { text: '견적 상세페이지', disabled: true, href: '/estimates/form' }
 ]);
 
@@ -307,7 +307,7 @@ const warningAlert = ref(false);
                                 <v-dialog v-model="proposalModal" max-width="600px">
                                     <v-card>
                                         <v-card-title class="d-flex justify-space-between">
-                                            <span>제안 리스트</span>
+                                            <span>제안 목록</span>
                                             <v-btn icon @click="closeProposalModal">
                                                 <v-icon>mdi-close</v-icon>
                                             </v-btn>
@@ -539,10 +539,8 @@ const warningAlert = ref(false);
 
         <!-- 제출 -->
         <v-row justify="end">
-            <v-col cols="2" sm="2">
-                <v-btn color="success" class="mr-3" flat @click="cancel">취소</v-btn>
-                <v-btn color="info" class="mr-3" flat @click="save">저장</v-btn>
-            </v-col>
+            <v-btn class="mr-2 mt-2" color="primary" variant="flat" style="font-size: 15px; font-weight: 600;" @click="save">저장</v-btn>
+            <v-btn class="mr-7 mt-2" color="primary" variant="outlined" style="font-size: 15px; font-weight: 600;" @click="cancel">목록으로 돌아가기</v-btn>
         </v-row>
     </div>
 </template>

@@ -5,12 +5,20 @@ import UiParentCard from '@/components/shared/UiParentCard.vue';
 import { useRouter } from 'vue-router';
 import api from '@/api/axiosinterceptor';
 
-const page = ref({ title: '견적 리스트' });
-const breadcrumbs = ref([
-    { text: '영업관리', disabled: false, href: '' }, 
-    { text: '견적', disabled: true, href: '/estimates' },
-]);
+const page = ref({ title: '견적 목록' });
 
+const breadcrumbs = ref([
+{
+	text: '영업관리',
+	disabled: false,
+	to: '#'
+},
+{
+	text: '견적',
+	disabled: true,
+	to: ''
+	},
+]);
 const dialogDelete = ref(false);
 const estimates = ref([]);
 const proposals = ref([]);
@@ -73,7 +81,7 @@ const headers = ref([
     { title: '', key: 'actions', sortable: false },
 ]);
 
-const formTitle = computed(() => (editedIndex.value === -1 ? '추가' : '수정'));
+const formTitle = computed(() => (editedIndex.value === -1 ? '견적 추가' : '견적 수정'));
 
 const router = useRouter();
 
@@ -187,7 +195,7 @@ initialize();
 </script>
 
 <template>
-    <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
+  <BaseBreadcrumb :title="page.title" class="" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
     <v-row>
       <v-col cols="12">
         <UiParentCard title="견적">
@@ -199,12 +207,13 @@ initialize();
             item-key="estNo"
             show-actions
           >
-            <template v-slot:top>
-              <v-toolbar class="bg-lightsecondary" flat>
-                <v-toolbar-title>등록된 견적 리스트</v-toolbar-title>
+          <template v-slot:top>
+              <v-row justify="end">
+                <v-col cols="auto">
                 <v-spacer></v-spacer>
-                <v-btn color="primary" variant="flat" @click="navigateToCreate">새로운 견적 등록</v-btn>
-              </v-toolbar>
+                <v-btn color="primary" class="mr-3 mt-4" variant="tonal" @click="navigateToCreate">견적 생성</v-btn>
+              </v-col>
+              </v-row>
             </template>
 
             <template v-slot:item.actions="{ item }">
@@ -236,7 +245,7 @@ initialize();
     <!-- 수정 -->
     <v-dialog v-model="dialogEdit" max-width="500px">
       <v-card>
-        <v-card-title class="text-h5 text-center py-6">{{ formTitle }}</v-card-title>
+        <v-card-title>{{ formTitle }}</v-card-title>
         <v-card-text>
           <v-form>
             <v-text-field v-model="editedItem.name" label="견적명" required></v-text-field>
@@ -253,9 +262,8 @@ initialize();
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="warning" variant="flat" @click="closeEditDialog">취소</v-btn>
-        <v-btn color="success" variant="flat" @click="save">저장</v-btn>
-        <v-spacer></v-spacer>
+        <v-btn color="primary" variant="outlined" style="font-size: 15px; font-weight: 600;" @click="save">수정</v-btn>
+        <v-btn color="close" variant="flat" style="font-size: 15px; font-weight: 600;" @click="closeEditDialog">닫기</v-btn>
       </v-card-actions>
     </v-card>
     </v-dialog>

@@ -177,9 +177,7 @@ const warningAlert = ref(false);
                     </v-col>
                     <v-spacer></v-spacer>
                     <v-col cols="auto">
-                        <v-btn color="primary" variant="flat" class="mr-2 mdi text-h6 mdi-plus-outline" @click="navigateToCreate"
-                            >새로운 견적 등록</v-btn
-                        >
+                        <v-btn color="primary" variant="flat" class="mr-2" @click="navigateToCreate">견적 생성</v-btn>
                     </v-col>
                 </v-row>
 
@@ -193,19 +191,20 @@ const warningAlert = ref(false);
                     show-actions
                 >
                     <template v-slot:item.actions="{ item }">
-                        <v-icon
-                            color="info"
+                        <EditIcon
+                            height="20"
+                            width="20"
+                            class="mr-2 text-primary cursor-pointer"
                             size="small"
-                            class="me-2"
                             @click="goToDetailEstimate(item.estNo)"
-                            role="button"
-                            aria-label="Edit Estimate"
-                        >
-                            mdi-pencil
-                        </v-icon>
-                        <v-icon color="error" size="small" @click="deleteItem(item)" role="button" aria-label="Delete Estimate">
-                            mdi-delete
-                        </v-icon>
+                        />
+                        <TrashIcon
+                            height="20"
+                            width="20"
+                            class="text-error cursor-pointer"
+                            size="small"
+                            @click="deleteItem(item)"
+                        />
                     </template>
                 </v-data-table>
             </v-card>

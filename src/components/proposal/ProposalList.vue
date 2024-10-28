@@ -5,11 +5,11 @@ import api from '@/api/axiosinterceptor';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 
-const page = ref({ title: '' });
-// const breadcrumbs = ref([
-//     { text: '영업관리', disabled: false, href: '#' },
-//     { text: '제안', disabled: true, href: '#' }
-// ]);
+const page = ref({ title: '제안 목록' });
+const breadcrumbs = ref([
+    { text: '영업관리', disabled: false, href: '#' },
+    { text: '제안', disabled: true, href: '#' }
+]);
 
 const dialogDelete = ref(false);
 const proposals = ref([]);
@@ -62,7 +62,7 @@ const headers = ref([
     { title: '', key: 'actions', sortable: false }
 ]);
 
-const formTitle = computed(() => (editedIndex.value === -1 ? '추가' : '수정'));
+const formTitle = computed(() => (editedIndex.value === -1 ? '제안 추가' : '제안 수정'));
 
 const router = useRouter();
 
@@ -233,7 +233,7 @@ const warningAlert = ref(false);
         </v-col>
 
         <v-col cols="12" md="10">
-            <UiParentCard title="">
+            <UiParentCard title="제안">
                 <v-data-table
                     :headers="headers"
                     :items="displayedProposals"
@@ -244,22 +244,30 @@ const warningAlert = ref(false);
                     <template v-slot:top>
                         <v-toolbar class="bg-lightsecondary" flat>
                             <v-toolbar-title></v-toolbar-title>
-                            <v-spacer></v-spacer>
-                            <v-col cols="auto">
-                                <v-btn color="primary" variant="flat" class="mr-2 mdi text-h6 mdi-plus-outline" @click="navigateToCreate"
-                                    >새로운 제안 등록</v-btn
-                                >
-                            </v-col>
+                                <v-row justify="end">
+                                    <v-col cols="auto">
+                                    <v-spacer></v-spacer>
+                                    <v-btn color="primary" variant="tonal" class="mr-2" @click="navigateToCreate">제안 생성</v-btn>
+                                </v-col>
+                            </v-row>
                         </v-toolbar>
                     </template>
 
                     <template v-slot:item.actions="{ item }">
-                        <v-icon color="info" size="small" class="me-2" @click="editItem(item)" role="button" aria-label="Edit Proposal">
-                            mdi-tooltip-edit
-                        </v-icon>
-                        <v-icon color="error" size="small" @click="deleteItem(item)" role="button" aria-label="Delete Proposal">
-                            mdi-delete-empty
-                        </v-icon>
+                        <EditIcon
+                            height="20"
+                            width="20"
+                            class="mr-2 text-primary cursor-pointer"
+                            size="small"
+                            @click="editItem(item)"
+                        />
+                        <TrashIcon
+                            height="20"
+                            width="20"
+                            class="text-error cursor-pointer"
+                            size="small"
+                            @click="deleteItem(item)"
+                        />
                     </template>
                 </v-data-table>
             </UiParentCard>
@@ -268,7 +276,7 @@ const warningAlert = ref(false);
 
     <v-dialog v-model="dialogEdit" max-width="500px">
         <v-card>
-            <v-card-title class="text-h5 text-center py-6">{{ formTitle }}</v-card-title>
+            <v-card-title>{{ formTitle }}</v-card-title>
             <v-card-text>
                 <v-form>
                     <v-text-field v-model="editedItem.leadName" label="영업기회명" disabled></v-text-field>
@@ -283,9 +291,8 @@ const warningAlert = ref(false);
             </v-card-text>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="error" variant="flat" @click="closeEditDialog">Cancel</v-btn>
-                <v-btn color="success" variant="flat" @click="save">Save</v-btn>
-                <v-spacer></v-spacer>
+                <v-btn color="primary" variant="outlined" style="font-size: 15px; font-weight: 600;" @click="save">수정</v-btn>
+                <v-btn color="close" variant="plain" style="font-size: 15px; font-weight: 600;" @click="closeEditDialog">닫기</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>

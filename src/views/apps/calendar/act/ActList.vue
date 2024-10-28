@@ -11,9 +11,9 @@ import ConfirmDialogs from '@/components/modal/ConfirmDialogs.vue';
 const page = ref({ title: '영업활동 목록' });
 const breadcrumbs = ref([
 {
-	text: '영업도구',
+	text: '일정관리',
 	disabled: false,
-	to: '/'
+	to: '#'
 },
 {
 	text: '영업활동',
@@ -102,7 +102,7 @@ onMounted(() => {
   <BaseBreadcrumb :title="page.title" class="" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
   <v-row>
     <v-col cols="12">
-      <UiParentCard title="Act List">
+      <UiParentCard title="영업활동">
         <v-data-table
           class="rounded-md datatabels actlist"
           :headers="headers"
@@ -163,12 +163,12 @@ onMounted(() => {
                 class="mb-md-0 mb-3"
               />
               <v-spacer></v-spacer>
-              <v-btn color="primary" @click="goToAddAct">Add New</v-btn>
+              <v-btn color="primary" variant="tonal" @click="goToAddAct">영업활동 생성</v-btn>
             </v-toolbar>
           </template>
 
           <template v-slot:no-data>
-            <v-btn color="primary" @click="resetSearch"> Reset </v-btn>
+            <v-btn color="primary" variant="tonal" @click="resetSearch"> 초기화 </v-btn>
           </template>
         </v-data-table>
         <ConfirmDialogs :dialog="dialogDelete" @agree="confirmDelete" @disagree="cancleDelete" />

@@ -149,7 +149,7 @@ onMounted(() => {
                         </v-col>
                         <v-spacer></v-spacer>
                         <v-col cols="auto">
-                            <v-btn color="primary" to="/sales/lead/new">영업기회 생성</v-btn>
+                            <v-btn variant="tonal" color="primary" to="/sales/lead/new" class="mb-3">영업기회 생성</v-btn>
                         </v-col>
                     </v-row>
                     <v-divider :thickness="3" class="border-opacity-50 thick-divider" color="info"></v-divider>

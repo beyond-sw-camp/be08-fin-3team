@@ -9,7 +9,7 @@ const headers1 = ref([
     { title: '성공 확률(%)', align: 'start', key: 'successRate' },
     { title: '내용', align: 'start', key: 'description' },
     { title: '예상 소요 기간(일)', align: 'start', key: 'expectedDuration' },
-    { title: 'Actions', align: 'start' },
+    { title: '', align: 'start' },
 ]);
 
 const headers2 = ref([
@@ -17,7 +17,7 @@ const headers2 = ref([
     { title: '기본 프로세스', key: 'isDefault' },
     { title: '내용', key: 'description' },
     { title: '예상 소요기간', key: 'expectedDuration' },
-    { title: 'Actions', align: 'start' },
+    { title: '', align: 'start' },
 ]);
 
 const dialog = ref(false);
@@ -192,7 +192,7 @@ onMounted(() => {
 <template>
     <v-row>
         <v-col cols="12">
-            <UiParentCard title="Sales Process">
+            <UiParentCard title="프로세스 관리">
                 <v-data-table
                     class="border rounded-md"
                     :headers="headers2"
@@ -211,20 +211,28 @@ onMounted(() => {
                             <td>{{ item.description }}</td>
                             <td>{{ item.expectedDuration }}</td>
                             <td>
-                                <v-icon color="info" size="small" class="me-2" @click.stop="editItem(item, 'parent')">
-                                    mdi-pencil
-                                </v-icon>
-                                <v-icon color="error" size="small" @click.stop="deleteItem(item, 'parent')">
-                                    mdi-delete
-                                </v-icon>
+                                <EditIcon
+                                    height="20"
+                                    width="20"
+                                    class="mr-2 text-primary cursor-pointer"
+                                    size="small"
+                                    @click.stop="editItem(item, 'parent')"
+                                />
+                                <TrashIcon
+                                    height="20"
+                                    width="20"
+                                    class="text-error cursor-pointer"
+                                    size="small"
+                                    @click.stop="deleteItem(item, 'parent')"
+                                />
                             </td>
                         </tr>
                     </template>
                     <template v-slot:top>
                         <v-toolbar class="bg-lightsecondary" flat>
-                            <v-toolbar-title>Process</v-toolbar-title>
+                            <v-toolbar-title>프로세스</v-toolbar-title>
                             <v-spacer></v-spacer>
-                            <v-btn color="primary" variant="flat" dark @click="addParentProcess">Add New Parent Process</v-btn>
+                            <v-btn class="mr-3" color="primary" variant="tonal" dark @click="addParentProcess">프로세스 생성</v-btn>
                         </v-toolbar>
                     </template>
                 </v-data-table>
@@ -242,20 +250,28 @@ onMounted(() => {
                             <td>{{ item.description }}</td>
                             <td>{{ item.expectedDuration }}</td>
                             <td>
-                                <v-icon color="info" size="small" class="me-2" @click.stop="editItem(item, 'sub')">
-                                    mdi-pencil
-                                </v-icon>
-                                <v-icon color="error" size="small" @click.stop="deleteItem(item, 'sub')">
-                                    mdi-delete
-                                </v-icon>
+                                <EditIcon
+                                    height="20"
+                                    width="20"
+                                    class="mr-2 text-primary cursor-pointer"
+                                    size="small" 
+                                    @click.stop="editItem(item, 'sub')"
+                                />
+                                <TrashIcon
+                                    height="20"
+                                    width="20"
+                                    class="text-error cursor-pointer"
+                                    size="small"
+                                    @click.stop="deleteItem(item, 'sub')"
+                                />
                             </td>
                         </tr>
                     </template>
                     <template v-slot:top>
                         <v-toolbar class="bg-lightsecondary" flat>
-                            <v-toolbar-title>Sub Process</v-toolbar-title>
+                            <v-toolbar-title>하위 프로세스</v-toolbar-title>
                             <v-spacer></v-spacer>
-                            <v-btn color="primary" variant="flat" dark @click="addSubProcess">Add New Sub Process</v-btn>
+                            <v-btn class="mr-3" color="primary" variant="tonal" dark @click="addSubProcess">하위 프로세스 생성</v-btn>
                         </v-toolbar>
                     </template>
                 </v-data-table>
@@ -266,7 +282,7 @@ onMounted(() => {
     <v-dialog v-model="dialog" max-width="500px">
         <v-card>
             <v-card-title class="text-h5">
-                {{ dialogMode.includes('edit') ? 'Edit Item' : dialogMode === 'add-parent' ? 'Add Parent Process' : 'Add Sub Process' }}
+                {{ dialogMode.includes('edit') ? '프로세스 수정' : dialogMode === 'add-parent' ? '프로세스 등록' : '하위 프로세스 등록' }}
             </v-card-title>
 
             <v-card-text>
@@ -302,9 +318,9 @@ onMounted(() => {
                 </v-container>
             </v-card-text>
             <v-card-actions>
-                <v-btn v-if="dialogMode === 'add-parent' || dialogMode === 'edit-parent'" color="primary" @click="saveParentProcess" :disabled="!formValid">Save Parent Process</v-btn>
-                <v-btn v-else color="primary" @click="saveSubProcess" :disabled="!formValid">Save Sub Process</v-btn>
-                <v-btn @click="dialog = false">Cancel</v-btn>
+                <v-btn v-if="dialogMode === 'add-parent' || dialogMode === 'edit-parent'" color="primary" flat style="font-size: 15px; font-weight: 600;" @click="saveParentProcess" :disabled="!formValid">저장</v-btn>
+                <v-btn v-else color="primary" flat style="font-size: 15px; font-weight: 600;" @click="saveSubProcess" :disabled="!formValid">저장</v-btn>
+                <v-btn flat style="font-size: 15px; font-weight: 600;" @click="dialog = false">닫기</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
@@ -315,7 +331,7 @@ onMounted(() => {
             <v-card-text>Are you sure you want to delete this item?</v-card-text>
             <v-card-actions>
                 <v-btn color="error" @click="confirmDelete">Delete</v-btn>
-                <v-btn @click="dialogDelete = false">Cancel</v-btn>
+                <v-btn  flat style="font-size: 15px; font-weight: 600;" @click="dialogDelete = false">Cancel</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>

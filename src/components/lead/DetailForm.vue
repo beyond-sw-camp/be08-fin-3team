@@ -644,9 +644,9 @@ onMounted(() => {
                             <v-text-field v-model="leadResponseDto.addr" variant="outlined" color="primary"></v-text-field>
                             <v-text-field variant="outlined" color="primary" placeholder="상세 주소"></v-text-field>
                         </div>
-                        <v-btn color="primary" class="mr-3" flat @click="submitForm">{{ saveBtn }}</v-btn>
-                        <v-btn v-if="saveBtn == '수정'" color="error" class="mr-3" flat @click="deleteDialog = true">삭제</v-btn>
-                        <v-btn color="success" class="mr-3" flat to="/sales/lead">목록</v-btn>
+                        <v-btn color="primary" class="mr-2" flat @click="submitForm">{{ saveBtn }}</v-btn>
+                        <v-btn v-if="saveBtn == '수정'" color="error" class="mr-2"  @click="deleteDialog = true">삭제</v-btn>
+                        <v-btn class="ml-" variant="outlined" color="primary" to="/sales/lead">목록으로 돌아가기</v-btn>
                     </v-col>
                     <v-col cols="12" md="6">
                         <v-label class="mb-2 font-weight-medium">영업종료일</v-label>

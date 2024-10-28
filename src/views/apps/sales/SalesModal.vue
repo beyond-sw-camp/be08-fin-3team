@@ -22,9 +22,11 @@
         </v-form>
       </v-card-text>
       <v-card-actions>
-        <v-btn @click="saveSale">저장</v-btn>
-        <v-btn @click="handleClose">취소</v-btn>
-        <v-btn color="red" @click="deleteSale" v-if="sale.salesNo">삭제</v-btn> 
+        <v-btn color="primary" variant="outlined" @click="saveSale" flat style="font-size: 15px; font-weight: 600;">수정</v-btn>
+        <v-btn color="error" variant="outlined" @click="deleteSale" v-if="sale.salesNo" flat style="font-size: 15px; font-weight: 600;">삭제</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn color="close" @click="handleClose" style="font-size: 15px; font-weight: 600;">닫기</v-btn>
+
       </v-card-actions>
     </v-card>
   </v-dialog>

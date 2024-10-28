@@ -98,7 +98,7 @@ const horizontalItems: menu[] = [
         to: '/sales/lead'
     },
     {
-        title: '캘린더',
+        title: '일정관리',
         icon: CalendarIcon,
         to: '/apps/calendar',
         children: [

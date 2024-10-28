@@ -73,11 +73,12 @@
 			</v-card-text>
 			<ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="cancleDelete" />
 			<v-card-actions>
+					<v-btn v-if="mode === 'edit'" color="primary" variant="outlined" @click="updatePlan" flat style="font-size: 15px; font-weight: 600;">수정</v-btn>
+					<v-btn v-if="mode === 'edit'" color="error" variant="outlined" @click="deletePlan" flat style="font-size: 15px; font-weight: 600;">삭제</v-btn>
 				<v-spacer></v-spacer>
-					<v-btn color="close" @click="closeModal">Close</v-btn>
-					<v-btn v-if="mode === 'add'" color="success" variant="text" @click="submitPlan" flat>Save</v-btn>
-					<v-btn v-else-if="mode === 'edit'" color="success" variant="text" @click="updatePlan" flat>Update</v-btn>
-					<v-btn v-if="mode === 'edit'" color="error" variant="text" @click="deletePlan" flat>Delete</v-btn>
+					<v-btn v-if="mode === 'add'" color="primary"@click="addTodo" flat style="font-size: 15px; font-weight: 600;">저장</v-btn>
+					<v-btn color="close" @click="closeModal" style="font-size: 15px; font-weight: 600;">닫기</v-btn>
+
 					<ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="cancleDelete" />
 			</v-card-actions>
 		</v-card>

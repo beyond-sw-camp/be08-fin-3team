@@ -20,7 +20,7 @@ function allowedDates(val: unknown) {
 							<CalendarFilters />
 					</v-col>
 					<v-col cols="10">
-							<UiParentCard title="SalesBoost Calendar">
+							<UiParentCard title="캘린더">
 									<FullCalendar />
 							</UiParentCard>
 					</v-col>

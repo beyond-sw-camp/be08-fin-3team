@@ -163,9 +163,9 @@ const formIsValid = computed(()=>{
         </v-col>
 
     </v-row>
-    <div class="d-flex gap-3 mt-5 justify-content flex-column flex-wrap flex-xl-nowrap flex-sm-row fill-height"> 
-            <v-btn color="info" variant="outlined" to="/sales/contact">목록</v-btn>
-            <v-btn color="primary" variant="outlined" @click="updateCustomer" :disabled="!formIsValid">고객 정보 수정</v-btn>
+    <div class="d-flex gap-2 mt-5 justify-content flex-column flex-wrap flex-xl-nowrap flex-sm-row fill-height"> 
+        <v-btn color="primary" variant="flat" @click="updateCustomer" :disabled="!formIsValid">수정</v-btn>
+        <v-btn color="info" variant="outlined" to="/sales/contact">목록으로 돌아가기</v-btn>
     </div>   
 </template>
 <style scoped>

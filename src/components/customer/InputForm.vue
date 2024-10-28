@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { mask } from 'maska';  
 import api from '@/api/axiosinterceptor';
+import BaseButton from '../BaseButton.vue';
 
 const userName = ref();
 const grades = ref(['S등급', 'A등급','B등급','C등급','D등급']);
@@ -46,7 +47,7 @@ const registerAPI = async()=>{
             alert(res.data.result);
         }  
     }catch(err){
-        console.log(`[ERROR 몌세지] : ${err}`);
+        console.log(`[ERROR 메세지] : ${err}`);
 
     }
 }
@@ -139,8 +140,8 @@ onMounted(()=>{
 
     </v-row>
     <div class="d-flex gap-3 mt-5 justify-content flex-column flex-wrap flex-xl-nowrap flex-sm-row fill-height"> 
-            <v-btn color="info" variant="outlined" to="/sales/contact">목록</v-btn>
-            <v-btn color="primary" variant="outlined" @click="registerCustomer" :disabled="!formIsValid">고객 등록</v-btn>
+        <v-btn color="primary" variant="flat" @click="registerCustomer" :disabled="!formIsValid">고객 등록</v-btn>
+        <v-btn color="info" variant="outlined" to="/sales/contact">목록으로 돌아가기</v-btn>
     </div>   
 </template>
 <style scoped>

@@ -192,11 +192,11 @@ onMounted(() => {
 <template>
   <v-row>
     <v-col cols="12">
-      <UiParentCard title="Target sales management">
+      <UiParentCard title="목표 매출 관리">
         <v-row class="mb-5">
           <v-col cols="4" sm="4">
             <v-select
-              label="Select Year"
+              label="년도 선택"
               v-model="searchYear"
               :items="yearRange"
               hide-details
@@ -206,7 +206,7 @@ onMounted(() => {
             <v-select
               v-model="searchSalesperson"
               :items="userNames"
-              label="Select Salesperson"
+              label="영업사원 선택"
             ></v-select>
           </v-col>
           <v-col cols="4">
@@ -239,9 +239,13 @@ onMounted(() => {
               <td>{{ item.month11 }}</td>
               <td>{{ item.month12 }}</td>
               <td>
-                <v-icon color="info" size="small" class="me-2" @click.stop="editTargetSale(item)">
-                  mdi-pencil
-                </v-icon>
+                <EditIcon
+                    height="20"
+                    width="20"
+                    class="mr-2 text-primary cursor-pointer"
+                    size="small"
+                    @click.stop="editTargetSale(item)"
+                />
               </td>
             </tr>
           </template>
@@ -250,12 +254,13 @@ onMounted(() => {
               <v-toolbar-title>Target Sale</v-toolbar-title>
               <v-spacer></v-spacer>
               <v-btn 
+                class="mr-3"
                 v-if="canAddTargetSale" 
                 color="primary" 
-                variant="flat" 
+                variant="tonal" 
                 dark 
                 @click.stop="openDialog">
-                Add New TargetSale
+                목표 매출 생성
               </v-btn>
             </v-toolbar>
           </template>
@@ -266,7 +271,7 @@ onMounted(() => {
 
   <v-dialog v-model="dialog" max-width="600px">
     <v-card>
-      <v-card-title>{{ isEditMode ? 'Update TargetSales' : 'Add TargetSales' }}</v-card-title>
+      <v-card-title>{{ isEditMode ? '목표매출 수정' : '목표매출 등록' }}</v-card-title>
       <v-card-text>
         <v-container>
           <v-form v-model="formValid">
@@ -290,8 +295,8 @@ onMounted(() => {
         </v-container>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="primary" @click="saveTargetSale()" :disabled="!formValid">Save</v-btn>
-        <v-btn @click="closeDialog">Cancel</v-btn>
+        <v-btn color="primary" flat style="font-size: 15px; font-weight: 600;" @click="saveTargetSale()" :disabled="!formValid">저장</v-btn>
+        <v-btn color="close" flat style="font-size: 15px; font-weight: 600;" @click="closeDialog">닫기</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

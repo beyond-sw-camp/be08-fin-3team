@@ -465,7 +465,7 @@ export default defineComponent({
         <v-select
         v-model="selectedOption"
         :items="items"
-        label="Select"
+        label="생성"
         hide-details
         outlined
         class="select-item"
