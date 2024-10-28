@@ -2,6 +2,7 @@
 import { ref, watch, onMounted } from 'vue';
 import api from '@/api/axiosinterceptor';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
+import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
 
 const headers1 = ref([
     { title: '서브 프로세스', align: 'start', key: 'subProcessName' },
@@ -21,7 +22,8 @@ const headers2 = ref([
 ]);
 
 const dialog = ref(false);
-const dialogDelete = ref(false);
+// const dialogDelete = ref(false);
+const showConfirmDialog = ref(false);
 const processes = ref([]);
 const subProcesses = ref([]);
 const editedItem = ref(null);
@@ -137,7 +139,8 @@ async function saveSubProcess() {
 function deleteItem(item, type) {
     editedItem.value = { ...item };
     dialogMode.value = `delete-${type}`;
-    dialogDelete.value = true;
+    // dialogDelete.value = true;
+    showConfirmDialog.value = true; 
 }
 
 // 폼 유효성 검사 함수
@@ -156,7 +159,8 @@ function validateForm() {
 // 항목 삭제 확정
 async function confirmDelete() {
     try {
-        dialogDelete.value = false;
+        // dialogDelete.value = false;
+        showConfirmDialog.value = false;
         const apiUrl = dialogMode.value.includes('parent')
             ? `/admin/processes/${editedItem.value.processNo}`
             : `/admin/subprocesses/${editedItem.value.subProcessNo}`;
@@ -325,14 +329,6 @@ onMounted(() => {
         </v-card>
     </v-dialog>
 
-    <v-dialog v-model="dialogDelete" max-width="400px">
-        <v-card>
-            <v-card-title class="text-h5">Delete Confirmation</v-card-title>
-            <v-card-text>Are you sure you want to delete this item?</v-card-text>
-            <v-card-actions>
-                <v-btn color="error" @click="confirmDelete">Delete</v-btn>
-                <v-btn  flat style="font-size: 15px; font-weight: 600;" @click="dialogDelete = false">Cancel</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    <ConfirmDialogs :dialog="showConfirmDialog" @agree="confirmDelete" @disagree="showConfirmDialog = false" />
+
 </template>

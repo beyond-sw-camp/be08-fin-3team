@@ -4,6 +4,10 @@ import { useRouter } from 'vue-router';
 import api from '@/api/axiosinterceptor';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
+import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
+import { de } from 'date-fns/locale';
+
+const showConfirmDialogs = ref(false); // 열림 상태 관리
 
 const page = ref({ title: '제안 목록' });
 const breadcrumbs = ref([
@@ -129,6 +133,8 @@ const deleteProposalApi = async () => {
         console.error('삭제 실패:', error);
         errorAlert.value = true;
         alertDialog.value = true;
+    } finally {
+        showConfirmDialogs.value = false;
     }
     close();
 };
@@ -145,17 +151,20 @@ const createNewProposal = () => {
 
 const confirmDelete = async () => {
     await deleteProposalApi();
-    dialogDelete.value = false;
+    // dialogDelete.value = false;
+    showConfirmDialogs.value = false;
 };
 
 const deleteItem = (item) => {
     editedItem.value = { ...item };
     editedIndex.value = proposals.value.indexOf(item);
-    dialogDelete.value = true;
+    // dialogDelete.value = true;
+    showConfirmDialogs.value = true;
 };
 
 const closeDeleteDialog = () => {
-    dialogDelete.value = false;
+    // dialogDelete.value = false;
+    showConfirmDialogs.value = false;
 };
 
 const navigateToCreate = () => {
@@ -187,6 +196,7 @@ const warningAlert = ref(false);
 </script>
 
 <template>
+    <ConfirmDialogs :dialog="showConfirmDialogs" @agree="deleteProposalApi" @disagree="() => (showConfirmDialogs = false)"/>
     <v-dialog v-model="alertDialog" max-width="500" class="dialog-mw">
         <v-card>
             <v-card-text>
@@ -293,18 +303,6 @@ const warningAlert = ref(false);
                 <v-spacer></v-spacer>
                 <v-btn color="primary" variant="outlined" style="font-size: 15px; font-weight: 600;" @click="save">수정</v-btn>
                 <v-btn color="close" variant="plain" style="font-size: 15px; font-weight: 600;" @click="closeEditDialog">닫기</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
-
-    <v-dialog v-model="dialogDelete" max-width="500px">
-        <v-card>
-            <v-card-title class="text-h5 text-center py-6">선택한 제안을 정말 삭제하시겠습니까?</v-card-title>
-            <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="error" variant="flat" @click="closeDeleteDialog">삭제</v-btn>
-                <v-btn color="success" variant="flat" @click="confirmDelete">취소</v-btn>
-                <v-spacer></v-spacer>
             </v-card-actions>
         </v-card>
     </v-dialog>

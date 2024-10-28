@@ -2,9 +2,10 @@
 <script>
 import api from '@/api/axiosinterceptor';
 import ContractModal from './ContractModal.vue';
+import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
 
 export default {
-    components: { ContractModal },
+    components: { ContractModal, ConfirmDialogs },
     data() {
         return {
             contracts: [],
@@ -16,6 +17,8 @@ export default {
                 { title: '', key: 'action', sortable: false },
             ],
             showModal: false,
+            showConfirmDialogs: false,
+            selectedContractNo: null, // 삭제할 계약 번호 저장해놓고 공유하기
             editedContract: {
                 contractNo: null,
                 name: '',
@@ -53,17 +56,21 @@ export default {
                 console.error('계약 목록을 가져오는 데 실패했습니다:', error);
             }
         },
-        async deleteContract(contractNo) {
-            if (confirm('정말로 이 계약을 삭제하시겠습니까?')) {
-                try {
-                    await api.delete(`/contract/${contractNo}`);
-                    this.fetchContracts();
-                    alert('계약이 삭제되었습니다.');
-                } catch (error) {
-                    console.error('계약 삭제에 실패했습니다:', error);
-                    alert('계약 삭제에 실패했습니다.');
-                }
+        async confirmDeleteContract() {
+            try {
+                await api.delete(`/contract/${this.selectedContractNo}`);
+                this.fetchContracts();
+                alert('계약이 삭제되었습니다.');
+            } catch (error) {
+                console.error('계약 삭제에 실패했습니다:', error);
+                alert('계약 삭제에 실패했습니다.');
+            } finally {
+                this.showConfirmDialogs = false;
             }
+        },
+        async deleteContract(contractNo) {
+            this.selectedContractNo = contractNo;
+            this.showConfirmDialogs = true;
         },
         editContract(contract) {
             this.editedContract = { ...contract };
@@ -149,6 +156,8 @@ export default {
                 <v-alert type="info">데이터가 없습니다.</v-alert>
             </template>
         </v-data-table>
+
+        <ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDeleteContract" @disagree="showConfirmDialogs = false" />
 
         <ContractModal
             v-model="showModal"

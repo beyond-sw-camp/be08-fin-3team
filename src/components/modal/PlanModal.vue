@@ -116,7 +116,7 @@
 <script>
 import '@/views/apps/calendar/calendar.css';
 import api from '@/api/axiosinterceptor';
-import ConfirmDialogs from './ConfirmDialogs.vue';
+import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
 import {planClsMapping, categoryColors} from '@/utils/PlanMappings'
 
 export default {

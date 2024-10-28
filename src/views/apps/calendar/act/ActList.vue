@@ -6,7 +6,7 @@ import UiParentCard from '@/components/shared/UiParentCard.vue';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import api from '@/api/axiosinterceptor';
 import { reverseActStatus, actStatus } from '@/utils/ActStatusMappings';
-import ConfirmDialogs from '@/components/modal/ConfirmDialogs.vue';
+import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
 
 const page = ref({ title: '영업활동 목록' });
 const breadcrumbs = ref([

@@ -139,7 +139,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import api from '@/api/axiosinterceptor';
 import { actStatus } from '@/utils/ActStatusMappings';
-import ConfirmDialogs from '@/components/modal/ConfirmDialogs.vue';
+import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
 import './Act.css'
 
 export default {

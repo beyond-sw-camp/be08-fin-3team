@@ -50,7 +50,7 @@
 
 <script>
 import '@/views/apps/calendar/calendar.css'
-import ConfirmDialogs from './ConfirmDialogs.vue';
+import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
 import api from '@/api/axiosinterceptor';
 
 export default {

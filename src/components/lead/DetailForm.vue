@@ -2,6 +2,9 @@
 import { computed, ref, onMounted, reactive, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '@/api/axiosinterceptor';
+import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
+
+const showConfirmDialogs = ref(false); // 열림 상태 관리
 
 const route = useRoute();
 const router = useRouter();
@@ -274,7 +277,8 @@ const deleteDialog = ref(false);
 
 const deleteLead = async () => {
     const leadNo = leadResponseDto.leadNo;
-    deleteDialog.value = false;
+    // deleteDialog.value = false;
+    showConfirmDialogs.value = false;
     if (leadNo) {
         try {
             await api.delete(`/leads/${leadNo}`);
@@ -430,6 +434,8 @@ onMounted(() => {
 
 <template>
     <v-card elevation="10">
+        <ConfirmDialogs :dialog="showConfirmDialogs" @agree="deleteLead" @disagree="() => (showConfirmDialogs = false)" />
+
         <v-dialog v-model="alertDialog" max-width="500" class="dialog-mw">
             <v-card>
                 <v-card-text>
@@ -448,17 +454,6 @@ onMounted(() => {
                 </v-card-text>
                 <v-card-actions>
                     <v-btn color="primary" block @click="alertDialog = false" flat>Close</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-        <v-dialog v-model="deleteDialog" max-width="500" class="dialog-mw">
-            <v-card>
-                <v-card-title class="headline">경고</v-card-title>
-                <v-card-text> 이 항목을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다. </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="primary" tonal @click="deleteLead">삭제</v-btn>
-                    <v-btn color="error" tonal @click="deleteDialog = false">취소</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -645,7 +640,7 @@ onMounted(() => {
                             <v-text-field variant="outlined" color="primary" placeholder="상세 주소"></v-text-field>
                         </div>
                         <v-btn color="primary" class="mr-2" flat @click="submitForm">{{ saveBtn }}</v-btn>
-                        <v-btn v-if="saveBtn == '수정'" color="error" class="mr-2"  @click="deleteDialog = true">삭제</v-btn>
+                        <v-btn v-if="saveBtn == '수정'" color="error" class="mr-2"  @click="showConfirmDialogs = true">삭제</v-btn>
                         <v-btn class="ml-" variant="outlined" color="primary" to="/sales/lead">목록으로 돌아가기</v-btn>
                     </v-col>
                     <v-col cols="12" md="6">

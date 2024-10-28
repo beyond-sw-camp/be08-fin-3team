@@ -2,9 +2,11 @@
 import { computed, nextTick, ref, watch } from 'vue';
 import api from '@/api/axiosinterceptor';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
+import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
 
 const dialog = ref(false);
-const dialogDelete = ref(false);
+// const dialogDelete = ref(false);
+const showConfirmDialog = ref(false);
 const formValid = ref(false);
 const departmentNames = ref([]);
 const searchProdName = ref('');
@@ -120,7 +122,8 @@ function editItem(item) {
 function deleteItem(item) {
     editedIndex.value = items.value.indexOf(item);
     editedItem.value = Object.assign({}, item);
-    dialogDelete.value = true;
+    // dialogDelete.value = true;
+    showConfirmDialog.value = true;
 }
 
 async function save() {
@@ -161,19 +164,20 @@ function close() {
 }
 
 function closeDelete() {
-    dialogDelete.value = false;
+    // dialogDelete.value = false;
+    showConfirmDialog.value = false;
     nextTick(() => {
         editedItem.value = Object.assign({}, defaultItem.value);
         editedIndex.value = -1;
     });
 }
 
-watch(dialog, (val) => {
-    if (!val) close();
-});
-watch(dialogDelete, (val) => {
-    if (!val) closeDelete();
-});
+// watch(dialog, (val) => {
+//     if (!val) close();
+// });
+// watch(dialogDelete, (val) => {
+//     if (!val) closeDelete();
+// });
 
 initialize();
 </script>
@@ -302,5 +306,7 @@ initialize();
                 />
             </template>
         </v-data-table>
+        <ConfirmDialogs :dialog="showConfirmDialog" @agree="deleteItemConfirm" @disagree="closeDelete"
+        />
     </UiParentCard>
 </template>

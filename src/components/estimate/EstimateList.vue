@@ -4,6 +4,8 @@ import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import { useRouter } from 'vue-router';
 import api from '@/api/axiosinterceptor';
+import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
+const showConfirmDialogs = ref(false); // 열림 상태 관리
 
 const page = ref({ title: '견적 목록' });
 
@@ -178,16 +180,19 @@ const createNewEstimate = () => {
 const deleteItem = (item) => {
     editedItem.value = { ...item };
     editedIndex.value = estimates.value.indexOf(item);
-    dialogDelete.value = true;
+    // dialogDelete.value = true;
+    showConfirmDialogs.value = true;
 };
 
 const confirmDelete = async () => {
     await deleteEstimateApi();
-    dialogDelete.value = false;
+    // dialogDelete.value = false;
+    showConfirmDialogs.value = false;
 };
 
 const closeDeleteDialog = () => {
-    dialogDelete.value = false;
+    // dialogDelete.value = false;
+    showConfirmDialogs.value = false;
 };
 
 initialize();
@@ -269,16 +274,6 @@ initialize();
     </v-dialog>
 
     <!-- 삭제 -->
-    <v-dialog v-model="dialogDelete" max-width="500px">
-      <v-card>
-        <v-card-title class="text-h5 text-center py-6">선택한 견적을 정말 삭제하시겠습니까?</v-card-title>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="warning" variant="flat" @click="closeDeleteDialog">취소</v-btn>
-          <v-btn color="success" variant="flat" @click="confirmDelete">삭제</v-btn>
-          <v-spacer></v-spacer>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="closeDeleteDialog" />
   </template>
   
