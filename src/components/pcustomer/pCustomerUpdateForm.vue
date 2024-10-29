@@ -1,8 +1,13 @@
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, ref } from 'vue';
 import api from '@/api/axiosinterceptor';
 import { useRouter ,useRoute} from 'vue-router';
-import { mask } from 'maska';  
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+import EditConfirmDialog from '../shared/EditConfirmDialog.vue';
+import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
 const userName = ref('');
 const grades = ref(['S등급', 'A등급','B등급','C등급']);
@@ -21,6 +26,11 @@ const clsOptions = ref(['자사홈페이지','인터넷검색','지인소개','�
 const contact = ref('');
 const contactOptions = ref(['미접촉','접촉시도','접촉중','접촉금지','고객전환','기존고객'])
 const address = ref('');
+const loggedInUserEmail = ref(localStorage.getItem("loginUserEmail"));
+const userEmail = ref();
+
+const showEditConfirmDialog = ref(false);
+const showDeleteConfirmDialog = ref(false);
 
 const router = useRouter();
 const route = useRoute();
@@ -29,12 +39,14 @@ onMounted(()=>{
     getCustomerInfoAPI(route.params.id);
 })
 const updatePCustomer = ()=>{
-    if(confirm("고객정보를 수정하시겠습니까?")){
-        updatePCustomerAPI(route.params.id);
-    }
+    showEditConfirmDialog.value = true; 
 }
 
-const updatePCustomerAPI=async(id: string | string[])=>{
+const deletePCustomer = ()=>{
+    showDeleteConfirmDialog.value = true;
+}
+
+const updatePCustomerAPI=async(id)=>{
     try{
         const response = await api.patch(`/pcustomers/${id}`,{
             name:pcName.value?pcName.value:"",  // 필수
@@ -53,8 +65,13 @@ const updatePCustomerAPI=async(id: string | string[])=>{
         });
         console.log(response.data);
         if(response.data.code ==200){
-            alert(response.data.result);
-            getCustomerInfoAPI(route.params.id);
+            // alert(response.data.result);   
+            showEditConfirmDialog.value = false;
+            triggerAlert('수정이 완료되었습니다.', 'success');
+        //    getCustomerInfoAPI(route.params.id);
+        }else{
+            triggerAlert(response.data.message,'warning');
+            showEditConfirmDialog.value = false; 
         }
     }catch(err){
         console.log(`[ERROR 몌세지] : ${err}`);
@@ -62,7 +79,7 @@ const updatePCustomerAPI=async(id: string | string[])=>{
 
 }
 
-const getCustomerInfoAPI = async(id: string | string[])=>{
+const getCustomerInfoAPI = async(id)=>{
     try{
         const res = await api.get(`/pcustomers/${id}`);
         console.log(res.data.result);
@@ -81,30 +98,48 @@ const getCustomerInfoAPI = async(id: string | string[])=>{
             fax.value = info.fax;
             address.value = info.addr;
             note.value = info.note;
+            userEmail.value = info.userEmail;
         }
     }catch(err){
-        console.log(`[ERROR 몌세지] : ${err}`);
+        console.log(err);
     }
 }
 
+const deletePCustoemrAPI=async(id)=>{
+    try{
+        const response = await api.delete(`/pcustomers/${id}`);
+        console.log(response);
+        if(response.data.code == 200){
+            showDeleteConfirmDialog.result = false;
+            triggerAlert(response.data.result,'success');
+            setTimeout(() => {
+                router.push({ name: "pCustomer" });
+            }, 2000); 
+        }
+    }catch(err){
+        console.log(err);
+    }
+
+}
+
 const confirmName = ref([
-    (s:string)=> !! s|| '고객명을 입력해주세요'
+    (s)=> !! s|| '고객명을 입력해주세요'
 ]);
 
 // 휴대폰 번호
 const confirmPhone = ref([
-    (s:string) => !!s|| '휴대폰 번호를 입력해주세요'
+    (s) => !!s|| '휴대폰 번호를 입력해주세요'
 ])
 
 
 // 접촉구분
 const confirmCls = ref([
-    (v: string) => !!v || '접촉구분을 선택해주세요'
+    (v) => !!v || '접촉구분을 선택해주세요'
 ])
 
 // 접촉구분
 const confirmContact = ref([
-    (v: string) => !!v || '접촉상태를 선택해주세요'
+    (v) => !!v || '접촉상태를 선택해주세요'
 ])
 
 
@@ -116,8 +151,11 @@ const formIsValid = computed(()=>{
 onMounted(()=>{
     userName.value = localStorage.getItem('')||'';
 })
+
+const isAssignedUser = computed(()=> userEmail.value === loggedInUserEmail.value);
 </script>
 <template>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <v-row>
         <v-col cols="6">
             <v-label class="font-weight-medium mb-2">고객명</v-label><span class="require">*</span>
@@ -189,12 +227,25 @@ onMounted(()=>{
             <v-label class="font-weight-medium mb-2">비고</v-label>
             <v-textarea v-model="note"  variant="solo"/>
         </v-col>
-        
-
     </v-row>
+
+    <EditConfirmDialog
+        :dialog="showEditConfirmDialog"
+        message="고객정보를 수정하시겠습니까?"
+        @confirm="updatePCustomerAPI(route.params.id)"
+        @close="showEditConfirmDialog = false"
+    />
+
+    <ConfirmDialogs
+        :dialog="showDeleteConfirmDialog"
+        message="고객정보를 삭제하시겠습니까?"
+        @agree="deletePCustoemrAPI(route.params.id)"
+        @disagree="showDeleteConfirmDialog = false"
+    />
     <div class="d-flex gap-3 mt-5 justify-content flex-column flex-wrap flex-xl-nowrap flex-sm-row fill-height"> 
-            <v-btn color="info" variant="outlined" to="/sales/prospect">목록</v-btn>
-            <v-btn color="primary" variant="outlined" @click="updatePCustomer" :disabled="!formIsValid">고객 정보 수정</v-btn>
+            <v-btn v-if="isAssignedUser" color="primary" variant="flat" @click="updatePCustomer" :disabled="!formIsValid">수정</v-btn>
+            <v-btn v-if="isAssignedUser" color="error" class="mr-2"  @click="deletePCustomer">삭제</v-btn>
+            <v-btn color="info" variant="outlined" to="/sales/prospect">목록으로 돌아가기</v-btn>
     </div>   
 </template>
 <style scoped>
