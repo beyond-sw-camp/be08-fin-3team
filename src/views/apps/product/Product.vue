@@ -41,9 +41,9 @@ const headers = ref([
     { title: '포장 수량', key: 'quantity' },
     { title: '포장 단위', key: 'unit' },
     { title: '규격', key: 'field' },
-    { title: '원가', key: 'supplyPrice' },
-    { title: '세율', key: 'taxRate' },
-    { title: '가격', key: 'price' },
+    { title: '원가(원)', key: 'supplyPrice' },
+    { title: '세율(%)', key: 'taxRate' },
+    { title: '가격(원)', key: 'price' },
     { title: '', key: 'actions'},
 ]);
 
@@ -329,13 +329,13 @@ initialize();
                                                 <v-text-field v-model="editedItem.field" label="규격" required></v-text-field>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="4">
-                                                <v-text-field v-model="editedItem.supplyPrice" label="원가" :rules="[v => /^[0-9]+$/.test(v) || '숫자만 입력하세요']" required></v-text-field>
+                                                <v-text-field v-model="editedItem.supplyPrice" label="원가 (원)" :rules="[v => /^[0-9]+$/.test(v) || '숫자만 입력하세요']" required></v-text-field>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="4">
-                                                <v-text-field v-model="editedItem.taxRate" label="세율" :rules="[v => /^[0-9]+$/.test(v) || '숫자만 입력하세요']" required></v-text-field>
+                                                <v-text-field v-model="editedItem.taxRate" label="세율 (%)" :rules="[v => /^[0-9]+$/.test(v) || '숫자만 입력하세요']" required></v-text-field>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="4">
-                                                <v-text-field v-model="editedItem.price" label="가격"
+                                                <v-text-field v-model="editedItem.price" label="가격 (원)"
                                                     :rules="[
                                                             v => !!v || '가격은 필수 입력입니다.',
                                                             v => /^[0-9]+$/.test(v) || '숫자만 입력하세요'
