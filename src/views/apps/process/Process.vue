@@ -326,7 +326,7 @@ onMounted(() => {
                             <v-btn class="mr-3" color="primary" variant="tonal" dark @click="addSubProcess">하위 프로세스 생성</v-btn>
                         </v-toolbar>
                         <v-col cols="12">
-                            <!-- <p style = "font-weight: bold;">검색 결과: {{ subProcesses.length }}건</p> -->
+                            <p style = "font-weight: bold;">검색 결과: {{ subProcesses.length }}건</p>
                         </v-col>
                     </template>
                 </v-data-table>
