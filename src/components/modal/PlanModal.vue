@@ -1,9 +1,9 @@
 <template>
-	<v-dialog :model-value="AddPlanModal" @update:model-value="$emit('update:AddPlanModal', $event)" persistent max-width="500px">
+	<v-dialog  ref="planModal" :model-value="AddPlanModal" @update:model-value="$emit('update:AddPlanModal', $event)" persistent max-width="500px">
 		<v-card>
 			<v-card-title>일정</v-card-title>
 			<v-card-text>
-				<v-form @submit.prevent="submitPlan" lazy-validation>
+				<v-form ref="form" @submit.prevent="submitPlan" lazy-validation>
 					<div>
 						<v-alert v-if="showAlert" type="warning" variant="tonal" class="warn-alert">
 							<h5 class="text-h5 text-capitalize">warning</h5>
@@ -76,9 +76,8 @@
 					<v-btn v-if="mode === 'edit'" color="primary" variant="outlined" @click="updatePlan" flat style="font-size: 15px; font-weight: 600;">수정</v-btn>
 					<v-btn v-if="mode === 'edit'" color="error" variant="outlined" @click="deletePlan" flat style="font-size: 15px; font-weight: 600;">삭제</v-btn>
 				<v-spacer></v-spacer>
-					<v-btn v-if="mode === 'add'" color="primary"@click="addTodo" flat style="font-size: 15px; font-weight: 600;">저장</v-btn>
+					<v-btn v-if="mode === 'add'" color="primary"@click="submitPlan" flat style="font-size: 15px; font-weight: 600;">저장</v-btn>
 					<v-btn color="close" @click="closeModal" style="font-size: 15px; font-weight: 600;">닫기</v-btn>
-
 					<ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="cancleDelete" />
 			</v-card-actions>
 		</v-card>
@@ -187,13 +186,12 @@ export default {
 	},
 	methods: {
 		validatePlan(){
+			const isValid = this.$refs.form.validate();
 			if (!this.plan.title || !this.plan.planCls || !this.plan.planDate || !this.plan.startTime || !this.plan.endTime) {
-				this.showAlert = true;
-				this.alertMessage = '필수 필드를 입력해주세요'
-				setTimeout(() => {
-					this.showAlert = false;
-				}, 2000);
-        return false;
+				return false;
+			}
+			if (!isValid) {
+				return false;
 			}
 			return true;
 		},
@@ -277,7 +275,7 @@ export default {
 			this.plan.backgroundColor = categoryColor;
 
 			this.$emit('show-alert', {
-				message: '저장이 완료되었습니다.',
+				message: '일정이 등록되었습니다.',
 				type: 'success',
 			});
 			this.$emit('add', this.plan);
@@ -294,9 +292,8 @@ export default {
 				this.plan.backgroundColor = categoryColor;
 				const response = await api.patch(`/plans/${this.plan.planNo}`, this.plan);
 				const updatedPlan = response.data.result;
-
 				this.$emit('show-alert', {
-					message: '수정이 완료되었습니다.',
+					message: '일정이 수정되었습니다.',
 					type: 'success',
 				});
 				this.$emit('update', updatedPlan);
