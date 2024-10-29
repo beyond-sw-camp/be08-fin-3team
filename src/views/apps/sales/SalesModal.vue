@@ -6,14 +6,34 @@
       </v-card-title>
       <v-card-text>
         <v-form ref="form" v-model="valid" lazy-validation>
-          <v-text-field v-model="sale.salesCls" label="매출 구분" required />
+          <v-text-field v-model="sale.salesName" label="매출명" required />
           <v-text-field v-model="sale.salesDate" label="매출일" type="date" required />
           <v-text-field v-model="sale.taxCls" label="과세 구분" />
-          <v-text-field v-model="sale.surtaxYn" label="추가 세금 여부 (Y/N)" maxlength="1" />
-          <v-text-field v-model="sale.supplyPrice" label="공급가액" type="number" @input="calculateTaxAndPrice" />
+          <v-select
+            v-model="sale.surtaxYn"
+            label="추가 세금 여부"
+            :items="['Y', 'N']"
+            required
+          />
+          <v-text-field
+            v-model="sale.supplyPrice"
+            label="공급가액"
+            type="number"
+            @input="calculateTaxAndPrice"
+          />
           <v-text-field v-model="sale.tax" label="세액" type="number" readonly />
-          <v-text-field v-model="sale.productCount" label="수량" type="number" />
-          <v-text-field v-model="sale.price" label="총 가격" type="number" readonly />
+          <v-text-field
+            v-model="sale.productCount"
+            label="수량"
+            type="number"
+          />
+          <v-text-field
+            v-model="sale.price"
+            label="총 가격"
+            type="number"
+            readonly
+            :value="Math.floor(sale.price)" 
+          />
           <v-text-field v-model="sale.expArrivalDate" label="입고예정일" type="date" />
           <v-text-field v-model="sale.busiType" label="사업 유형" />
           <v-text-field v-model="sale.busiTypeDetail" label="사업 유형 상세" />
@@ -77,7 +97,7 @@ export default {
         try {
           await api.delete(`sales/${this.sale.salesNo}`);
           this.$emit('deleted', this.sale.salesNo);
-          this.handleClose(); // 삭제 후 창 닫기
+          this.handleClose(); 
         } catch (error) {
           console.error('매출 삭제에 실패했습니다:', error);
           alert('매출 삭제에 실패했습니다.');

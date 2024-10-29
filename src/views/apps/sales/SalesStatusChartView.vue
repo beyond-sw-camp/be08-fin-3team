@@ -9,12 +9,12 @@ const yearOptions = ref<number[]>([]);
 
 const breadcrumbs = ref([
     {
-        text: 'Sales Chart',
+        text: 'Sales',
         disabled: false,
-        href: 'sales status chart'
+        href: '../../sales'
     },
     {
-        text: 'Sales Chart',
+        text: 'Status Chart',
         disabled: true,
         href: '#'
     }
@@ -26,7 +26,7 @@ for (let i = selectedYear.value - 9; i <= selectedYear.value; i++) {
 }
 
 const areaChart = ref<{
-    series: Array<{ name: string; data: number[] }>;
+    series: { name: string; data: number[]; color?: string }[];
     categories: string[];
 }>({
     series: [],
@@ -51,7 +51,7 @@ const chartOptions = computed(() => ({
         enabled: false
     },
     stroke: {
-        width: 3,
+        width: [3, 2],
         curve: 'smooth'
     },
     xaxis: {
@@ -59,16 +59,16 @@ const chartOptions = computed(() => ({
         categories: areaChart.value.categories,
         tickAmount: 12, 
         labels: {
-            format: 'M월'
+            format: 'yyyy-MM'
         },
         endOnTick: false, 
     },
     yaxis: {
         opposite: false,
         min: 0,
-        max: 5000000,
+        max: 20000000,
         labels: {
-            formatter: (value: number) => value.toFixed(0),
+            formatter: (value: number) => `${value.toLocaleString()} 원`, 
             show: true
         }
     },
@@ -84,15 +84,14 @@ const chartOptions = computed(() => ({
         theme: 'light',
         x: {
             formatter: (value: string) => {
-                return new Date(value).toLocaleString('ko-KR', { month: 'short' });
+                return new Date(value).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit' });
             }
         },
         y: {
-            formatter: (value: number) => `${value}건`
+            formatter: (value: number) => `${value.toLocaleString('ko-KR')} ₩`
         }
-    }
+    },
 }));
-
 
 const fetchMonthlySalesData = async (year: number) => {
     try {
@@ -100,16 +99,27 @@ const fetchMonthlySalesData = async (year: number) => {
         console.log('API 응답 데이터:', response.data);
 
         const data = response.data.result || {};
-
         const allMonths = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
-        
         const salesData = allMonths.map(month => data[month] || 0);
 
         areaChart.value.categories = allMonths;
         areaChart.value.series = [{ name: '매출액', data: salesData }];
-        
-        console.log('카테고리:', areaChart.value.categories); // 확인용
-        console.log('판매 데이터:', salesData); // 확인용
+
+        // 전년도 데이터 가져오기
+        const prevYearResponse = await api.get(`/sales/count/monthly?year=${year - 1}`);
+        const prevYearData = prevYearResponse.data.result || {};
+        const prevYearMonths = Array.from({ length: 12 }, (_, i) => `${year - 1}-${String(i + 1).padStart(2, '0')}`);
+        const prevSalesData = prevYearMonths.map(month => prevYearData[month] || 0);
+
+        areaChart.value.series.push({
+            name: '전년도 매출액',
+            data: prevSalesData,
+            color: '#718096' 
+        });
+
+        console.log('카테고리:', areaChart.value.categories); 
+        console.log('판매 데이터:', salesData); 
+        console.log('전년도 데이터:', prevSalesData); 
     } catch (error) {
         console.error('데이터 로드 실패:', error);
     }
@@ -119,9 +129,12 @@ const onYearChange = () => {
     fetchMonthlySalesData(selectedYear.value);
 };
 
-onMounted(() => {
-    fetchMonthlySalesData(selectedYear.value);
+onMounted(async () => {
+    await fetchMonthlySalesData(selectedYear.value);
 });
+
+const chartSeries = computed(() => areaChart.value.series);
+
 </script>
 
 <template>
@@ -139,7 +152,8 @@ onMounted(() => {
                         />
                     </v-col>
                 </v-row>
-                <apexchart type="area" height="300" :options="chartOptions" :series="areaChart.series"></apexchart>
+                <apexchart type="area" height="300" :options="chartOptions" :series="chartSeries"></apexchart>
+
             </UiParentCard>
         </v-col>
     </v-row>

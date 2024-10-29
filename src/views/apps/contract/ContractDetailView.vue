@@ -1,13 +1,23 @@
-
 <script>
 import api from '@/api/axiosinterceptor';
 import ContractModal from './ContractModal.vue';
 
 export default {
     components: { ContractModal },
+    props: {
+        filter: {
+            type: Object,
+            default: () => ({
+                name: '',
+                startDate: '',
+                endDate: ''
+            }),
+        },
+    },
     data() {
         return {
             contracts: [],
+            filteredContracts: [],
             headers: [
                 { title: '계약 번호', key: 'contractNo' },
                 { title: '계약 이름', key: 'name' },
@@ -38,20 +48,37 @@ export default {
                 note: '',
                 estimateNo: '',
             },
-            search: '',
         };
     },
     mounted() {
         this.fetchContracts();
+    },
+    watch: {
+        filter: {
+            immediate: true,
+            handler() {
+                this.applyFilter();
+            },
+        },
     },
     methods: {
         async fetchContracts() {
             try {
                 const response = await api.get('/contract');
                 this.contracts = response.data.result;
+                this.applyFilter(); // Fetch 후 필터 적용
             } catch (error) {
                 console.error('계약 목록을 가져오는 데 실패했습니다:', error);
             }
+        },
+        applyFilter() {
+            this.filteredContracts = this.contracts.filter(contract => {
+                return (
+                    (this.filter.name ? contract.name.includes(this.filter.name) : true) &&
+                    (this.filter.startDate ? new Date(contract.startDate) >= new Date(this.filter.startDate) : true) &&
+                    (this.filter.endDate ? new Date(contract.endDate) <= new Date(this.filter.endDate) : true)
+                );
+            });
         },
         async deleteContract(contractNo) {
             if (confirm('정말로 이 계약을 삭제하시겠습니까?')) {
@@ -71,7 +98,7 @@ export default {
         },
         openModal() {
             this.editedContract = {
-                contractNo: null, 
+                contractNo: null,
                 name: '',
                 startDate: '',
                 endDate: '',
@@ -104,34 +131,35 @@ export default {
                 } else {
                     await api.post('/contract', contract);
                 }
-                this.fetchContracts(); 
+                this.fetchContracts();
                 this.closeModal();
+                // alert('계약이 저장되었습니다.'); 
             } catch (error) {
                 console.error('계약 저장에 실패했습니다:', error);
             }
-        },
+        }
     },
 };
 </script>
 
-
 <template>
     <div>
         <v-row>
-            <v-col><div >총 견적 개수: {{ contracts.length }}개</div> </v-col>
+            <v-col>
+                <div>총 견적 개수: {{ filteredContracts.length }}개</div>
+            </v-col>
             <v-col cols="12" lg="12" md="6" class="text-right">
                 <v-btn color="primary" @click="openModal" flat class="ml-auto">
-                    <v-icon class="mr-2">mdi-account-multiple-plus</v-icon>계약 추가
+                    <v-icon class="mr-2">mdi-account-multiple-plus</v-icon>계약 생성
                 </v-btn>
             </v-col>
         </v-row>
-        <v-data-table :headers="headers" :items="contracts" class="elevation-0">
 
+        <v-data-table :headers="headers" :items="filteredContracts" class="elevation-0">
             <template v-slot:item.action="{ item }">
                 <v-btn @click="editContract(item)" style="color: slateblue">수정</v-btn>
                 <v-btn @click="deleteContract(item.contractNo)" style="color: crimson">삭제</v-btn>
             </template>
-
             <template v-slot:no-data>
                 <v-alert type="info">데이터가 없습니다.</v-alert>
             </template>
@@ -145,4 +173,3 @@ export default {
         />
     </div>
 </template>
-

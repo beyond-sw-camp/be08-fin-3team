@@ -13,12 +13,12 @@ interface SalesPredictionDto {
 
 const breadcrumbs = ref([
     {
-        text: 'Sales Chart',
+        text: 'Sales',
         disabled: false,
-        href: 'sales predictions chart'
+        href: '../../sales'
     },
     {
-        text: 'Sales Chart',
+        text: 'Prediction Chart',
         disabled: true,
         href: '#'
     }
@@ -149,10 +149,10 @@ const monthlyChartOptions = computed(() => {
         xaxis: {
             type: 'category',
             categories: monthlyResponseBody.value ? monthlyResponseBody.value.map((item: { predictedTime: any; }) => {
-                return item.predictedTime; // "년도-월" 형식으로 레이블 표시
+                return item.predictedTime; 
             }) : [],
             labels: {
-                formatter: (value: string) => value // X축 레이블에서 3자리마다 쉼표를 없앰
+                formatter: (value: string) => value 
             }
         },
         yaxis: {
@@ -231,11 +231,13 @@ const quarterlyChartOptions = computed(() => {
 
 const getMonthlyChartTitle = computed(() => {
     const month = new Date().getMonth() + 1; 
-    return `${month <= 6 ? '전반기' : '하반기'} 매출 예측 차트`;
+    const year = new Date().getFullYear();
+    return `${year + 1}년 ${month <= 6 ? '하반기' : '전반기'} 매출 예측 차트`;
 });
 
 const getQuarterlyChartTitle = computed(() => {
-    return '분기별 매출 예측 차트';
+    const year = new Date().getFullYear();
+    return `${year + 1}년 분기별 매출 예측 차트`;
 });
 </script>
 
