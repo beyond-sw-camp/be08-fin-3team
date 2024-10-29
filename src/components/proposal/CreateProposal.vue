@@ -9,7 +9,6 @@ import AlertComponent from '@/components/shared/AlertComponent.vue';
 
 const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
-
 const router = useRouter();
 
 const page = ref({ title: '제안 등록' });
@@ -88,7 +87,7 @@ const save = async () => {
     try {
         const res = await api.post('/proposals', editedItem.value);
         if (res.status === 200 || res.status === 201) {
-            triggerAlert('제안이 추가되었습니다.', 'success', 2000,'/proposals');
+            triggerAlert('제안이 추가되었습니다.', 'success', 2000, '/proposals');
             // successAlert.value = true;
             // alertDialog.value = true;
             // setTimeout(() => router.push('/proposals'), 1500);
@@ -142,7 +141,6 @@ const warningAlert = ref(false);
                             label="요청일"
                             type="date"
                             :rules="[(v) => !!v || '요청일을 선택해주세요']"
-                            required
                             outlined
                         ></v-text-field>
                     </v-col>
@@ -151,22 +149,18 @@ const warningAlert = ref(false);
                     <v-row>
                         <v-col class="ml-3" cols="5" md="2">
                             <v-text-field
-                            v-model="editedItem.leadName"
-                            :items="leads"
-                            item-text="name"
-                            :rules="[(v) => !!v || '영업기회 버튼을 눌러 선택해주세요']"
-                            readonly
-                            outlined
+                                v-model="editedItem.leadName"
+                                :items="leads"
+                                item-text="name"
+                                :rules="[(v) => !!v || '영업기회 버튼을 눌러 선택해주세요']"
+                                readonly
+                                outlined
                             ></v-text-field>
                         </v-col>
 
                         <v-col class="mt-1" cols="3" md="3">
-                            <v-btn
-                            variant="flat"
-                            class="cus-btn"
-                            @click="openLeadModal"
-                            >
-                            <v-icon small class="mr-1">mdi-plus</v-icon>영업기회 가져오기
+                            <v-btn variant="flat" class="cus-btn" @click="openLeadModal">
+                                <v-icon small class="mr-1">mdi-plus</v-icon>영업기회 가져오기
                             </v-btn>
                         </v-col>
                     </v-row>
@@ -199,7 +193,6 @@ const warningAlert = ref(false);
                             label="제안 시작일"
                             type="date"
                             :rules="[(v) => !!v || '제안 시작일을 선택해주세요']"
-                            required
                             outlined
                         ></v-text-field>
                     </v-col>
@@ -210,6 +203,16 @@ const warningAlert = ref(false);
                             label="제안 종료일"
                             type="date"
                             :rules="[(v) => !!v || '제안 종료일을 선택해주세요']"
+                            outlined
+                        ></v-text-field>
+                    </v-col>
+
+                    <v-col cols="12" sm="6">
+                        <v-text-field
+                            v-model="editedItem.submitDate"
+                            label="제출일"
+                            type="date"
+                            :rules="[(v) => !!v || '제출일을 선택해주세요']"
                             required
                             outlined
                         ></v-text-field>
@@ -221,7 +224,6 @@ const warningAlert = ref(false);
                             label="발표일"
                             type="date"
                             :rules="[(v) => !!v || '발표일을 선택해주세요']"
-                            required
                             outlined
                         ></v-text-field>
                     </v-col>
@@ -236,7 +238,7 @@ const warningAlert = ref(false);
                                 <v-progress-circular v-if="loading" indeterminate color="white" size="20"></v-progress-circular>
                                 저장
                             </v-btn>
-                            <v-btn class="ml-2"  variant="outlined" color="primary" flat @click="cancel">목록으로 돌아가기</v-btn>
+                            <v-btn class="ml-2" variant="outlined" color="primary" flat @click="cancel">목록으로 돌아가기</v-btn>
                         </v-col>
                     </v-row>
                 </v-form>
@@ -246,7 +248,6 @@ const warningAlert = ref(false);
 </template>
 
 <style scoped>
-
 .cus-btn {
     background-color: #3f99f3;
     color: white;
@@ -256,7 +257,9 @@ const warningAlert = ref(false);
     line-height: 30px;
     padding: 2px 10px 30px 5px;
     border-radius: 8px;
-    transition: background-color 0.3s, color 0.3s;
+    transition:
+        background-color 0.3s,
+        color 0.3s;
     box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.1);
 }
 </style>
