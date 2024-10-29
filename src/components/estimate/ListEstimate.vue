@@ -5,18 +5,20 @@ import UiParentCard from '@/components/shared/UiParentCard.vue';
 import { useRouter } from 'vue-router';
 import api from '@/api/axiosinterceptor';
 import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
-const showConfirmDialogs = ref(false); // 열림 상태 관리
 import { useAlert } from '@/utils/useAlert';
 import AlertComponent from '@/components/shared/AlertComponent.vue';
 
 const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
+const showConfirmDialogs = ref(false); // 열림 상태 관리
 
-const page = ref({ title: '' });
+const page = ref({ title: '견적 목록' });
+const breadcrumbs = ref([
+    { text: '영업관리', disabled: false, href: '#' },
+    { text: '견적', disabled: true, href: '#' }
+]);
 
-const dialogDelete = ref(false);
 const estimates = ref([]);
-const dialogEdit = ref(false);
 const editedIndex = ref(-1);
 
 const defaultItem = {
@@ -89,7 +91,7 @@ const deleteEstimateApi = async () => {
         // successAlert.value = true;
         // alertDialog.value = true;
 
-        triggerAlert('견적이 삭제되었습니다.', 'success', 2000,'/estimates');
+        triggerAlert('견적이 삭제되었습니다.', 'success', 2000, '/estimates');
 
         estimates.value.splice(editedIndex.value, 1);
         resetForm();
@@ -97,7 +99,7 @@ const deleteEstimateApi = async () => {
     } catch (error) {
         // errorAlert.value = true;
         // alertDialog.value = true;
-    triggerAlert('견적 삭제를 실패했습니다.', 'error', 2000);
+        triggerAlert('견적 삭제를 실패했습니다.', 'error', 2000);
     }
 };
 
@@ -133,7 +135,6 @@ const warningAlert = ref(false);
 </script>
 
 <template>
-    
     <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
     <v-row>
@@ -165,11 +166,11 @@ const warningAlert = ref(false);
             <v-card elevation="0" class="pa-4">
                 <v-row class="d-flex align-center mb-1">
                     <v-col cols="auto">
-                        <v-card-title class="mb-0">검색결과: {{ dataSize }}건</v-card-title>
+                        <v-card-title class="mb-0 custom-title">검색결과: {{ dataSize }}건</v-card-title>
                     </v-col>
                     <v-spacer></v-spacer>
                     <v-col cols="auto">
-                        <v-btn color="primary" variant="flat" class="mr-2" @click="navigateToCreate">견적 생성</v-btn>
+                        <v-btn color="primary" variant="tonal" class="mr-8" @click="navigateToCreate">견적 생성</v-btn>
                     </v-col>
                 </v-row>
 
@@ -190,13 +191,7 @@ const warningAlert = ref(false);
                             size="small"
                             @click="goToDetailEstimate(item.estNo)"
                         />
-                        <TrashIcon
-                            height="20"
-                            width="20"
-                            class="text-error cursor-pointer"
-                            size="small"
-                            @click="deleteItem(item)"
-                        />
+                        <TrashIcon height="20" width="20" class="text-error cursor-pointer" size="small" @click="deleteItem(item)" />
                     </template>
                 </v-data-table>
             </v-card>
@@ -234,5 +229,10 @@ const warningAlert = ref(false);
 
 .text-center {
     text-align: center;
+}
+
+.custom-title {
+    font-size: 14px;
+    color: rgb(201, 198, 198);
 }
 </style>
