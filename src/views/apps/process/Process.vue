@@ -30,7 +30,7 @@ const headers1 = ref([
     { title: '성공 확률(%)', align: 'start', key: 'successRate' },
     { title: '내용', align: 'start', key: 'description' },
     { title: '예상 소요 기간(일)', align: 'start', key: 'expectedDuration' },
-    { title: '액션', align: 'start' },
+    { title: ' ', align: 'start' },
 ]);
 
 const headers2 = ref([
@@ -38,7 +38,7 @@ const headers2 = ref([
     { title: '기본 프로세스', key: 'isDefault' },
     { title: '내용', key: 'description' },
     { title: '예상 소요기간', key: 'expectedDuration' },
-    { title: '액션', align: 'start' },
+    { title: ' ', align: 'start' },
 ]);
 
 const dialog = ref(false);
@@ -60,7 +60,7 @@ async function fetchProcesses() {
         processes.value = response.data.result;
     } catch (error) {
         console.error('Error fetching Sub processes:', error.message || error);
-        triggerAlert('프로세스 가져오기 실패', 'error', 2000);
+        triggerAlert('프로세스 가져오는 것을 실패했습니다.', 'error', 2000);
     }
 }
 
@@ -72,7 +72,7 @@ async function fetchSubProcesses(processName) {
         subProcesses.value = response.data.result;
     } catch (error) {
         console.error('Error fetching Sub processes:', error.message || error);
-        triggerAlert('하위 프로세스 가져오기 실패', 'error', 2000);
+        triggerAlert('하위 프로세스 가져오것을 실패했습니다.', 'error', 2000);
     } finally {
         setTimeout(() => {
             isLoading.value = false;
@@ -128,6 +128,8 @@ async function saveParentProcess() {
             const response = await api.post(`/admin/processes`, editedItem.value);
             console.log('Parent process 추가 성공:', response.data);
             triggerAlert('프로세스가 등록되었습니다.', 'success', 2000);
+
+            await fetchSubProcesses(editedItem.value.processName);
         } else if (dialogMode.value === 'edit-parent') {
             const response = await api.patch(`/admin/processes/${editedItem.value.processNo}`, editedItem.value);
             console.log('Parent process 수정 성공:', response.data);
@@ -157,7 +159,7 @@ async function saveSubProcess() {
 
         dialog.value = false;
 
-        await fetchSubProcesses(selectedProcess.value.processName);
+        fetchSubProcesses(selectedProcess.value.processName);
         fetchProcesses();
     } catch (error) {
         console.error('하위 프로세스 저장 중 오류:', error.message || error);
@@ -347,25 +349,25 @@ onMounted(() => {
                             <v-switch label="프로세스 기본 여부" color="primary" v-model="editedItem.isDefault"></v-switch>
                         </v-col>
                         <v-col cols="12">
-                            <v-text-field v-model="editedItem.processName" label="Process Name"
+                            <v-text-field v-model="editedItem.processName" label="프로세스 명"
                                 :rules="[v => !!v || '프로세스 명은 필수 입니다.']"
                                 @input="validateForm"/>
                         </v-col>
                         <v-col cols="12">
-                            <v-text-field v-model="editedItem.description" label="Description" />
+                            <v-text-field v-model="editedItem.description" label="내용" />
                         </v-col>
                     </v-row>
                     <v-row v-else>
                         <v-col cols="12">
-                            <v-text-field v-model="editedItem.subProcessName" label="Sub Process Name"
+                            <v-text-field v-model="editedItem.subProcessName" label="하위 프로세스 명"
                                 :rules="[v => !!v || '프로세스 명은 필수 입니다.']"
                                 @input="validateForm"/>
-                            <v-text-field v-model="editedItem.progressStep" label="Progress Step"
-                                :rules="[v => !!v || '프로세스 단계는 필수 입니다.']"
+                            <v-text-field v-model="editedItem.progressStep" label="진행 단계"
+                                :rules="[v => !!v || '프로세스 진행 단계는 필수 입니다.']"
                                 @input="validateForm"/>
-                            <v-text-field v-model="editedItem.successRate" label="Success Rate (%)" :rules="[v => /^[0-9]+$/.test(v) || '숫자만 입력하세요']" required/>
-                            <v-text-field v-model="editedItem.description" label="Description"  required/>
-                            <v-text-field v-model="editedItem.expectedDuration" label="Expected Duration"
+                            <v-text-field v-model="editedItem.successRate" label="성공 확률 (%)" :rules="[v => /^[0-9]+$/.test(v) || '숫자만 입력하세요']" required/>
+                            <v-text-field v-model="editedItem.description" label="내용"  required/>
+                            <v-text-field v-model="editedItem.expectedDuration" label="예상 소요 시간"
                                 :rules="[
                                         v => !!v || '예상 소요기간은 필수 입니다.',
                                         v => /^[0-9]+$/.test(v) || '숫자만 입력하세요'
