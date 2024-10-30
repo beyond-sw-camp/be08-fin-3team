@@ -32,11 +32,15 @@
                                 <v-col class="text-sm-left">
                                     <span class="font-weight-black custom-margin">부서 정보</span>
                                 </v-col>
-                                <v-col>
-                                    <v-btn color="primary" variant="tonal" @click="addItem" :disabled="selected">생성</v-btn>
-                                    <v-btn color="primary" variant="tonal" @click="updateItem(selected)" :disabled="!selected">수정</v-btn>
+                                <v-col v-if="!isEdit">
+                                    <v-btn color="primary" variant="tonal" @click="addItem">생성</v-btn>
+                                    <v-btn color="primary" variant="tonal" :disabled="!selected" @click.stop = "editMode()">수정</v-btn>
                                     <v-btn class="mr-3" color="error" variant="tonal" @click.stop="deleteItem(selected)" :disabled="!selected">삭제</v-btn>
                                 </v-col>
+                                <v-col v-else>
+                                    <v-btn color="primary" variant="tonal" @click="updateItem(selected)">저장</v-btn>
+                                </v-col>
+
                             </v-row>
                             <v-row class="align-center justify-space-between" style="padding: 1rem 0; flex-wrap: nowrap; overflow-x: auto;">
                                 <v-progress-circular
@@ -48,23 +52,53 @@
                                 ></v-progress-circular>
                                 <v-col style="min-width: 200px;">
                                     <span class="font-weight-black">상위 부서</span>
-                                    <v-text-field dense :value="selected ? selected.upperDeptName : ''"></v-text-field>
+                                    <v-select
+                                        v-if="isEdit"
+                                        v-model="selected.upperDeptName"
+                                        :items="departmentNames"
+                                    ></v-select>
+                                    <v-text-field v-else>{{ selected ? selected.upperDeptName : '' }}</v-text-field>
                                 </v-col>
                                 <v-col style="min-width: 200px;">
                                     <span class="font-weight-black">부서 코드</span>
-                                    <v-text-field dense :value="selected ? selected.deptCode : ''"></v-text-field>
+                                    <v-text-field
+                                        v-if="isEdit"
+                                        v-model="selected.deptCode"
+                                        :readonly="isEdit"
+                                    ></v-text-field>
+                                    
+                                    <v-text-field v-else dense :value="selected ? selected.deptCode : ''"></v-text-field>
                                 </v-col>
                                 <v-col style="min-width: 200px;">
                                     <span class="font-weight-black">부서명</span>
-                                    <v-text-field dense :value="selected ? selected.name : ''"></v-text-field>
+                                    <v-text-field
+                                        v-if="isEdit"
+                                        v-model="selected.name"
+                                        dense
+                                        :rules="[v => !!v || '부서명은 필수입니다.']"
+                                        @input="validateForm"
+                                    ></v-text-field>
+                                    <v-text-field v-else dense :value="selected ? selected.name : ''"></v-text-field>
                                 </v-col>
                                 <v-col style="min-width: 200px;">
                                     <span class="font-weight-black">영문 부서명</span>
-                                    <v-text-field dense :value="selected ? selected.engName : ''"></v-text-field>
+                                    <v-text-field
+                                        v-if="isEdit"
+                                        v-model="selected.engName"
+                                        dense
+                                        :rules="[v => !!v || '영문 부서명은 필수입니다.']"
+                                        @input="validateForm"
+                                    ></v-text-field>
+                                    <v-text-field v-else dense :value="selected ? selected.engName : ''"></v-text-field>
                                 </v-col>
                                 <v-col style="min-width: 200px;">
                                     <span class="font-weight-black">부서장</span>
-                                    <v-text-field dense :value="selected ? selected.deptHead : ''"></v-text-field>
+                                    <v-select
+                                        v-if="isEdit"
+                                        v-model="selected.deptHead"
+                                        :items="userNames"
+                                    ></v-select>
+                                    <v-text-field v-else dense :value="selected ? selected.deptHead : ''"></v-text-field>
                                 </v-col>
                             </v-row>
                         </div>
@@ -76,7 +110,7 @@
 
     <v-dialog v-model="dialog" max-width="500px">
         <v-card>
-            <v-card-title class="text-h5">{{ isEdit ? '부서 정보 수정' : '부서 생성' }}</v-card-title>
+            <v-card-title class="text-h5">'부서 생성'</v-card-title>
             <v-card-text>
                 <v-container>
                     <v-row>
@@ -86,7 +120,6 @@
                                 v-model="department.deptCode"
                                 dense
                                 :rules="[v => !!v || '부서 코드는 필수입니다.']"
-                                :readonly="isEdit"
                                 @input="validateForm"
                             ></v-text-field>
                         </v-col>
@@ -126,7 +159,7 @@
                 </v-container>
             </v-card-text>
             <v-card-actions>
-                <v-btn color="primary" variant="plain" flat style="font-size: 15px; font-weight: 600;" @click="isEdit ? updateDepartment() : saveDepartment()">
+                <v-btn color="primary" variant="plain" flat style="font-size: 15px; font-weight: 600;" @click="saveDepartment()">
                     저장
                 </v-btn>
                 <v-btn color="close" flat style="font-size: 15px; font-weight: 600;" @click="dialog = false">닫기</v-btn>
@@ -205,7 +238,7 @@ export default {
 
             const id = this.active[0];
             this.isLoading = true;
-
+            this.isEdit = false;
             const findDepartment = (departments) => {
                 for (const department of departments) {
                     if (department.no === id) {
@@ -337,10 +370,11 @@ export default {
 
                 const apiUrl = `/admin/departments/${this.selected.no}`;
                 const response = await api.patch(apiUrl, this.department);
+                this.isEdit = false;
                 console.log('부서 업데이트 성공:', response.data);
                 this.triggerAlert('부서 정보를 수정하였습니다.', 'success', 2000);
 
-                this.clearForm();
+
                 await this.fetchDepartments();
             } catch (error) {
                 console.error('부서 업데이트 중 오류 발생:', error);
@@ -349,7 +383,6 @@ export default {
 
         updateItem(item) {
             if (!item) return;
-            this.isEdit = true;
             this.department = { 
                 deptCode: item.deptCode,
                 deptName: item.name,
@@ -357,7 +390,10 @@ export default {
                 deptHead: item.deptHead,
                 upperDeptName: item.upperDeptName,
             };
-            this.dialog = true;
+            
+            console.log("상위부서 : ", this.department.upperDeptName, "타입: ", typeof this.department.upperDeptName);
+
+            this.updateDepartment();
         },
 
         deleteItem(item) {
@@ -370,6 +406,10 @@ export default {
             this.clearForm();
             this.dialog = true;
         },
+
+        editMode(){
+            this.isEdit = true;
+        }
     },
     
     setup() {
