@@ -5,15 +5,27 @@ import api from '@/api/axiosinterceptor';
 
 import { useAlert } from '@/utils/useAlert';
 import AlertComponent from '@/components/shared/AlertComponent.vue';
+import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
+
+const page = ref({ title: '목표 매출 관리' });
+const breadcrumbs = ref([
+    {
+        text: '관리자',
+        disabled: false,
+        href: '#'
+    },
+    {
+        text: '목표 매출  관리',
+        disabled: true,
+        href: '#'
+    }
+]);
 
 const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
 const searchYear = ref('');
 const searchSalesperson = ref('');
 const targetSales = ref([]);
-// const showAlert = ref(false);
-// const alertMessage = ref('');
-// const alertColor = ref('');
 const canAddTargetSale = ref(false);
 const userNames = ref([]);
 const productNames = ref([]);
@@ -46,26 +58,23 @@ const headers = ref([
 
 function groupDataByProduct(data) {
   const groupedData = [];
-
   data.forEach(item => {
     let existingProduct = groupedData.find(prod => prod.prodName === item.prodName);
-
     if (!existingProduct) {
       existingProduct = {
         prodName: item.prodName,
         month01: '', month02: '', month03: '', month04: '',
         month05: '', month06: '', month07: '', month08: '',
         month09: '', month10: '', month11: '', month12: '',
-        sum: 0
+        sum: 0,
+        isEditing: false
       };
       groupedData.push(existingProduct);
     }
-
     const monthKey = `month${String(item.month).padStart(2, '0')}`;
     existingProduct[monthKey] = item.monthTarget;
     existingProduct.sum += item.monthTarget;
   });
-
   return groupedData;
 }
 
@@ -98,16 +107,13 @@ async function fetchTargetSales() {
     if (response.data.code === 200) {
       if (Array.isArray(response.data.result)) {
         targetSales.value = groupDataByProduct(response.data.result);
-        // showAlert.value = false;
         canAddTargetSale.value = true;
       }
     } else {
       canAddTargetSale.value = false;
       
       triggerAlert('년도와 영업사원을 선택해주세요.', 'warning', 2000);
-      // alertMessage.value = '년도와 영업사원을 선택해주세요.';
-      // alertColor.value = 'error';
-      // showAlert.value = true;
+
       targetSales.value = [];
       canAddTargetSale.value = false;
     }
@@ -143,7 +149,6 @@ async function saveTargetSale() {
     console.log(response);
     triggerAlert('목표매출이 등록되었습니다.', 'success', 2000);
   } catch (error) {
-    // console.error('Error adding target sale:', error.message || error);
     triggerAlert('목표매출 등록에 실패했습니다.', 'error', 2000);
   }
 }
@@ -192,6 +197,10 @@ const search = () => {
   fetchTargetSales();
 };
 
+function formatNumber(value) {
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 onMounted(() => {
   fetchUsers();
   fetchProducts();
@@ -199,7 +208,8 @@ onMounted(() => {
 </script>
 
 <template>
-    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
+  <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
+  <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
   <v-row>
     <v-col cols="12">
       <UiParentCard title="목표 매출 관리">
@@ -222,11 +232,10 @@ onMounted(() => {
           <v-col cols="4">
             <v-btn color="primary" @click="search">검색</v-btn>
           </v-col>
+          <v-col cols="12">
+                <p style = "font-weight: bold;">검색 결과: {{ targetSales.length }}건, 금액(원)</p>
+          </v-col>
         </v-row>
-
-        <!-- <v-alert v-if="showAlert" class="mb-3" :color="alertColor" variant="tonal">
-          {{ alertMessage }}
-        </v-alert> -->
 
         <v-data-table
           class="border rounded-md" 
@@ -235,19 +244,19 @@ onMounted(() => {
           <template v-slot:item="{ item }">
             <tr>
               <td>{{ item.prodName }}</td>
-              <td>{{ item.sum }}</td>
-              <td>{{ item.month01 }}</td>
-              <td>{{ item.month02 }}</td>
-              <td>{{ item.month03 }}</td>
-              <td>{{ item.month04 }}</td>
-              <td>{{ item.month05 }}</td>
-              <td>{{ item.month06 }}</td>
-              <td>{{ item.month07 }}</td>
-              <td>{{ item.month08 }}</td>
-              <td>{{ item.month09 }}</td>
-              <td>{{ item.month10 }}</td>
-              <td>{{ item.month11 }}</td>
-              <td>{{ item.month12 }}</td>
+              <td>{{ formatNumber(item.sum) }}</td>
+              <td>{{ formatNumber(item.month01) }}</td>
+              <td>{{ formatNumber(item.month02) }}</td>
+              <td>{{ formatNumber(item.month03) }}</td>
+              <td>{{ formatNumber(item.month04) }}</td>
+              <td>{{ formatNumber(item.month05) }}</td>
+              <td>{{ formatNumber(item.month06) }}</td>
+              <td>{{ formatNumber(item.month07) }}</td>
+              <td>{{ formatNumber(item.month08) }}</td>
+              <td>{{ formatNumber(item.month09) }}</td>
+              <td>{{ formatNumber(item.month10) }}</td>
+              <td>{{ formatNumber(item.month11) }}</td>
+              <td>{{ formatNumber(item.month12) }}</td>
               <td>
                 <EditIcon
                     height="20"
@@ -295,7 +304,13 @@ onMounted(() => {
                 ></v-select>
               </v-col>
               <v-col cols="12">
-                <v-text-field v-model="newTargetSale.sum" label="합계" type="number" />
+                <v-text-field 
+                  v-model="newTargetSale.sum" 
+                  label="합계" 
+                  type="number" 
+                  :rules="[v => v > 0 || '합계는 0이 될 수 없습니다.']"
+                  @blur="newTargetSale.sum = parseInt(newTargetSale.sum) || 0"
+                />
               </v-col>
               <v-col cols="4" v-for="(month, index) in 12" :key="index">
                 <v-text-field v-model="newTargetSale.monthTargets[index]" :label="`${index + 1}월`" type="number" />
