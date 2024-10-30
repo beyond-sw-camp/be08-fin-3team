@@ -13,6 +13,7 @@ const employeeId = ref('');
 const router = useRouter();
 const authStore = useAuthStore();
 const dialog=ref(false);
+const isLoading = ref(false);
 
 const passwordRules = ref([
     (v: string) => !!v || '비밀번호를 입력해주세요',
@@ -39,6 +40,7 @@ const login =()=>{
 
 const loginApi=async()=>{
     try{
+        isLoading.value = true;
         const res = await baseApi.post('/users/login',{
             loginType: isEmployeeIdLogin.value ? 'employeeId':'email', // 로그인 방식 구분
             email: email.value ? email.value : null,
@@ -59,6 +61,8 @@ const loginApi=async()=>{
         }
     }catch(err) {
         console.log(err);
+    }finally{
+        isLoading.value = false;
     }
 
 }
@@ -89,6 +93,8 @@ const saveHistory = ()=>{
     </div>
     <Form class="mt-5">
           <!-- 로그인 방식 선택 (체크박스 또는 스위치) -->
+          <v-progress-circular v-if="isLoading" indeterminate color="primary" size="50"
+          style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></v-progress-circular>
         <v-switch
             v-model="isEmployeeIdLogin"
             color="primary"

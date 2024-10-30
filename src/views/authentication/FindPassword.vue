@@ -12,6 +12,7 @@ import LogoIcon from '@/assets/images/logos/logolight.svg';
                     <v-card rounded="md" elevation="10" class="px-sm-1 px-0  mx-auto">
                         <v-card-item class="pa-sm-8">
                             <div class="d-flex justify-center my-5">  <img :src="LogoIcon" alt="home" /></div>
+                            
                             <p class="text-subtitle-1 text-center text-10">
                                 가입하신 이메일 주소를 입력해주세요
                             </p>
