@@ -12,6 +12,9 @@ const depts = ref(['영업부','개발부','인사부','총무부','기획부','
 const showCodeInput = ref(false);
 const loading = ref(false);
 const code = ref();
+const mailBtnDisable = ref(false);
+const codeBtnNotDisable = ref(true);
+const isLoading = ref(false);
 
 const router = useRouter();
 
@@ -41,21 +44,23 @@ const mailIsValid = computed(() => {
 });
 
 const isSendButtonDisabled = computed(() => {
-    return !mailIsValid.value || loading.value;
+    return !mailIsValid.value || loading.value || mailBtnDisable.value;
 });
 
 const codeIsValid = computed(()=>{
-    return code.value && (code.value.length==6);
+    return code.value && (code.value.length==6) && codeBtnNotDisable.value;
 })
 
 const signUp=()=>{
     if(formIsValid.value){
+
         signUpApi();
     }    
 }
 
 const signUpApi = async()=>{
     try{
+        isLoading.value = true;
         const res = await baseApi.post('/users/join',{
             name:name.value,
             email:email.value,
@@ -76,6 +81,8 @@ const signUpApi = async()=>{
             }
     }catch(err){
         console.log(err);
+    }finally{
+        isLoading.value = false;
     }
 }
 
@@ -114,6 +121,9 @@ const sendCodeCheck = async()=>{
         if(res.data.code ===200){
             alert("인증을 완료했습니다.");
             valid.value = true;
+            mailBtnDisable.value = true;
+            codeBtnNotDisable.value = false;
+
         }else{
             alert(res.data.message);
         }
@@ -127,6 +137,8 @@ const sendCodeCheck = async()=>{
     </div>
     <v-row>
         <v-col cols="12 pb-0">
+            <v-progress-circular v-if="isLoading" indeterminate color="primary" size="50"
+            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></v-progress-circular>
             <v-label class="text-subtitle-1 font-weight-medium pb-2">이름</v-label>
             <VTextField v-model="name" :rules="nameRules" required placeholder="이름을 입력해주세요" ></VTextField>
             <v-label class="mb-2 font-weight-medium">부서</v-label>
@@ -152,7 +164,7 @@ const sendCodeCheck = async()=>{
             <VTextField required placeholder="인증코드 6자리 입력" v-model="code" type="number"></VTextField>
         </v-col>
         <v-col cols="12 pb-0" sm="3" v-if="showCodeInput">      
-            <v-btn block color="primary" flat class="send-code-check" size="large" :disabled="!codeIsValid"  @click="sendCodeCheck">확인</v-btn>
+            <v-btn block color="primary" flat class="send-code-check" size="large" :disabled="!codeIsValid" @click="sendCodeCheck">확인</v-btn>
         </v-col>
         <v-col cols="12">
             <v-label class="text-subtitle-1 font-weight-medium pb-2">비밀번호</v-label>
