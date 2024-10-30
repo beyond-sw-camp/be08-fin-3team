@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth';
 import { Form } from 'vee-validate';
 import baseApi from '@/api/baseapi';
 import { useRouter } from 'vue-router';
+import PasswordResetModal from '../modal/PasswordResetModal.vue';
 
 const isEmployeeIdLogin = ref(false);
 const password = ref('');
@@ -11,6 +12,7 @@ const email = ref('');
 const employeeId = ref('');
 const router = useRouter();
 const authStore = useAuthStore();
+const dialog=ref(false);
 
 const passwordRules = ref([
     (v: string) => !!v || '비밀번호를 입력해주세요',
@@ -27,6 +29,7 @@ const formIsValid = computed(()=>{// 계산된 속성 사용
         return email.value && password.value;
     }
 })
+
 
 const login =()=>{
     if(formIsValid.value){
@@ -64,6 +67,17 @@ const saveLocalStorage=(result:any)=>{
         localStorage.setItem('loginUserEmail', result.email);
         localStorage.setItem('accessToken',result.accessToken);
         localStorage.setItem('loginUserRole',result.role);
+}
+
+// const findPassword = ()=>{
+//      dialog.value = true  // 창 열기
+// }
+
+const closeModal = ()=>{
+     dialog.value = false;  // 닫기
+}
+const saveHistory = ()=>{
+     dialog.value = false;
 }
 </script>
 
@@ -111,10 +125,11 @@ const saveLocalStorage=(result:any)=>{
             type="password"
             class="pwdInput"
         ></VTextField>
+        <!-- <PasswordResetModal :dialog="dialog" @update:dialog="dialog=$event" @close="closeModal" @save="saveHistory"/> -->
         <div class="d-flex flex-wrap align-center my-3 ml-n2">
            
             <div class="ml-sm-auto">
-                <RouterLink to="" class="text-primary text-decoration-none text-body-1 opacity-1 font-weight-medium">비밀번호를 잊으셨나요?</RouterLink
+                <RouterLink to="/auth/find-password" class="text-primary text-decoration-none text-body-1 opacity-1 font-weight-medium">비밀번호 찾기</RouterLink
                 >
             </div>
         </div>

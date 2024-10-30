@@ -24,3 +24,4 @@ import ResetPassword from '@/components/auth/ResetForm.vue';
         </v-container>
     </div>
 </template>
+ 

@@ -21,11 +21,7 @@ const AuthRoutes = {
             path: '/auth/login',
             component: () => import('@/views/authentication/Login.vue')
         },
-        {
-            name: 'Side Register',
-            path: '/auth/register',
-            component: () => import('@/views/authentication/SideRegister.vue')
-        },
+    
         {
             name: 'Boxed Register',
             path: '/auth/register2',
@@ -66,6 +62,16 @@ const AuthRoutes = {
             path: '/auth/maintenance',
             component: () => import('@/views/authentication/Maintenance.vue')
         },
+        {
+            name:"FindPassword",
+            path: "/auth/find-password",
+            component:() => import('@/views/authentication/FindPassword.vue')
+        },
+        {
+            name:"ChangePassword",
+            path: "/auth/change-password",
+            component:() => import('@/views/authentication/ChangePassword.vue')
+        }
     ]
 };
 
