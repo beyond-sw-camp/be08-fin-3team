@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth';
 import { Form } from 'vee-validate';
 import baseApi from '@/api/baseapi';
 import { useRouter } from 'vue-router';
+import PasswordResetModal from '../modal/PasswordResetModal.vue';
 
 const isEmployeeIdLogin = ref(false);
 const password = ref('');
@@ -11,6 +12,8 @@ const email = ref('');
 const employeeId = ref('');
 const router = useRouter();
 const authStore = useAuthStore();
+const dialog=ref(false);
+const isLoading = ref(false);
 
 const passwordRules = ref([
     (v: string) => !!v || '비밀번호를 입력해주세요',
@@ -28,6 +31,7 @@ const formIsValid = computed(()=>{// 계산된 속성 사용
     }
 })
 
+
 const login =()=>{
     if(formIsValid.value){
         loginApi();
@@ -36,6 +40,7 @@ const login =()=>{
 
 const loginApi=async()=>{
     try{
+        isLoading.value = true;
         const res = await baseApi.post('/users/login',{
             loginType: isEmployeeIdLogin.value ? 'employeeId':'email', // 로그인 방식 구분
             email: email.value ? email.value : null,
@@ -56,6 +61,8 @@ const loginApi=async()=>{
         }
     }catch(err) {
         console.log(err);
+    }finally{
+        isLoading.value = false;
     }
 
 }
@@ -64,6 +71,17 @@ const saveLocalStorage=(result:any)=>{
         localStorage.setItem('loginUserEmail', result.email);
         localStorage.setItem('accessToken',result.accessToken);
         localStorage.setItem('loginUserRole',result.role);
+}
+
+// const findPassword = ()=>{
+//      dialog.value = true  // 창 열기
+// }
+
+const closeModal = ()=>{
+     dialog.value = false;  // 닫기
+}
+const saveHistory = ()=>{
+     dialog.value = false;
 }
 </script>
 
@@ -75,6 +93,8 @@ const saveLocalStorage=(result:any)=>{
     </div>
     <Form class="mt-5">
           <!-- 로그인 방식 선택 (체크박스 또는 스위치) -->
+          <v-progress-circular v-if="isLoading" indeterminate color="primary" size="50"
+          style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></v-progress-circular>
         <v-switch
             v-model="isEmployeeIdLogin"
             color="primary"
@@ -111,10 +131,11 @@ const saveLocalStorage=(result:any)=>{
             type="password"
             class="pwdInput"
         ></VTextField>
+        <!-- <PasswordResetModal :dialog="dialog" @update:dialog="dialog=$event" @close="closeModal" @save="saveHistory"/> -->
         <div class="d-flex flex-wrap align-center my-3 ml-n2">
            
             <div class="ml-sm-auto">
-                <RouterLink to="" class="text-primary text-decoration-none text-body-1 opacity-1 font-weight-medium">비밀번호를 잊으셨나요?</RouterLink
+                <RouterLink to="/auth/find-password" class="text-primary text-decoration-none text-body-1 opacity-1 font-weight-medium">비밀번호 찾기</RouterLink
                 >
             </div>
         </div>
