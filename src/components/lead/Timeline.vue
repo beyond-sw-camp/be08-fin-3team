@@ -2,6 +2,7 @@
 import { reactive, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/axiosinterceptor';
+import { reverseActStatus } from '@/utils/ActStatusMappings';
 
 const route = useRoute();
 
@@ -28,8 +29,8 @@ const fetchData = async (leadNo) => {
             api.get(`/acts/timeline/${leadNo}`),
             api.get(`/proposals/timeline/${leadNo}`),
             api.get(`/estimates/timeline/${leadNo}`),
-            api.get(`/contract/timeline/${leadNo}`)
-            // api.get(`/sales/timeline/${leadNo}`)
+            api.get(`/contract/timeline/${leadNo}`),
+            api.get(`/sales/timeline/${leadNo}`)
         ]);
 
         lead.value = leadRes.data.result;
@@ -37,9 +38,14 @@ const fetchData = async (leadNo) => {
         proposal.value = proposalRes.data.result;
         estimate.value = estimateRes.data.result;
         contract.value = contractRes.data.result;
+        sales.value = salesRes.data.result;
     } catch (error) {
         console.error('타임라인 데이터를 조화하는데 실패했습니다.', error);
     }
+};
+
+const formatCurrency = (value) => {
+    return value.toLocaleString(); // 천 단위 구분을 추가
 };
 
 onMounted(() => {
@@ -63,9 +69,12 @@ onMounted(() => {
                             <div>
                                 <div class="d-md-flex">
                                     <h3 class="text-h6">매출</h3>
-                                    <div class="sl-date text-muted ms-1">매출일자</div>
+                                    <div class="sl-date text-muted ms-1">{{ sales.value.salesDate }}</div>
                                 </div>
-                                <v-alert class="mt-4 fs-3" color="secondary" variant="tonal"> KRW 공급가액 </v-alert>
+                                <v-alert class="mt-4 fs-3" color="secondary" variant="tonal">
+                                    {{ sales.value.salesName }}<br />
+                                    KRW {{ formatCurrency(sales.value.supplyPrice) }}
+                                </v-alert>
                             </div>
                         </div>
                     </div>
@@ -83,9 +92,9 @@ onMounted(() => {
                                     <div class="sl-date text-muted ms-1">{{ contract.value.contractDate }}</div>
                                 </div>
                                 <v-alert class="mt-4 fs-3" color="primary" variant="tonal">
-                                    {{ contract.value.contractDate }}<br />
+                                    {{ contract.value.name }}<br />
                                     {{ contract.value.startDate }} ~ {{ contract.value.endDate }}<br />
-                                    KRW {{ contract.value.supplyPrice }}
+                                    KRW {{ formatCurrency(contract.value.supplyPrice) }}
                                 </v-alert>
                             </div>
                         </div>
@@ -105,7 +114,7 @@ onMounted(() => {
                                 </div>
                                 <v-alert class="mt-3 fs-3" color="secondary" variant="tonal">
                                     {{ estimate.value.name }}<br />
-                                    KRW {{ estimate.value.supplyPrice }}
+                                    KRW {{ formatCurrency(estimate.value.supplyPrice) }}
                                 </v-alert>
                             </div>
                         </div>
@@ -147,7 +156,7 @@ onMounted(() => {
                                     <v-alert class="mt-3 fs-3" color="secondary" variant="tonal">
                                         {{ act.name }}<br />
                                         {{ lead.value.customerName }}<br />
-                                        {{ act.cls }} / {{ act.purpose }} / {{ lead.value.userName }}
+                                        {{ reverseActStatus[act.cls] || act.cls }} / {{ act.purpose }} / {{ lead.value.userName }}
                                     </v-alert>
                                 </div>
                             </div>

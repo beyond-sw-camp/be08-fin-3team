@@ -28,12 +28,6 @@ const processes = ref([
     { text: '계약', value: 5 }
 ]);
 
-// const today = new Date();
-// const prevMonth = ref(today.toISOString().substring(0, 8) + '01');
-// const nextMonth = new Date(today.setMonth(today.getMonth() + 2));
-// const startDate = ref(today.toISOString().substring(0, 8) + '01');
-// const endDate = ref(nextMonth.toISOString().substring(0, 10));
-
 const startDate = new Date();
 startDate.setMonth(startDate.getMonth() - 1);
 startDate.setDate(1);
