@@ -3,7 +3,7 @@
 		<v-card>
 			<v-card-title>할 일</v-card-title>
 			<v-card-text>
-				<v-form @submit.prevent="addTodo" lazy-validation>
+				<v-form ref="form" @submit.prevent="addTodo" lazy-validation>
 					<div>
 						<v-alert v-if="showAlert" type="warning" variant="tonal" class="warn-alert">
 							<h5 class="text-h5 text-capitalize">warning</h5>
@@ -92,14 +92,18 @@ export default {
 	
 	methods: {
     validateTodo() {
+			const isValid = this.$refs.form.validate();
       if (!this.todo.title || !this.todo.todoCls || !this.todo.priority || !this.todo.dueDate || !this.todo.status) {
-        this.showAlert = true;
-        this.alertMessage = '필수 필드를 입력해주세요';
+        // this.showAlert = true;
+        // this.alertMessage = '필수 필드를 입력해주세요';
         setTimeout(() => {
           this.showAlert = false;
         }, 2000);
         return false;
       }
+			if(!isValid){
+				return false;
+			}
       return true;
     },
 

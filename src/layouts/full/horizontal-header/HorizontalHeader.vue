@@ -10,6 +10,7 @@ import RtlLogo from '../logo/RtlLogo.vue';
 // dropdown imports
 import NotificationDD from '../vertical-header/NotificationDD.vue';
 import ProfileDD from '../vertical-header/ProfileDD.vue';
+import HorizontalSidebar from '../horizontal-sidebar/HorizontalSidebar.vue';
 
 const customizer = useCustomizerStore();
 const showSearch = ref(false);
@@ -43,7 +44,7 @@ const getCart = computed(() => {
                 </div>
             </v-locale-provider>
             <v-locale-provider v-else>
-                <div class="pt-2 pr-4 d-sm-flex d-none">
+                <div class="ml-4 pt-2 pr-4 d-sm-flex d-none">
                     <Logo />
                 </div>
                 <div class="pt-2 pr-2 d-sm-none d-flex">
@@ -56,13 +57,11 @@ const getCart = computed(() => {
             </v-btn>
 
             <v-spacer />
-
-
             <!-- Notification -->
-            <NotificationDD />
+            <!-- <NotificationDD /> -->
 
             <!-- User Profile -->
-            <div class="ml-3">
+            <div class="ml-3 mr-3">
                 <ProfileDD />
             </div>
         </div>

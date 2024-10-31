@@ -110,7 +110,7 @@ const horizontalItems: menu[] = [
                 to: '/apps/calendar',
             },
             {
-                title: 'Todo',
+                title: '할 일',
                 icon: CircleDotIcon,
                 to: '/apps/todo/list'
             },
