@@ -14,6 +14,7 @@ const loading = ref(false);
 const code = ref();
 const mailBtnDisable = ref(false);
 const codeBtnNotDisable = ref(true);
+const isLoading = ref(false);
 
 const router = useRouter();
 
@@ -59,6 +60,7 @@ const signUp=()=>{
 
 const signUpApi = async()=>{
     try{
+        isLoading.value = true;
         const res = await baseApi.post('/users/join',{
             name:name.value,
             email:email.value,
@@ -79,6 +81,8 @@ const signUpApi = async()=>{
             }
     }catch(err){
         console.log(err);
+    }finally{
+        isLoading.value = false;
     }
 }
 
@@ -133,6 +137,8 @@ const sendCodeCheck = async()=>{
     </div>
     <v-row>
         <v-col cols="12 pb-0">
+            <v-progress-circular v-if="isLoading" indeterminate color="primary" size="50"
+            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></v-progress-circular>
             <v-label class="text-subtitle-1 font-weight-medium pb-2">이름</v-label>
             <VTextField v-model="name" :rules="nameRules" required placeholder="이름을 입력해주세요" ></VTextField>
             <v-label class="mb-2 font-weight-medium">부서</v-label>
