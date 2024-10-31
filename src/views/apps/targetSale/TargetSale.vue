@@ -53,7 +53,7 @@ const headers = ref([
   { title: '10월', key: 'month10' },
   { title: '11월', key: 'month11' },
   { title: '12월', key: 'month12' },
-  { title: '액션', align: 'start' },
+  { title: ' ', align: 'start' },
 ]);
 
 function groupDataByProduct(data) {
