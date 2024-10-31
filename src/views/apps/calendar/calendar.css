@@ -13,13 +13,13 @@
 
 /* 영업활동 */
 .act-event {
-  background-color: #f1a1ae;
+  background-color: #a9acd8;
   color: white;
   font-size: 14px;
   border: none;
 }
 .act-event:hover {
-  background-color: #df8998;
+  background-color: #9da1d1;
   cursor: pointer;
   border: none;
 }

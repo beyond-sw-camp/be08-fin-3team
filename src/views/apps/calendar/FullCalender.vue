@@ -11,7 +11,6 @@ import { useCalendarStore } from '@/stores/apps/calendar/calendar';
 import api from '@/api/axiosinterceptor';
 import { reverseActStatus, actStatus } from '@/utils/ActStatusMappings';
 import {categoryMapping, reversePlanCls} from '@/utils/PlanMappings'
-import axios from 'axios';
 
 export default defineComponent({
   components: {
@@ -90,9 +89,9 @@ export default defineComponent({
       try{
         const response = await api.get('/calendars/user/exists');
         console.log(response);
-        if(response.data.result){ // 캘린더 fetch
+        if(response.data.result){
           await this.fetchCalendarData();
-        }else{ // 캘린더 create
+        }else{
           await this.createCalendar();
         }   
       }catch(e){
@@ -465,7 +464,7 @@ export default defineComponent({
         <v-select
         v-model="selectedOption"
         :items="items"
-        label="생성"
+        label="일정 생성"
         hide-details
         outlined
         class="select-item"
@@ -519,8 +518,8 @@ export default defineComponent({
   transform: translateX(-50%);
   z-index: 3000;
   width: 100%;
-  max-width: 14%;
+  max-width: 17%;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  font-size: 16px;
+  font-size: 15px;
 }
 </style>

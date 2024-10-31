@@ -190,11 +190,11 @@ const MainRoutes = {
             path: '/apps/chart/act',
             component: () => import('@/views/apps/sbChart/ActChart.vue')
         },
-        // {
-        //     name: 'TodoList',
-        //     path: '/apps/todo/list',
-        //     component: () => import('@/views/apps/todo/TodoList.vue')
-        // },
+        {
+            name: 'TodoList',
+            path: '/apps/todo/list',
+            component: () => import('@/views/apps/todo/TodoList.vue')
+        },
         {
             name: 'PlanList',
             path: '/apps/plan/list',
