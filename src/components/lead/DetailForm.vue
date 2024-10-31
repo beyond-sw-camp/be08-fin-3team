@@ -210,8 +210,6 @@ const submitForm = async () => {
         try {
             let response;
 
-            console.log(leadResponseDto);
-
             if (!leadResponseDto.leadNo) {
                 response = await api.post('/leads', {
                     name: leadResponseDto.name,
@@ -228,8 +226,13 @@ const submitForm = async () => {
                     note: leadResponseDto.note,
                     custNo: leadResponseDto.customerNo
                 });
+
                 console.log('POST response:', response.data);
-                triggerAlert('저장이 완료되었습니다.', 'success');
+
+                if (response.data.isSuccess) {
+                    leadResponseDto.leadNo = response.data.result.leadNo;
+                    triggerAlert('저장이 완료되었습니다.', 'success', 1500, '/sales/lead');
+                }
             } else {
                 response = await api.patch(`/leads/${leadResponseDto.leadNo}`, {
                     name: leadResponseDto.name,
@@ -246,19 +249,12 @@ const submitForm = async () => {
                     note: leadResponseDto.note,
                     custNo: leadResponseDto.customerNo
                 });
-                console.log('PATCH response:', response.data);
-                console.log('triggerAlert 호출 전');
-                triggerAlert('수정이 완료되었습니다.', 'success');
-                return router.go(0);
-            }
 
-            if (response.data.isSuccess) {
-                if (leadResponseDto.leadNo == null || leadResponseDto.leadNo == '') {
-                    leadResponseDto.leadNo = response.data.result.leadNo;
-                    router.push(`/sales/lead/detail/${leadResponseDto.leadNo}`);
+                console.log('PATCH response:', response.data);
+
+                if (response.data.isSuccess) {
+                    triggerAlert('수정이 완료되었습니다.', 'success', 1500, '/sales/lead');
                 }
-            } else {
-                console.error('데이터 전송 중 오류가 발생했습니다:', error);
             }
         } catch (error) {
             console.error('데이터 전송 중 오류가 발생했습니다:', error);
