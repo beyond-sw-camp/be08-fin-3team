@@ -174,12 +174,13 @@ onMounted(() => {
 <style>
 .alert {
     position: fixed;
-    top: 16%;
+    top: 20%;
     left: 90%;
     transform: translateX(-50%);
     z-index: 3000;
     width: 100%;
-    max-width: 14%;
+    max-width: 17%;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    font-size: 15px;
 }
 </style>
