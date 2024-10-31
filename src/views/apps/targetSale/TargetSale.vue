@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted} from 'vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import api from '@/api/axiosinterceptor';
 
@@ -141,8 +141,15 @@ function openDialog() {
 async function saveTargetSale() {
   validateForm();
   if (!formValid.value) return;
+
+  const dataToSave = {
+    ...newTargetSale.value,
+    sum: parseNumber(newTargetSale.value.sum),
+    monthTargets: newTargetSale.value.monthTargets.map(target => parseNumber(target)),
+  };
+  
   try {
-    const response = await api.post('/admin/targetsales', newTargetSale.value);
+    const response = await api.post('/admin/targetsales', dataToSave);
     dialog.value = false;
     fetchTargetSales();
     closeDialog();
@@ -152,6 +159,7 @@ async function saveTargetSale() {
     triggerAlert('목표매출 등록에 실패했습니다.', 'error', 2000);
   }
 }
+
 
 function editTargetSale(item) {
   newTargetSale.value = {
@@ -199,6 +207,15 @@ const search = () => {
 
 function formatNumber(value) {
   return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function formatNumberWithCommas(value) {
+  if (value === null || value === undefined) return '';
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function parseNumber(value) {
+  return parseInt(value.toString().replace(/,/g, '')) || 0;
 }
 
 onMounted(() => {
@@ -307,13 +324,19 @@ onMounted(() => {
                 <v-text-field 
                   v-model="newTargetSale.sum" 
                   label="합계" 
-                  type="number" 
-                  :rules="[v => v > 0 || '합계는 0이 될 수 없습니다.']"
-                  @blur="newTargetSale.sum = parseInt(newTargetSale.sum) || 0"
+                  type="text" 
+                  @input="newTargetSale.sum = formatNumberWithCommas(parseNumber(newTargetSale.sum))"
+                  :rules="[v => /^(?!.*,,)[0-9]*(,[0-9]+)*$/.test(v)|| '숫자만 입력하세요']"
                 />
               </v-col>
               <v-col cols="4" v-for="(month, index) in 12" :key="index">
-                <v-text-field v-model="newTargetSale.monthTargets[index]" :label="`${index + 1}월`" type="number" />
+                <v-text-field 
+                  v-model="newTargetSale.monthTargets[index]" 
+                  :label="`${index + 1}월`" 
+                  type="text"
+                  @input="newTargetSale.monthTargets[index] = formatNumberWithCommas(parseNumber(newTargetSale.monthTargets[index]))"
+                  :rules="[v => /^(?!.*,,)[0-9]*(,[0-9]+)*$/.test(v)|| '숫자만 입력하세요']"
+                />
               </v-col>
             </v-row>
           </v-form>
