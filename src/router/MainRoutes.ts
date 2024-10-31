@@ -627,6 +627,11 @@ const MainRoutes = {
             component: () => import('@/views/apps/sales/SalesStatusChartView.vue')
         },
         {
+            name: 'TargetSaleChartView',
+            path: '/apps/chart/targetsales/status',
+            component: () => import('@/views/apps/targetSale/TargetSaleChartView.vue')
+        },
+        {
             name: 'SalesPridictionsChart',
             path: '/apps/chart/sales/pridictions',
             component: () => import('@/views/apps/sales/SalesPredictionChartView.vue')
