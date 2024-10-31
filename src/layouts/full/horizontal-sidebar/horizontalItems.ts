@@ -218,7 +218,7 @@ const horizontalItems: menu[] = [
                         title: '매출 예측 차트',
                         icon: ChartAreaIcon,
                         to: '/apps/chart/sales/pridictions'
-                    },
+                    }
                 ]
             },
             {
@@ -226,6 +226,11 @@ const horizontalItems: menu[] = [
                 icon: CircleDotIcon,
                 to: '/apps/chart/act'
             },
+            {
+                title: '계약 차트',
+                icon: CircleDotIcon,
+                to: '/apps/chart/status'
+            }
         ]
     },
 

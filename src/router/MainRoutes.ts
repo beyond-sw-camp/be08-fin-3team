@@ -191,6 +191,11 @@ const MainRoutes = {
             component: () => import('@/views/apps/sbChart/ActChart.vue')
         },
         {
+            name: 'contractChart',
+            path: '/apps/chart/status',
+            component: () => import('@/views/apps/statusChart/contractChart.vue')
+        },
+        {
             name: 'TodoList',
             path: '/apps/todo/list',
             component: () => import('@/views/apps/todo/TodoList.vue')
