@@ -140,16 +140,6 @@ async function search() {
     }
 }
 
-watch([() => editedItem.value.supplyPrice, () => editedItem.value.taxRate], () => {
-    if (editedItem.value.supplyPrice && editedItem.value.taxRate) {
-        const supplyPrice = parseFloat(editedItem.value.supplyPrice.toString().replace(/,/g, ''));
-        const taxRate = parseFloat(editedItem.value.taxRate.toString().replace(/,/g, '')) / 100;
-        editedItem.value.price = Math.floor(supplyPrice + (supplyPrice * taxRate)); // Remove decimals
-    } else {
-        editedItem.value.price = '';
-    }
-});
-
 function initialize() {
     editedItem.value = Object.assign({}, defaultItem.value);
     editMode.value = false;
@@ -163,10 +153,10 @@ function editItem(item) {
     editedIndex.value = items.value.indexOf(item);
     editedItem.value = {
         ...item,
-        supplyPrice: item.supplyPrice.toString().replace(/,/g, ''),
-        taxRate: item.taxRate.toString().replace(/,/g, ''),
-        price: item.price.toString().replace(/,/g, ''),
-        quantity: item.quantity.toString().replace(/,/g, '')
+        supplyPrice: item.supplyPrice,
+        taxRate: item.taxRate,
+        price: item.price,
+        quantity: item.quantity
     };
     dialog.value = true;
     editMode.value = true;
@@ -181,6 +171,12 @@ function deleteItem(item) {
 async function save() {
     if (formValid.value) {
         try {
+            
+            editedItem.value.price = parseNumber(editedItem.value.price);
+            editedItem.value.supplyPrice = parseNumber(editedItem.value.supplyPrice);
+            editedItem.value.quantity = parseNumber(editedItem.value.quantity);
+            editedItem.value.taxRate = parseNumber(editedItem.value.taxRate);
+
             if (editedIndex.value > -1) {
                 await api.patch(`/admin/products/${editedItem.value.prodNo}`, editedItem.value);
                 Object.assign(items.value[editedIndex.value], editedItem.value);
@@ -194,7 +190,7 @@ async function save() {
             close();
         } catch (error) {
             console.error('저장 중 오류 발생:', error);
-            triggerAlert('제품 등록에  실패했습니다.', 'error', 2000);
+            triggerAlert('제품 등록에 실패했습니다.', 'error', 2000);
         }
     }
 }
@@ -230,11 +226,20 @@ function closeDelete() {
     });
 }
 
-const formatNumber = (value) => {
+function formatNumber(value) {
     if (value === null || value === undefined) return '';
     const num = parseFloat(value.toString().replace(/,/g, ''));
     return isNaN(num) ? '' : num.toLocaleString();
 };
+
+function formatNumberWithCommas(value) {
+    if (value === null || value === undefined) return '';
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function parseNumber(value) {
+    return parseInt(value.toString().replace(/,/g, '')) || 0;
+}
 
 function treeDepartments(departments) {
     const names = [];
@@ -249,6 +254,16 @@ function treeDepartments(departments) {
     
     return names;
 }
+
+watch([() => editedItem.value.supplyPrice, () => editedItem.value.taxRate], ([newSupplyPrice, newTaxRate]) => {
+    const supplyPriceValue = parseNumber(newSupplyPrice);
+    const taxRateValue = parseNumber(newTaxRate);
+
+    if (!isNaN(supplyPriceValue) && !isNaN(taxRateValue)) {
+        const calculatedPrice = supplyPriceValue * (1 + taxRateValue / 100);
+        editedItem.value.price = formatNumberWithCommas(calculatedPrice.toFixed(0));
+    }
+});
 
 initialize();
 </script>
@@ -320,7 +335,12 @@ initialize();
                                                 ></v-select>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="4">
-                                                <v-text-field v-model="editedItem.quantity" label="포장 수량" :rules="[v => /^[0-9]+$/.test(v) || '숫자만 입력하세요']" required></v-text-field>
+                                                <v-text-field v-model="editedItem.quantity"
+                                                    label="포장 수량"
+                                                    :rules="[v => /^(?!.*,,)[0-9]*(,[0-9]+)*$/.test(v)|| '숫자만 입력하세요']"
+                                                    @input="editedItem.quantity = formatNumberWithCommas(parseNumber(editedItem.quantity))"
+                                                    required>
+                                                </v-text-field>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="4">
                                                 <v-text-field v-model="editedItem.unit" label="포장 단위" required></v-text-field>
@@ -329,17 +349,23 @@ initialize();
                                                 <v-text-field v-model="editedItem.field" label="규격" required></v-text-field>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="4">
-                                                <v-text-field v-model="editedItem.supplyPrice" label="원가 (원)" :rules="[v => /^[0-9]+$/.test(v) || '숫자만 입력하세요']" required></v-text-field>
+                                                <v-text-field v-model="editedItem.supplyPrice"
+                                                    label="원가 (원)"
+                                                    :rules="[v => /^(?!.*,,)[0-9]*(,[0-9]+)*$/.test(v) || '숫자만 입력하세요']"
+                                                    @input="editedItem.supplyPrice = formatNumberWithCommas(parseNumber(editedItem.supplyPrice))"
+                                                    required>
+                                                </v-text-field>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="4">
-                                                <v-text-field v-model="editedItem.taxRate" label="세율 (%)" :rules="[v => /^[0-9]+$/.test(v) || '숫자만 입력하세요']" required></v-text-field>
+                                                <v-text-field v-model="editedItem.taxRate" label="세율 (%)" :rules="[v => /^(?!.*,,)[0-9]*(,[0-9]+)*$/.test(v) || '숫자만 입력하세요']" required></v-text-field>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="4">
                                                 <v-text-field v-model="editedItem.price" label="가격 (원)"
                                                     :rules="[
                                                             v => !!v || '가격은 필수 입력입니다.',
-                                                            v => /^[0-9]+$/.test(v) || '숫자만 입력하세요'
+                                                            v => /^(?!.*,,)[0-9]*(,[0-9]+)*$/.test(v) || '숫자만 입력하세요'
                                                         ]"
+                                                    @input="editedItem.price = formatNumberWithCommas(parseNumber(editedItem.price))"
                                                     required>
                                                 </v-text-field>
                                             </v-col>
