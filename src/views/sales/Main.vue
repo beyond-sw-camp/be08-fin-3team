@@ -17,6 +17,7 @@ const state = reactive({
 
 const searchCond = reactive({
     searchDate: searchDate.value,
+    deptNo: selectedManager.value,
     userNo: selectedManager.value
 });
 
@@ -157,6 +158,7 @@ watch(
     () => selectedDept.value,
     (newDept) => {
         if (newDept != null) {
+            searchCond.deptNo = newDept;
             selectedManager.value = 0;
             fetchUser(newDept);
         }
