@@ -152,6 +152,7 @@ async function saveSubProcess() {
             console.log('Subprocess 추가 성공:', response.data);
             triggerAlert('하위 프로세스가 등록되었습니다.', 'success', 2000);
         } else if (dialogMode.value === 'edit-sub') {
+            console.log("하위 프로세스 번호 : ", editedItem.value.subProcessNo);
             const response = await api.patch(`/admin/subprocesses/${editedItem.value.subProcessNo}`, editedItem.value);
             console.log('Subprocess 수정 성공:', response.data);
             triggerAlert('하위 프로세스가 수정되었습니다.', 'success', 2000);
@@ -205,11 +206,9 @@ async function confirmDelete() {
 
         editedItem.value = null;
 
-        if (dialogMode.value.includes('sub')) {
-            await fetchSubProcesses(selectedProcess.value.processName);
-        } else {
-            await fetchProcesses();
-        }
+        await fetchSubProcesses(selectedProcess.value.processName);
+        await fetchProcesses();
+
     } catch (error) {
         console.error('Error deleting item:', error.message || error);
         triggerAlert('프로세스 삭제에 실패했습니다.', 'error', 2000);

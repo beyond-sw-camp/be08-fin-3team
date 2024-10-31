@@ -210,6 +210,11 @@ const horizontalItems: menu[] = [
                         to: '/apps/chart/sales/status'
                     },
                     {
+                        title: '목표 매출 차트',
+                        icon: ChartAreaIcon,
+                        to: '/apps/chart/targetsales/status'
+                    },
+                    {
                         title: '매출 예측 차트',
                         icon: ChartAreaIcon,
                         to: '/apps/chart/sales/pridictions'
