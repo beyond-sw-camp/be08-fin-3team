@@ -1,0 +1,12 @@
+.v-data-table__group-header {
+  display: none; 
+}
+.group-red {
+  background-color: #ffcccc;
+}
+.group-blue {
+  background-color: #cce5ff;
+}
+.group-green {
+  background-color: #d4edda;
+}
