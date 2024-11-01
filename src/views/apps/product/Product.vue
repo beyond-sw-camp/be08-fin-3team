@@ -1,269 +1,323 @@
-<template>
-    <v-container>
-        <v-row>
-            <v-col cols="12" sm="6" md="3">
-                <v-sheet class="pa-4 pt-1">
-                    <v-text-field 
-                        v-model="productCode" 
-                        placeholder="제품 코드"
-                        append-inner-icon="mdi-magnify"
-                        solo
-                    ></v-text-field>
-
-                    <v-text-field 
-                        v-model="productName" 
-                        placeholder="제품명"
-                        append-inner-icon="mdi-magnify"
-                        solo
-                    ></v-text-field>
-
-                    <div class="list-container">
-                        <v-list dense shaped>
-                            <v-list-item  
-                                v-for="(item, index) in items" 
-                                :key="index"
-                                @click="selectItem(item)"
-                            > 
-                                <v-list-item-content>
-                                    <v-list-item-title>{{ item.name }} ({{ item.prodCode }})</v-list-item-title>
-                                </v-list-item-content>
-                                <v-divider></v-divider>
-                            </v-list-item>
-                        </v-list>
-                    </div>
-                </v-sheet>
-            </v-col>
-
-            <v-col cols="12" sm="6" md="9">
-                <v-card>
-                    <v-card-title class="custom-card-header">
-                        <span class="headline">Details</span>
-                    </v-card-title>
-
-                    <v-row class="text-right">
-                        <v-col>
-                            <v-btn variant="tonal" color="primary" @click="clearForm">신규</v-btn>
-                            <v-btn variant="tonal" color="primary" @click="saveProduct">저장</v-btn>
-                            <v-btn variant="tonal" color="primary" @click.stop="deleteItem(selectedItem)">삭제</v-btn>
-                        </v-col>
-                    </v-row>
-
-                    <hr class="divider"></hr>
-
-                    <v-card-text>
-                        <v-alert v-if="errorMessage" type="warning" class="mb-3">{{ errorMessage }}</v-alert>
-                        <v-row>
-                            <v-col cols="4">
-                                <span class="font-weight-black">제품 코드</span>
-                                <v-text-field v-model="selectedItem.prodCode" dense></v-text-field>
-                            </v-col>
-                            <v-col cols="4">
-                                <span class="font-weight-black">제품명</span>
-                                <v-text-field v-model="selectedItem.name" dense></v-text-field>
-                            </v-col>
-                            <v-col cols="4">
-                                <span class="font-weight-black">영문 제품명</span>
-                                <v-text-field v-model="selectedItem.engName" dense></v-text-field>
-                            </v-col>
-                            <v-col cols="4">
-                                <span class="font-weight-black">제품 약명</span>
-                                <v-text-field v-model="selectedItem.abbrName" dense></v-text-field>
-                            </v-col>
-                            <v-col cols="4">
-                                <span class="font-weight-black">출시일</span>
-                                <v-text-field v-model="selectedItem.releaseDate" dense></v-text-field>
-                            </v-col>
-                            <v-col cols="4">
-                                <span class="font-weight-black">포장 수량</span>
-                                <v-text-field v-model="selectedItem.quantity" dense></v-text-field>
-                            </v-col>
-                            <v-col cols="4">
-                                <span class="font-weight-black">포장 단위</span>
-                                <v-text-field v-model="selectedItem.unit" dense></v-text-field>
-                            </v-col>
-                            <v-col cols="4">
-                                <span class="font-weight-black">규격</span>
-                                <v-text-field v-model="selectedItem.field" dense></v-text-field>
-                            </v-col>
-                            <v-col cols="4">
-                                <span class="font-weight-black">원가</span>
-                                <v-text-field v-model="selectedItem.supplyPrice" dense></v-text-field>
-                            </v-col>
-                            <v-col cols="4">
-                                <span class="font-weight-black">세율</span>
-                                <v-text-field v-model="selectedItem.taxRate" dense></v-text-field>
-                            </v-col>
-                            <v-col cols="4">
-                                <span class="font-weight-black">가격</span>
-                                <v-text-field v-model="selectedItem.price" dense></v-text-field>
-                            </v-col>
-                            <v-col cols="4">
-                                <span class="font-weight-black">부서</span>
-                                <v-text-field v-model="selectedItem.dept" dense></v-text-field>
-                            </v-col>
-                        </v-row>
-                    </v-card-text>
-                </v-card>
-            </v-col>
-        </v-row>
-    </v-container>
-
-    <v-dialog v-model="dialogDelete" max-width="400px">
-        <v-card>
-            <v-card-title class="text-h5">Delete Confirmation</v-card-title>
-            <v-card-text>Are you sure you want to delete this item?</v-card-text>
-            <v-card-actions>
-                <v-btn color="error" @click="confirmDelete">Delete</v-btn>
-                <v-btn @click="dialogDelete = false">Cancel</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
-</template>
-
-<script>
+<script setup>
+import { computed, nextTick, ref, watch } from 'vue';
 import api from '@/api/axiosinterceptor';
+import UiParentCard from '@/components/shared/UiParentCard.vue';
+import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
 
-export default {
-    data() {
-        return {
-            productCode: '',
-            productName: '',
-            selectedItem: {
-                prodNo: 0,
-                prodCode: '',
-                name: '',
-                engName: '',
-                abbrName: '',
-                releaseDate: '',
-                dept: '',
-                quantity: 0,
-                unit: '',
-                field: '',
-                supplyPrice: 0,
-                taxRate: 0,
-                price: 0
-            },
-            items: [],
-            errorMessage: '',
-            dialogDelete: false,
-        };
-    },
-    methods: {
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
+
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
+
+const dialog = ref(false);
+// const dialogDelete = ref(false);
+const showConfirmDialog = ref(false);
+const formValid = ref(false);
+const departmentNames = ref([]);
+const searchProdName = ref('');
+
+const headers = ref([
+    { title: '제품 코드', key: 'prodCode' },
+    { title: '제품명', key: 'name' },
+    { title: '영문 제품명', key: 'engName' },
+    { title: '제품 약명', key: 'abbrName' },
+    { title: '출시일', key: 'releaseDate' },
+    { title: '부서', key: 'dept' },
+    { title: '포장 수량', key: 'quantity' },
+    { title: '포장 단위', key: 'unit' },
+    { title: '규격', key: 'field' },
+    { title: '원가', key: 'supplyPrice' },
+    { title: '세율', key: 'taxRate' },
+    { title: '가격', key: 'price' },
+    { title: '', key: 'actions'},
+]);
+
+const items = ref([]);
+const editedIndex = ref(-1);
+const editedItem = ref({
+    prodNo: 0,
+    prodCode: '',
+    name: '',
+    engName: '',
+    abbrName: '',
+    releaseDate: '',
+    dept: '',
+    quantity: 0,
+    unit: '',
+    field: '',
+    supplyPrice: 0,
+    taxRate: 0,
+    price: 0,
+});
+const defaultItem = ref({
+    prodNo: 0,
+    prodCode: '',
+    name: '',
+    engName: '',
+    abbrName: '',
+    releaseDate: '',
+    dept: '',
+    quantity: 0,
+    unit: '',
+    field: '',
+    supplyPrice: 0,
+    taxRate: 0,
+    price: 0,
+});
+
+async function fetchDepartments(){
+    try{
+        const response = await api.get('/admin/departments')
+        console.log(response);
+
+        departmentNames.value = response.data.result.map(department => department.name);
+
+        console.log(departmentNames.value);
+    }catch{
+        console.error('Error:', error.message || error);
+    }
+}
+
+async function fetchProducts() {
+    try {
+        const response = await api.get('/admin/products');
+        items.value = response.data.result;
+    } catch (error) {
+        console.error('제품 정보를 가져오는 중 오류 발생:', error);
+    }
+}
+
+async function search() {
+    if (!searchProdName.value) {
+            await fetchProducts();
+            return;
+    }
+    try {
+        const response = await api.get(`/admin/products/${searchProdName.value}`);
         
-        async fetchProducts() {
-            try {
-                const response = await api.get('/products');
-                this.items = response.data.result;
-            } catch (error) {
-                console.error('제품 정보를 가져오는 중 오류 발생:', error);
+        if (Array.isArray(response.data.result)) {
+            items.value = response.data.result;
+        } else if (typeof response.data.result === 'object' && response.data.result !== null) {
+            items.value = [response.data.result];
+        } else {
+            console.error('Unexpected data format:', response.data.result);
+            items.value = [];
+        }
+    } catch (error) {
+        console.error('제품 정보를 가져오는 중 오류 발생:', error);
+    }
+}
+
+
+function initialize() {
+    editedItem.value = Object.assign({}, defaultItem.value);
+    fetchProducts();
+    fetchDepartments();
+
+}
+
+const formTitle = computed(() => (editedIndex.value === -1 ? '제품 등록' : '제품 수정'));
+
+function editItem(item) {
+    editedIndex.value = items.value.indexOf(item);
+    editedItem.value = Object.assign({}, item);
+    dialog.value = true;
+}
+
+function deleteItem(item) {
+    editedIndex.value = items.value.indexOf(item);
+    editedItem.value = Object.assign({}, item);
+    // dialogDelete.value = true;
+    showConfirmDialog.value = true;
+}
+
+async function save() {
+    if (formValid.value) {
+        try {
+            if (editedIndex.value > -1) {
+                await api.patch(`/admin/products/${editedItem.value.prodNo}`, editedItem.value);
+                Object.assign(items.value[editedIndex.value], editedItem.value);
+                triggerAlert('제품이 수정되었습니다.', 'success', 2000);
+            } else {
+                const response = await api.post('/admin/products', editedItem.value);
+                items.value.push(response.data.result);
+                triggerAlert('제품이 등록되었습니다.', 'success', 2000);
             }
-        },
+            fetchProducts();
+            close();
+        } catch (error) {
+            console.error('저장 중 오류 발생:', error);
+            triggerAlert('제품 등록에  실패했습니다.', 'error', 2000);
+        }
+    }
+}
 
-        async confirmDelete() {
-            try {
-                this.dialogDelete = false;
-                // Delete API 호출
-                const apiUrl = `/products/${this.selectedItem.prodNo}`;
-                const response = await api.delete(apiUrl);
-                console.log('Delete successful:', response.data);
+async function deleteItemConfirm() {
+    try {
+        const apiUrl = `/admin/products/${editedItem.value.prodNo}`;
+        await api.delete(apiUrl);
+        items.value.splice(editedIndex.value, 1);
+        triggerAlert('제품이 삭제되었습니다.', 'success', 2000);
+        closeDelete();
+    } catch (error) {
+        console.error('삭제 중 오류 발생:', error);
+        triggerAlert('제품 삭제에 실패했습니다.', 'error', 2000);
+    }
+}
 
-                this.selectedItem = {};
-                await this.fetchProducts();
-            } catch (error) {
-                console.error('Error deleting item:', error.message || error);
-            }
-        },
+function close() {
+    dialog.value = false;
+    nextTick(() => {
+        editedItem.value = Object.assign({}, defaultItem.value);
+        editedIndex.value = -1;
+    });
+}
 
+function closeDelete() {
+    // dialogDelete.value = false;
+    showConfirmDialog.value = false;
+    nextTick(() => {
+        editedItem.value = Object.assign({}, defaultItem.value);
+        editedIndex.value = -1;
+    });
+}
 
-        selectItem(item) {
-            this.selectedItem = { ...item }; 
-            this.errorMessage = '';
-        },
+// watch(dialog, (val) => {
+//     if (!val) close();
+// });
+// watch(dialogDelete, (val) => {
+//     if (!val) closeDelete();
+// });
 
-        clearForm() {
-            this.selectedItem = {
-                prodCode: '',
-                name: '',
-                engName: '',
-                abbrName: '',
-                releaseDate: '',
-                dept: '',
-                quantity: 0,
-                unit: '',
-                field: '',
-                supplyPrice: 0,
-                taxRate: 0,
-                price: 0
-            };
-            this.errorMessage = ''; // 오류 메시지 초기화
-        },
-
-        async saveProduct() {
-            try {
-                if (!this.selectedItem.prodCode || !this.selectedItem.name) {
-                    this.errorMessage = '제품 코드와 이름을 입력해주세요.';
-                    return;
-                }
-                if (typeof this.selectedItem.quantity !== 'number' || this.selectedItem.quantity < 0) {
-                    this.errorMessage = '포장 수량은 양수의 숫자여야 합니다.';
-                    return;
-                }
-
-                await api.post('/products', this.selectedItem);
-                alert('저장되었습니다.');
-                this.fetchProducts();
-                this.clearForm();
-                this.errorMessage = ''; // 성공적으로 저장한 경우 오류 메시지 초기화
-            } catch (error) {
-                console.error('저장 중 오류 발생:', error);
-                alert('저장 중 오류가 발생했습니다.');
-            }
-        },
-
-        deleteItem(item) {
-            if (item.prodNo) {
-                this.selectedItem = item;
-                this.dialogDelete = true;
-            }
-        },
-    },
-
-
-    mounted() {
-        this.fetchProducts();
-    },
-};
+initialize();
 </script>
 
-<style scoped>
-/* 스타일은 여기에 추가 */
-.list-container {
-    max-height: 300px;
-    overflow-y: auto;
-    margin-top: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.v-btn {
-    margin-top: 0.55rem;
-    margin-right: 1rem;
-    margin-left: 0.2rem;
-    margin-bottom: 0.5rem;
-}
-
-.divider {
-    border-color: rgb(0, 110, 255);
-    margin-left: 15px;
-    margin-right: 15px;
-}
-
-.v-text-field {
-    margin-top: 0.5em;
-}
-
-.custom-card-header {
-    background-color: rgb(0, 110, 255);
-    color: white;
-}
-</style>
+<template>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
+    <UiParentCard title="관리 제품 목록">
+        <v-row class="mb-5">
+            <v-col cols="4" sm="4">
+                <v-text-field v-model="searchProdName"
+                            :items="userNames"
+                            label="제품명을 입력하세요."></v-text-field>
+            </v-col>
+            <v-col cols="4">
+                <v-btn color="primary" @click="search">검색</v-btn>
+            </v-col>
+        </v-row>
+        <v-data-table
+            class="border rounded-md"
+            :headers="headers"
+            :items="items"
+            :sort-by="[{ value: 'prodCode', order: 'asc' }]"
+        >
+            <template v-slot:top>
+                <v-toolbar class="bg-lightsecondary" flat>
+                    <v-toolbar-title>제품 목록</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                    <v-dialog v-model="dialog" max-width="600px">
+                        <template v-slot:activator="{ props }">
+                            <v-btn class="mr-2" color="primary" variant="tonal" v-bind="props">제품 생성</v-btn>
+                        </template>
+                        <v-card>
+                            <v-card-title>
+                                <span class="text-h5">{{ formTitle }}</span>
+                            </v-card-title>
+                            <v-card-text>
+                                <v-container class="px-0">
+                                    <v-form v-model="formValid">
+                                        <v-row>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-text-field v-model="editedItem.prodCode" label="제품 코드" :rules="[v => !!v || '제품 코드는 필수 입력입니다.']" required></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-text-field v-model="editedItem.name" label="제품명" :rules="[v => !!v || '제품 이름은 필수 입력입니다.']" required></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-text-field v-model="editedItem.engName" label="영문 제품명"
+                                                    :rules="[
+                                                        v => !!v || '영문 제품명은 필수 입력입니다.',
+                                                        v => /^[a-zA-Z\s]+$/.test(v) || '영문만 입력하세요'
+                                                    ]" required></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-text-field v-model="editedItem.abbrName" label="제품 약명" required></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-text-field v-model="editedItem.releaseDate" variant="outlined" hide-details type="date" required label="출시일"></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-select
+                                                    v-model="editedItem.dept"
+                                                    :items="departmentNames"
+                                                    label="부서명"
+                                                ></v-select>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-text-field v-model="editedItem.quantity" label="포장 수량" :rules="[v => /^[0-9]+$/.test(v) || '숫자만 입력하세요']" required></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-text-field v-model="editedItem.unit" label="포장 단위" required></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-text-field v-model="editedItem.field" label="규격" required></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-text-field v-model="editedItem.supplyPrice" label="원가" :rules="[v => /^[0-9]+$/.test(v) || '숫자만 입력하세요']" required></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-text-field v-model="editedItem.taxRate" label="세율" :rules="[v => /^[0-9]+$/.test(v) || '숫자만 입력하세요']" required></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-text-field v-model="editedItem.price" label="가격"
+                                                    :rules="[
+                                                            v => !!v || '가격은 필수 입력입니다.',
+                                                            v => /^[0-9]+$/.test(v) || '숫자만 입력하세요'
+                                                        ]"
+                                                    required>
+                                                </v-text-field>
+                                            </v-col>
+                                        </v-row>
+                                    </v-form>
+                                </v-container>
+                            </v-card-text>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn flat style="font-size: 15px; font-weight: 600;" color="primary" @click="save" :disabled="!formValid">저장</v-btn>
+                                <v-btn color="close" flat style="font-size: 15px; font-weight: 600;"  @click="close">닫기</v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
+                    <v-dialog v-model="dialogDelete" max-width="400px">
+                        <v-card>
+                            <v-card-title class="text-h5">Delete Confirmation</v-card-title>
+                            <v-card-text>Are you sure you want to delete this item?</v-card-text>
+                            <v-card-actions>
+                                <v-btn color="error" @click="deleteItemConfirm">Delete</v-btn>
+                                <v-btn @click="closeDelete">Cancel</v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
+                </v-toolbar>
+            </template>
+            <template v-slot:item.actions="{ item }">
+                <EditIcon
+                    height="20"
+                    width="20"
+                    class="mr-2 text-primary cursor-pointer"
+                    size="small"
+                    @click="editItem(item)"
+                />
+                <TrashIcon
+                    height="20"
+                    width="20"
+                    class="text-error cursor-pointer"
+                    size="small"
+                    @click="deleteItem(item)"
+                />
+            </template>
+        </v-data-table>
+        <ConfirmDialogs :dialog="showConfirmDialog" @agree="deleteItemConfirm" @disagree="closeDelete"
+        />
+    </UiParentCard>
+</template>

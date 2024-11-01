@@ -161,7 +161,7 @@ const MainRoutes = {
         },
         {
             name: 'Contract',
-            path: '/apps/contracts',
+            path: '/apps/contract',
             component: () => import('@/views/apps/contract/ContractView.vue')
         },
         {
@@ -402,14 +402,24 @@ const MainRoutes = {
             component: () => import('@/components/proposal/ProposalList.vue')
         },
         {
+            name: 'CreateProposal',
+            path: '/proposals/create',
+            component: () => import('@/components/proposal/CreateProposal.vue')
+        },
+        {
             name: 'EstimateList',
             path: '/estimates',
-            component: () => import('@/components/estimate/EstimateList.vue')
+            component: () => import('@/components/estimate/ListEstimate.vue')
         },
         {
             name: 'CreateEstimate',
             path: '/estimates/create',
             component: () => import('@/components/estimate/CreateEstimate.vue')
+        },
+        {
+            name: 'DetailEstimate',
+            path: '/estimates/form/:estNo',
+            component: () => import('@/components/estimate/DetailEstimate.vue')
         },
         {
             name: 'Gallery Lightbox',
@@ -558,29 +568,32 @@ const MainRoutes = {
    
           { // 부서
             name: "Department",
-            path: "/sales/departments",
+            path: "/admin/departments",
             component: () => import("@/views/apps/department/Department.vue"),
             props:true
           },
 
           { // 제품
             name: "Product",
-            path: "/sales/products",
+            path: "/admin/products",
             component: () => import("@/views/apps/product/Product.vue"),
-            props:true
+            props:true,
+            meta:{requiresAdmin:true}
           },
           { // 프로세스
             name: "Process",
-            path: "/sales/processes",
+            path: "/admin/processes",
             component: () => import("@/views/apps/process/Process.vue"),
-            props:true
+            props:true,
+            meta:{requiresAdmin:true}
           },
           
           { // 목표 매출
             name: "TargetSale",
-            path: "/sales/targetsales",
+            path: "/admin/targetsales",
             component: () => import("@/views/apps/targetSale/TargetSale.vue"),
-            props:true
+            props:true,
+            meta:{requiresAdmin:true}
           },
 
         {
@@ -608,6 +621,44 @@ const MainRoutes = {
             path: '/apps/chart/sales/pridictions',
             component: () => import('@/views/apps/sales/SalesPredictionChartView.vue')
         }
+
+        ,   {
+            name: 'MyPage',
+            path: '/apps/user/mypage',
+            component: () => import('@/views/apps/user/MyPage.vue')
+        },
+
+        {
+            name: 'MyCustomers',
+            path: '/apps/user/mypage/customers',
+            component: () => import('@/views/apps/user/MyCustomers.vue')
+        },
+        {
+            name: 'MyPCustomers',
+            path: '/apps/user/mypage/pcustomers',
+            component: () => import('@/views/apps/user/MyPCustomers.vue')
+        },
+        {
+            name: 'ContractCreate',
+            path: '/apps/contract/edit',
+            component: () => import('@/views/apps/contract/ContractEdit.vue')
+        },
+        {
+            name: 'ContractEdit',
+            path: '/apps/contract/edit/:contractNo',
+            component: () => import('@/views/apps/contract/ContractEdit.vue')
+        },
+        {
+            name: 'SalesCreate',
+            path: '/apps/sales/editer',
+            component: () => import('@/views/apps/sales/SalesEdit.vue')
+        },
+        {
+            name: 'SalesEdit',
+            path: '/apps/sales/editer/:salesNo',
+            component: () => import('@/views/apps/sales/SalesEdit.vue')
+        },
+
     ]
 };
 

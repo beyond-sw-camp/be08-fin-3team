@@ -21,7 +21,7 @@ const note = ref('');
 const cls = ref('');
 const clsOptions = ref(['자사홈페이지','인터넷검색','지인소개','제품설명회','세미나','전화(인바운드)','채팅','매일','기타']);
 const contact = ref('');
-const contactOptions = ref(['미접촉','접촉시도','접촉중','접촉금지','고객전환','기존고객'])
+const contactOptions = ref(['미접촉','접촉시도','접촉중','접촉금지','기존고객'])
 const address = ref('');
 
 const router = useRouter();
@@ -52,7 +52,7 @@ const registerAPI = async()=>{
             grade:grade.value?grade.value:null,
             phone:phone.value?phone.value:"", // 필수
             tel:tel.value?tel.value:null,
-            email:email.value?email.value:null,
+            email:email.value?email.value:null, // 필수
             fax:fax.value? fax.value:null,
             addr:address.value?address.value:null,
             note:note.value?note.value:null,
@@ -99,7 +99,7 @@ const confirmContact = ref([
 
 
 const formIsValid = computed(()=>{
-    return pcName.value && cls.value && contact.value && phone.value;
+    return pcName.value && cls.value && contact.value && phone.value && email.value;
 })
 
 
@@ -157,8 +157,8 @@ const formIsValid = computed(()=>{
             </v-text-field>
         </v-col>
         <v-col cols="6">
-            <v-label class="font-weight-medium mb-2">이메일</v-label>
-            <v-text-field color="primary" v-model="email" variant="outlined" type="email"/>
+            <v-label class="font-weight-medium mb-2">이메일</v-label><span class="require">*</span>
+            <v-text-field color="primary" v-model="email" variant="outlined" type="email" :rules="confirmEmail"/>
         </v-col>
 
         <v-col cols="6">

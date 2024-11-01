@@ -10,12 +10,12 @@ const SalesPredictionChartView = defineAsyncComponent(() => import('./SalesPredi
 
 const breadcrumbs = ref([
     {
-        text: 'Chart',
+        text: '차트',
         disabled: false,
         href: 'sales'
     },
     {
-        text: 'Sales Chart',
+        text: '매출 차트',
         disabled: true,
         href: '#'
     }

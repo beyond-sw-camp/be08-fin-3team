@@ -13,18 +13,18 @@ interface SalesPredictionDto {
 
 const breadcrumbs = ref([
     {
-        text: 'Sales',
+        text: '매출 Chart',
         disabled: false,
         href: '../../sales'
     },
     {
-        text: 'Prediction Chart',
+        text: '매출 예측 Chart',
         disabled: true,
         href: '#'
     }
 ]);
 
-const page = ref({ title: 'Chart' });
+const page = ref({ title: '차트' });
 const monthlyChartData = ref<{ series: Array<{ name: string; data: number[] }> }>({
     series: []
 });

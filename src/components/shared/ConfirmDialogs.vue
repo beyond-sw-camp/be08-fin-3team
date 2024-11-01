@@ -27,8 +27,8 @@ const agreeDialog = () => {
         <v-card-text class="text-h5">정말 삭제하시겠습니까?</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="green darken-1" variant="text" @click="closeDialog" flat>Disagree</v-btn>
-          <v-btn color="error" variant="text" @click="agreeDialog" flat>Agree</v-btn>
+          <v-btn color="error" variant="text" flat style="font-size: 16px; font-weight: 600;" @click="agreeDialog">삭제</v-btn>
+          <v-btn color="green darken-1" variant="text" flat style="font-size: 16px; font-weight: 600;" @click="closeDialog">닫기</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

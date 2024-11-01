@@ -10,8 +10,13 @@
 .alert {
   position: fixed;
   top: 10%;
-  right: 20px;
-  z-index: 999;
+  left: 90%;
+  transform: translateX(-50%);
+  z-index: 3000;
+  width: 100%;
+  max-width: 14%;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  font-size: 1
 }
 
 .cus-btn {

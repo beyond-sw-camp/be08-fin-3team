@@ -8,7 +8,7 @@
         <div class="customer_container">
             <div class="header">
                 <div class="result_count">(검색결과: {{ dataSize }}건)</div>   
-                <v-btn variant="tonal" color="primary" to="/sales/prospect/add">잠재고객 추가</v-btn>
+                <v-btn variant="tonal" color="primary" to="/sales/prospect/add">잠재고객 생성</v-btn>
             </div>
          
             <hr  class="divider"></hr>
@@ -34,9 +34,9 @@ onMounted(()=>{
 const fetchCustomers=async()=>{
     try{
         const res = await api.get('/pcustomers');
-        console.log(res);
+     //   console.log(res);
         if(res.data.code==200) {
-            console.log(res.data.result);
+    //        console.log(res.data.result);
             pcustomers.value = res.data.result;
         }
     }catch(err){
@@ -52,7 +52,7 @@ const handleFilter =(filterValues)=>{
 const fetchpCustomersByFilterAPI =async()=>{
     try{
         const response = await api.post("/pcustomers",filters.value);
-        console.log(response);
+ //       console.log(response);
         if(response.data.code==200){
             pcustomers.value = response.data.result;
         }
@@ -82,8 +82,9 @@ const fetchpCustomersByFilterAPI =async()=>{
 .filter_container {
     background-color: white;
     margin-right: 30px;
-    width: 25%;
+    width: 16%;
     height: 100%;
+    border-radius: 8px;
 }
 
 .customer_container {

@@ -11,6 +11,7 @@ import { useCalendarStore } from '@/stores/apps/calendar/calendar';
 import api from '@/api/axiosinterceptor';
 import { reverseActStatus, actStatus } from '@/utils/ActStatusMappings';
 import {categoryMapping, reversePlanCls} from '@/utils/PlanMappings'
+import axios from 'axios';
 
 export default defineComponent({
   components: {
@@ -85,19 +86,17 @@ export default defineComponent({
   },
 
   methods: {
-    // 캘린더 존재 여부 확인
-    async checkCalendarExists() {
-      try {
+    async checkCalendarExists(){
+      try{
         const response = await api.get('/calendars/user/exists');
-        const isCalendar = response.data.isSuccess;
-
-        if (isCalendar) {
+        console.log(response);
+        if(response.data.result){ // 캘린더 fetch
           await this.fetchCalendarData();
-        } else {
+        }else{ // 캘린더 create
           await this.createCalendar();
-        }
-      } catch (e) {
-        console.error(e);
+        }   
+      }catch(e){
+        console.log(e);
       }
     },
 
@@ -105,6 +104,8 @@ export default defineComponent({
     async createCalendar() {
       try {
         const response = await api.post('/calendars');
+        console.log("캘린더 생성")
+        console.log(response);
       } catch (e) {
         console.error(e);
       }
@@ -136,12 +137,15 @@ export default defineComponent({
     async fetchCalendarData() {
       try {
         const response = await api.get('/calendars/user/data');
-        const calendarData = response.data.result;
-        this.calendarNo = response.data.result.calendarNo;
+        const data = response.data;
+        // console.log("캘린더 조회")
+        // console.log(response);
+        if(data.code== 200){
+          const calendarData = response.data.result;
+          this.calendarNo = response.data.result.calendarNo;
+          const store = useCalendarStore();
 
-        const store = useCalendarStore();
-
-        const todos = calendarData.todos.map(todo => ({
+          const todos = calendarData.todos.map(todo => ({
           id: todo.todoNo,
           title: todo.title,
           start: todo.dueDate,
@@ -169,9 +173,12 @@ export default defineComponent({
           allDay: false,
           classNames: ['act-event'],
         }));
-
         store.setCalendarData([...todos, ...plans, ...acts]);
         this.applyFilter(store.filteredData);
+
+        }else{
+          alert(data.message);
+        }
 
       } catch (e) {
         console.error(e);
@@ -458,7 +465,7 @@ export default defineComponent({
         <v-select
         v-model="selectedOption"
         :items="items"
-        label="Select"
+        label="생성"
         hide-details
         outlined
         class="select-item"
@@ -479,7 +486,7 @@ export default defineComponent({
       @close="closePlanModal" @add="addPlan" @delete="deletePlan" @update="updatePlan" @show-alert="handleAlert"/>
 
       <v-alert v-if="showSuccessAlert" type="success" variant="tonal" :class="['alert', alertType]">
-        <h5 class="text-h6 text-capitalize">Success</h5>
+        <h5 class="text-h5 text-capitalize">Success</h5>
           {{ alertMessage }}
       </v-alert>
     </div>
@@ -507,12 +514,13 @@ export default defineComponent({
 
 .alert {
   position: fixed;
-  top: 10%;
-  left: 70%;
+  top: 20%;
+  left: 90%;
   transform: translateX(-50%);
   z-index: 3000;
-  width: 90%;
-  max-width: 12%;
+  width: 100%;
+  max-width: 14%;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
 }
 </style>

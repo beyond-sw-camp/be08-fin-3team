@@ -16,11 +16,11 @@ function allowedDates(val: unknown) {
 <template>
 	<v-row>
 			<v-col class="d-flex">
-        <v-col cols="3" class="d-flex justify-start">
+        <v-col cols="2" class="d-flex justify-start">
 							<CalendarFilters />
 					</v-col>
-					<v-col cols="11">
-							<UiParentCard title="SalesBoost Calendar">
+					<v-col cols="10">
+							<UiParentCard title="캘린더">
 									<FullCalendar />
 							</UiParentCard>
 					</v-col>

@@ -4,18 +4,32 @@ import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import { useRouter } from 'vue-router';
 import api from '@/api/axiosinterceptor';
+import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
+const showConfirmDialogs = ref(false); // 열림 상태 관리
+import { useAlert } from '@/utils/useAlert';
+import AlertComponent from '@/components/shared/AlertComponent.vue';
 
-const page = ref({ title: '견적 리스트' });
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
+
+const page = ref({ title: '견적 목록' });
+
 const breadcrumbs = ref([
-    { text: '영업관리', disabled: false, href: '' }, 
-    { text: '견적', disabled: true, href: '/estimates' },
+{
+	text: '영업관리',
+	disabled: false,
+	to: '#'
+},
+{
+	text: '견적',
+	disabled: true,
+	to: ''
+	},
 ]);
-
 const dialogDelete = ref(false);
-const estimates = ref([]);
 const proposals = ref([]);
 const estProducts = ref([]);
 const products = ref([]);
+const estimates = ref([]);
 const dialogEdit = ref(false);
 const editedIndex = ref(-1);
 
@@ -73,7 +87,7 @@ const headers = ref([
     { title: '', key: 'actions', sortable: false },
 ]);
 
-const formTitle = computed(() => (editedIndex.value === -1 ? '추가' : '수정'));
+const formTitle = computed(() => (editedIndex.value === -1 ? '견적 추가' : '견적 수정'));
 
 const router = useRouter();
 
@@ -94,14 +108,14 @@ const submitEstimateApi = async () => {
     const res = await api.post('/estimates', editedItem.value);
     console.log(res);
     if (res.status === 200) {
-      alert("견적이 성공적으로 등록되었습니다.");
+      triggerAlert('견적이 등록되었습니다.', 'success', 2000,'/estimates');
       await initialize(); 
       resetForm();
       router.push('/estimates');
     }
   } catch (error) {
     console.error("등록 실패:", error);
-    alert("견적 등록에 실패했습니다.");
+    triggerAlert('견적 등록을 실패했습니다.', 'error', 2000);
   }
 };
 
@@ -109,11 +123,11 @@ const updateEstimateApi = async () => {
     try {
         const res = await api.patch(`/estimates/${editedItem.value.estNo}`, editedItem.value);
         if (res.status === 200) {
-            alert("견적이 성공적으로 수정되었습니다.");
+          triggerAlert('견적이 수정되었습니다.', 'success', 2000,'/estimates');
             // Object.assign(estimates.value[editedIndex.value], res.data);
             await initialize();
             resetForm();
-            router.push('/estimates');
+            // router.push('/estimates');
             dialogEdit.value = false;
         }
     } catch (error) {
@@ -146,13 +160,13 @@ const displayedEstimates = computed(() => estimates.value);
 const deleteEstimateApi = async () => {
     try {
         await api.delete(`/estimates/${editedItem.value.estNo}`);
-        alert("견적이 성공적으로 삭제되었습니다.");
+        triggerAlert('견적이 삭제되었습니다.', 'success', 2000,'/estimates');
         estimates.value.splice(editedIndex.value, 1);
         resetForm();
         router.push('/estimates');
     } catch (error) {
         console.error("삭제 실패:", error);
-        alert("견적 삭제에 실패했습니다.");
+        triggerAlert('견적이 삭제되었습니다.', 'error');
     }
 };
 
@@ -170,16 +184,19 @@ const createNewEstimate = () => {
 const deleteItem = (item) => {
     editedItem.value = { ...item };
     editedIndex.value = estimates.value.indexOf(item);
-    dialogDelete.value = true;
+    // dialogDelete.value = true;
+    showConfirmDialogs.value = true;
 };
 
 const confirmDelete = async () => {
     await deleteEstimateApi();
-    dialogDelete.value = false;
+    // dialogDelete.value = false;
+    showConfirmDialogs.value = false;
 };
 
 const closeDeleteDialog = () => {
-    dialogDelete.value = false;
+    // dialogDelete.value = false;
+    showConfirmDialogs.value = false;
 };
 
 initialize();
@@ -187,7 +204,8 @@ initialize();
 </script>
 
 <template>
-    <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
+    <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
+  <BaseBreadcrumb :title="page.title" class="" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
     <v-row>
       <v-col cols="12">
         <UiParentCard title="견적">
@@ -199,12 +217,13 @@ initialize();
             item-key="estNo"
             show-actions
           >
-            <template v-slot:top>
-              <v-toolbar class="bg-lightsecondary" flat>
-                <v-toolbar-title>등록된 견적 리스트</v-toolbar-title>
+          <template v-slot:top>
+              <v-row justify="end">
+                <v-col cols="auto">
                 <v-spacer></v-spacer>
-                <v-btn color="primary" variant="flat" @click="navigateToCreate">새로운 견적 등록</v-btn>
-              </v-toolbar>
+                <v-btn color="primary" class="mr-3 mt-4" variant="tonal" @click="navigateToCreate">견적 생성</v-btn>
+              </v-col>
+              </v-row>
             </template>
 
             <template v-slot:item.actions="{ item }">
@@ -236,7 +255,7 @@ initialize();
     <!-- 수정 -->
     <v-dialog v-model="dialogEdit" max-width="500px">
       <v-card>
-        <v-card-title class="text-h5 text-center py-6">{{ formTitle }}</v-card-title>
+        <v-card-title>{{ formTitle }}</v-card-title>
         <v-card-text>
           <v-form>
             <v-text-field v-model="editedItem.name" label="견적명" required></v-text-field>
@@ -253,24 +272,13 @@ initialize();
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="warning" variant="flat" @click="closeEditDialog">취소</v-btn>
-        <v-btn color="success" variant="flat" @click="save">저장</v-btn>
-        <v-spacer></v-spacer>
+        <v-btn color="primary" variant="outlined" style="font-size: 15px; font-weight: 600;" @click="save">수정</v-btn>
+        <v-btn color="close" variant="flat" style="font-size: 15px; font-weight: 600;" @click="closeEditDialog">닫기</v-btn>
       </v-card-actions>
     </v-card>
     </v-dialog>
 
     <!-- 삭제 -->
-    <v-dialog v-model="dialogDelete" max-width="500px">
-      <v-card>
-        <v-card-title class="text-h5 text-center py-6">선택한 견적을 정말 삭제하시겠습니까?</v-card-title>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="warning" variant="flat" @click="closeDeleteDialog">취소</v-btn>
-          <v-btn color="success" variant="flat" @click="confirmDelete">삭제</v-btn>
-          <v-spacer></v-spacer>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="closeDeleteDialog" />
   </template>
   

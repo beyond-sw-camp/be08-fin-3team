@@ -114,7 +114,7 @@ onMounted(() => {
     <v-container fluid>
         <v-row>
             <!-- 검색 조건 영역 -->
-            <v-col cols="12" md="3">
+            <v-col cols="12" md="2">
                 <v-card elevation="0" class="pa-4">
                     <v-card-title class="title font-weight-bold">검색 조건</v-card-title>
                     <v-select
@@ -141,7 +141,7 @@ onMounted(() => {
             </v-col>
 
             <!-- 검색 결과 영역 -->
-            <v-col cols="12" md="9">
+            <v-col cols="12" md="10">
                 <v-card elevation="0" class="pa-4">
                     <v-row class="d-flex align-center">
                         <v-col cols="auto">
@@ -149,7 +149,7 @@ onMounted(() => {
                         </v-col>
                         <v-spacer></v-spacer>
                         <v-col cols="auto">
-                            <v-btn color="primary" to="/sales/lead/new">영업기회 생성</v-btn>
+                            <v-btn variant="tonal" color="primary" to="/sales/lead/new" class="mb-3">영업기회 생성</v-btn>
                         </v-col>
                     </v-row>
                     <v-divider :thickness="3" class="border-opacity-50 thick-divider" color="info"></v-divider>

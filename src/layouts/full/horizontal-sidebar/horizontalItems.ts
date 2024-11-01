@@ -1,19 +1,73 @@
 import {
-    AlertCircleIcon,
+    ChartPieIcon,
+    CoffeeIcon,
+    CpuIcon,
+    FlagIcon,
+    BasketIcon,
+    ApertureIcon,
+    LayoutGridIcon,
+    BoxIcon,
+    Message2Icon,
+    FilesIcon,
+    CalendarIcon,
+    UserCircleIcon,
+    ChartBarIcon,
+    ShoppingCartIcon,
+    ChartLineIcon,
+    ChartAreaIcon,
+    ChartDotsIcon,
+    ChartArcsIcon,
+    ChartCandleIcon,
+    ChartDonut3Icon,
+    ChartRadarIcon,
+    LayoutIcon,
+    CardboardsIcon,
+    PhotoIcon,
+    FileTextIcon,
+    BoxAlignBottomIcon,
+    BoxAlignLeftIcon,
+    FileDotsIcon,
+    EditCircleIcon,
     AppsIcon,
     BorderAllIcon,
-    BrandTablerIcon,
+    BorderHorizontalIcon,
+    BorderInnerIcon,
+    BorderTopIcon,
+    BorderVerticalIcon,
+    BorderStyle2Icon,
+    LoginIcon,
     CircleDotIcon,
+    UserPlusIcon,
+    RotateIcon,
+    ZoomCodeIcon,
+    SettingsIcon,
+    AlertCircleIcon,
+    BrandTablerIcon,
+    CodeAsterixIcon,
+    BrandCodesandboxIcon,
+    ColumnsIcon,
+    RowInsertBottomIcon,
+    EyeTableIcon,
+    SortAscendingIcon,
+    PageBreakIcon,
+    FilterIcon,
+    BoxModelIcon,
+    ServerIcon,
+    JumpRopeIcon,
+    LayoutKanbanIcon,
+    PhotoAiIcon,
+    SearchIcon,
+    SocialIcon,
+    BrandTidalIcon,
+    UsersIcon,
+    ToolIcon,
+    BrandAsanaIcon,
+    HomeIcon,
     ClipboardIcon,
     FileDescriptionIcon,
-    HomeIcon,
-    LoginIcon,
-    RotateIcon,
-    SettingsIcon,
-    UserPlusIcon,
-    ZoomCodeIcon,
     BrandAirtableIcon
 } from 'vue-tabler-icons';
+import type { boolean } from 'yup';
 
 export interface menu {
     header?: string;
@@ -31,604 +85,173 @@ export interface menu {
     class?: string;
     extraclass?: string;
     type?: string;
+    adminOnly?:boolean;
 }
 
 const horizontalItems: menu[] = [
     {
-        title: 'Dashboard',
+        title: 'Home',
         icon: HomeIcon,
-        to: '#',
-        children: [
-            {
-                title: 'Analytical',
-                icon: CircleDotIcon,
-                to: '/dashboards/analytical'
-            },
-            {
-                title: 'Classic',
-                icon: CircleDotIcon,
-                to: '/dashboards/classic'
-            },
-            {
-                title: 'Demographical',
-                icon: CircleDotIcon,
-                to: '/dashboards/demographical'
-            },
-            {
-                title: 'Minimal',
-                icon: CircleDotIcon,
-                to: '/dashboards/minimal'
-            },
-            {
-                title: 'eCommerce',
-                icon: CircleDotIcon,
-                to: '/dashboards/ecommerce'
-            },
-            {
-                title: 'Modern',
-                icon: CircleDotIcon,
-                to: '/dashboards/modern'
-            }
-        ]
+        to: '/sales/main',
     },
     {
-        title: 'Apps',
+        title: '영업기회',
         icon: AppsIcon,
-        to: '#',
+        to: '/sales/lead'
+    },
+    {
+        title: '일정관리',
+        icon: CalendarIcon,
+        to: '/apps/calendar',
         children: [
             {
-                title: 'Chats',
-                icon: CircleDotIcon,
-                to: '/apps/chats'
+                title: '캘린더',
+                icon: CalendarIcon,
+                to: '/apps/calendar',
             },
             {
-                title: 'Blog',
+                title: 'Todo',
                 icon: CircleDotIcon,
-                to: '/',
-                children: [
-                    {
-                        title: 'Posts',
-                        icon: CircleDotIcon,
-                        to: '/apps/blog/posts'
-                    },
-                    {
-                        title: 'Detail',
-                        icon: CircleDotIcon,
-                        to: '/apps/blog/early-black-friday-amazon-deals-cheap-tvs-headphones'
-                    }
-                ]
+                to: '/apps/todo/list'
             },
             {
-                title: 'E-Commerce',
+                title: '일정',
                 icon: CircleDotIcon,
-                to: '/ecommerce/',
-                children: [
-                    {
-                        title: 'Shop',
-                        icon: CircleDotIcon,
-                        to: '/ecommerce/products'
-                    },
-                    {
-                        title: 'Detail',
-                        icon: CircleDotIcon,
-                        to: '/ecommerce/product/detail/1'
-                    },
-                    {
-                        title: 'List',
-                        icon: CircleDotIcon,
-                        to: '/ecommerce/productlist'
-                    },
-                    {
-                        title: 'Checkout',
-                        icon: CircleDotIcon,
-                        to: '/ecommerce/checkout'
-                    },
-                    {
-                        title: 'Add Product',
-                        icon: CircleDotIcon,
-                        to: '/ecommerce/add-product'
-                    },
-                    {
-                        title: 'Edit Product',
-                        icon: CircleDotIcon,
-                        to: '/ecommerce/edit-product'
-                    }
-                ]
+                to: '/apps/plan/list'
             },
             {
-                title: 'User Profile',
+                title: '영업활동',
                 icon: CircleDotIcon,
-                to: '/',
-                children: [
-                    {
-                        title: 'Profile',
-                        icon: CircleDotIcon,
-                        to: '/apps/user/profile'
-                    },
-                    {
-                        title: 'Followers',
-                        icon: CircleDotIcon,
-                        to: '/apps/user/profile/followers'
-                    },
-                    {
-                        title: 'Friends',
-                        icon: CircleDotIcon,
-                        to: '/apps/user/profile/friends'
-                    },
-                    {
-                        title: 'Gallery',
-                        icon: CircleDotIcon,
-                        to: '/apps/user/profile/gallery'
-                    }
-                ]
+                to: '/apps/act/list'
             },
-            {
-                title: 'Notes',
-                icon: CircleDotIcon,
-                to: '/apps/notes'
-            },
-            {
-                title: 'Calendar',
-                icon: CircleDotIcon,
-                to: '/apps/calendar'
-            },
-            {
-                title: 'Kanban',
-                icon: CircleDotIcon,
-                to: '/apps/kanban'
-            }
         ]
     },
 
     {
-        title: 'Pages',
-        icon: ClipboardIcon,
-        to: '#',
+        title: '고객',
+        icon: UsersIcon,
+        to: '/sales/contact',
         children: [
             {
-                title: 'Gallery Lightbox',
+                title: '고객',
                 icon: CircleDotIcon,
-                to: '/pages/gallery-lightbox'
+                to: '/sales/contact',
             },
             {
-                title: 'Search Results',
+                title: '잠재고객',
                 icon: CircleDotIcon,
-                to: '/pages/search-results'
+                to: '/sales/prospect'
             },
-            {
-                title: 'Social Contacts',
-                icon: CircleDotIcon,
-                to: '/pages/social-media-contacts'
-            },
-            {
-                title: 'Treeview',
-                icon: CircleDotIcon,
-                to: '/pages/treeview'
-            },
-            {
-                title: 'Widget',
-                icon: CircleDotIcon,
-                to: '/widget-card',
-                children: [
-                    {
-                        title: 'Cards',
-                        icon: CircleDotIcon,
-                        to: '/widgets/cards'
-                    },
-                    {
-                        title: 'Banners',
-                        icon: CircleDotIcon,
-                        to: '/widgets/banners'
-                    },
-                    {
-                        title: 'Charts',
-                        icon: CircleDotIcon,
-                        to: '/widgets/charts'
-                    }
-                ]
-            },
-            {
-                title: 'UI',
-                icon: CircleDotIcon,
-                to: '#',
-                children: [
-                    {
-                        title: 'Alert',
-                        icon: CircleDotIcon,
-                        to: '/ui-components/alert'
-                    },
-                    {
-                        title: 'Accordion',
-                        icon: CircleDotIcon,
-                        to: '/ui-components/accordion'
-                    },
-                    {
-                        title: 'Avatar',
-                        icon: CircleDotIcon,
-                        to: '/ui-components/avatar'
-                    },
-                    {
-                        title: 'Chip',
-                        icon: CircleDotIcon,
-                        to: '/ui-components/chip'
-                    },
-                    {
-                        title: 'Dialog',
-                        icon: CircleDotIcon,
-                        to: '/ui-components/dialogs'
-                    },
-                    {
-                        title: 'List',
-                        icon: CircleDotIcon,
-                        to: '/ui-components/list'
-                    },
-                    {
-                        title: 'Menus',
-                        icon: CircleDotIcon,
-                        to: '/ui-components/menus'
-                    },
-                    {
-                        title: 'Rating',
-                        icon: CircleDotIcon,
-                        to: '/ui-components/rating'
-                    },
-                    {
-                        title: 'Tabs',
-                        icon: CircleDotIcon,
-                        to: '/ui-components/tabs'
-                    },
-                    {
-                        title: 'Tooltip',
-                        icon: CircleDotIcon,
-                        to: '/ui-components/tooltip'
-                    },
-                    {
-                        title: 'Typography',
-                        icon: CircleDotIcon,
-                        to: '/ui-components/typography'
-                    }
-                ]
-            },
-            {
-                title: 'Charts',
-                icon: CircleDotIcon,
-                to: '#',
-                children: [
-                    {
-                        title: 'Line',
-                        icon: CircleDotIcon,
-                        to: '/charts/line-chart'
-                    },
-                    {
-                        title: 'Gredient',
-                        icon: CircleDotIcon,
-                        to: '/charts/gredient-chart'
-                    },
-                    {
-                        title: 'Area',
-                        icon: CircleDotIcon,
-                        to: '/charts/area-chart'
-                    },
-                    {
-                        title: 'Candlestick',
-                        icon: CircleDotIcon,
-                        to: '/charts/candlestick-chart'
-                    },
-                    {
-                        title: 'Column',
-                        icon: CircleDotIcon,
-                        to: '/charts/column-chart'
-                    },
-                    {
-                        title: 'Doughnut & Pie',
-                        icon: CircleDotIcon,
-                        to: '/charts/doughnut-pie-chart'
-                    },
-                    {
-                        title: 'Radialbar & Radar',
-                        icon: CircleDotIcon,
-                        to: '/charts/radialbar-chart'
-                    }
-                ]
-            },
-            {
-                title: 'Auth',
-                icon: CircleDotIcon,
-                to: '#',
-                children: [
-                    {
-                        title: 'Error',
-                        icon: AlertCircleIcon,
-                        to: '/auth/404'
-                    },
-                    {
-                        title: 'Maintenance',
-                        icon: SettingsIcon,
-                        to: '/auth/maintenance'
-                    },
-                    {
-                        title: 'Login',
-                        icon: LoginIcon,
-                        to: '#',
-                        children: [
-                            {
-                                title: 'Side Login',
-                                icon: CircleDotIcon,
-                                to: '/auth/login'
-                            },
-                            {
-                                title: 'Boxed Login',
-                                icon: CircleDotIcon,
-                                to: '/auth/login2'
-                            }
-                        ]
-                    },
-                    {
-                        title: 'Register',
-                        icon: UserPlusIcon,
-                        to: '#',
-                        children: [
-                            {
-                                title: 'Side Register',
-                                icon: CircleDotIcon,
-                                to: '/auth/register'
-                            },
-                            {
-                                title: 'Boxed Register',
-                                icon: CircleDotIcon,
-                                to: '/auth/register2'
-                            }
-                        ]
-                    },
-                    {
-                        title: 'Forgot Password',
-                        icon: RotateIcon,
-                        to: '#',
-                        children: [
-                            {
-                                title: 'Side Forgot Password',
-                                icon: CircleDotIcon,
-                                to: '/auth/forgot-password'
-                            },
-                            {
-                                title: 'Boxed Forgot Password',
-                                icon: CircleDotIcon,
-                                to: '/auth/forgot-password2'
-                            }
-                        ]
-                    },
-                    {
-                        title: 'Two Steps',
-                        icon: ZoomCodeIcon,
-                        to: '#',
-                        children: [
-                            {
-                                title: 'Side Two Steps',
-                                icon: CircleDotIcon,
-                                to: '/auth/two-step'
-                            },
-                            {
-                                title: 'Boxed Two Steps',
-                                icon: CircleDotIcon,
-                                to: '/auth/two-step2'
-                            }
-                        ]
-                    }
-                ]
-            }
         ]
     },
     {
-        title: 'Forms',
-        icon: FileDescriptionIcon,
-        to: '#',
+        title: '영업관리',
+        icon: BrandAsanaIcon,
+        to: '/',
         children: [
             {
-                title: 'Form Elements',
+                title: '제안',
                 icon: CircleDotIcon,
-                to: '/components/',
-                children: [
+                to: '/proposals'
+            },
+            {
+                title: '견적',
+                icon: CircleDotIcon,
+                to: '/estimates'
+            },
+            {
+                title: '계약',
+                icon: CircleDotIcon,
+                to: '/apps/contract'
+            },
+            {
+                title: '매출',
+                icon: CircleDotIcon,
+                to: '/apps/sales'
+            },
+        ]
+    },
+   
+    {
+        title: '영업도구',
+        icon: ToolIcon,
+        to: '/',
+        children: [
+          {
+              title: '보고',
+              icon: CircleDotIcon,
+              to: '/apps/blog/posts'
+          },
+          {
+              title: '공지',
+              icon: CircleDotIcon,
+              to: '/apps/blog/early-black-friday-amazon-deals-cheap-tvs-headphones'
+          },
+          {
+              title: '영업활동',
+              icon: CircleDotIcon,
+              to: '/apps/act/list'
+          }
+      ]
+    },
+    {
+        title: '차트',
+        icon: ChartBarIcon,
+        to: '/',
+        children: [
+            {
+                title: '매출 차트',
+                icon: CircleDotIcon,
+                to: '/',
+                children:[
                     {
-                        title: 'Autocomplete',
-                        icon: CircleDotIcon,
-                        to: '/forms/form-elements/autocomplete'
+                        title: '매출 현황 차트',
+                        icon: ChartAreaIcon,
+                        to: '/apps/chart/sales/status'
                     },
                     {
-                        title: 'Combobox',
-                        icon: CircleDotIcon,
-                        to: '/forms/form-elements/combobox'
+                        title: '매출 예측 차트',
+                        icon: ChartAreaIcon,
+                        to: '/apps/chart/sales/pridictions'
                     },
-                    {
-                        title: 'Button',
-                        icon: CircleDotIcon,
-                        to: '/forms/form-elements/button'
-                    },
-                    {
-                        title: 'Checkbox',
-                        icon: CircleDotIcon,
-                        to: '/forms/form-elements/checkbox'
-                    },
-                    {
-                        title: 'Custom Inputs',
-                        icon: CircleDotIcon,
-                        to: '/forms/form-elements/custominputs'
-                    },
-                    {
-                        title: 'File Inputs',
-                        icon: CircleDotIcon,
-                        to: '/forms/form-elements/fileinputs'
-                    },
-                    {
-                        title: 'Radio',
-                        icon: CircleDotIcon,
-                        to: '/forms/form-elements/radio'
-                    },
-                    {
-                        title: 'Select',
-                        icon: CircleDotIcon,
-                        to: '/forms/form-elements/select'
-                    },
-                    {
-                        title: 'Date Time',
-                        icon: CircleDotIcon,
-                        to: '/forms/form-elements/date-time'
-                    },
-                    {
-                        title: 'Slider',
-                        icon: CircleDotIcon,
-                        to: '/forms/form-elements/slider'
-                    },
-                    {
-                        title: 'Switch',
-                        icon: CircleDotIcon,
-                        to: '/forms/form-elements/switch'
-                    },
+                ]
+            },
+            {
+                title: '활동 차트',
+                icon: CircleDotIcon,
+                to: '/apps/chart/act'
+            },
+        ]
+    },
 
-                    {
-                        title: 'Time Picker',
-                        icon: CircleDotIcon,
-                        to: '/forms/form-elements/time-picker'
-                    },
-                    {
-                        title: 'Stepper',
-                        icon: CircleDotIcon,
-                        to: '/forms/form-elements/stepper'
-                    }
-                ]
+    {
+        title: '관리자',
+        icon: SocialIcon,
+        to: '/',
+        adminOnly:true,
+        children: [
+            {
+                title: '부서',
+                icon: CircleDotIcon,
+                to: '/admin/departments'
             },
             {
-                title: 'Form Layout',
+                title: '제품',
                 icon: CircleDotIcon,
-                to: '/forms/form-layouts'
+                to: '/admin/products'
             },
             {
-                title: 'Form Horizontal',
+                title: '프로세스',
                 icon: CircleDotIcon,
-                to: '/forms/form-horizontal'
+                to: '/admin/processes'
             },
             {
-                title: 'Form Vertical',
+                title: '목표 매출',
                 icon: CircleDotIcon,
-                to: '/forms/form-vertical'
-            },
-            {
-                title: 'Form Custom',
-                icon: CircleDotIcon,
-                to: '/forms/form-custom'
-            },
-            {
-                title: 'Form Validation',
-                icon: CircleDotIcon,
-                to: '/forms/form-validation'
+                to: '/admin/targetsales'
             }
         ]
     },
-    {
-        title: 'Tables',
-        icon: BorderAllIcon,
-        to: '#',
-        children: [
-            {
-                title: 'Basic Table',
-                icon: CircleDotIcon,
-                to: '/tables/basic'
-            },
-            {
-                title: 'Dark Table',
-                icon: CircleDotIcon,
-                to: '/tables/dark'
-            },
-            {
-                title: 'Density Table',
-                icon: CircleDotIcon,
-                to: '/tables/density'
-            },
-            {
-                title: 'Fixed Header Table',
-                icon: CircleDotIcon,
-                to: '/tables/fixed-header'
-            },
-            {
-                title: 'Height Table',
-                icon: CircleDotIcon,
-                to: '/tables/height'
-            },
-            {
-                title: 'Editable Table',
-                icon: CircleDotIcon,
-                to: '/tables/editable'
-            }
-        ]
-    },
-    {
-        title: 'Data Tables',
-        icon: BrandAirtableIcon,
-        to: '#',
-        children: [
-            {
-                title: 'Basic Table',
-                icon: CircleDotIcon,
-                to: '/datatables/basic'
-            },
-            {
-                title: 'Header Table',
-                icon: CircleDotIcon,
-                to: '/datatables/header'
-            },
-            {
-                title: 'Selection Table',
-                icon: CircleDotIcon,
-                to: '/datatables/selection'
-            },
-            {
-                title: 'Sorting Table',
-                icon: CircleDotIcon,
-                to: '/datatables/sorting'
-            },
-            {
-                title: 'Pagination Table',
-                icon: CircleDotIcon,
-                to: '/datatables/pagination'
-            },
-            {
-                title: 'Filtering Table',
-                icon: CircleDotIcon,
-                to: '/datatables/filtering'
-            },
-            {
-                title: 'Grouping Table',
-                icon: CircleDotIcon,
-                to: '/datatables/grouping'
-            },
-            {
-                title: 'Table Slots',
-                icon: CircleDotIcon,
-                to: '/datatables/slots'
-            },
-            {
-                title: 'CRUD Table',
-                icon: CircleDotIcon,
-                to: '/tables/datatables/crudtable'
-            }
-        ]
-    },
-    {
-        title: 'Icons',
-        icon: BrandTablerIcon,
-        to: '#',
-        children: [
-            {
-                title: 'Material',
-                icon: CircleDotIcon,
-                to: '/icons/material'
-            },
-            {
-                title: 'Tabler',
-                icon: CircleDotIcon,
-                to: '/icons/tabler'
-            }
-        ]
-    }
 ];
 
 export default horizontalItems;

@@ -123,7 +123,7 @@ onMounted(() => {
           <v-select
               v-model="selectedYear"
               :items="yearOptions"
-              label="Select Year"
+              label="년도 선택"
               @update:model-value="onYearChange"
           />
       </v-col>

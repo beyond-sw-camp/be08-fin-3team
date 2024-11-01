@@ -38,7 +38,7 @@ const monthAchievement = ref(0);
 
 const fetchDept = async () => {
     try {
-        const response = await api.get(`/departments`);
+        const response = await api.get(`/admin/departments`);
 
         state.departments = [{ no: 0, name: '전체' }, ...response.data.result];
         fetchUser(0);
@@ -75,8 +75,9 @@ const fetchData = async () => {
             api.post('/leads/status/main', searchCond),
             api.post('/acts/status/main', searchCond),
             api.post('/sales/status/main', searchCond),
-            api.post('/targetsales/status/main', searchCond)
+            api.post('/admin/targetsales/status/main', searchCond)
         ]);
+
         customerCount.value = customerResponse.data.result;
         potenCustomerCount.value = potenCustomerResponse.data.result;
 
@@ -131,8 +132,22 @@ const fetchData = async () => {
         } else {
             monthResult.value = '0';
         }
-        yearAchievement.value = (salesResponse.data.result.yearSales * 100) / targetSalesResponse.data.result.yearTargetSales;
-        monthAchievement.value = (salesResponse.data.result.monthSales * 100) / targetSalesResponse.data.result.monthTargetSales;
+
+        if (salesResponse.data.result.yearSales > 0) {
+            yearAchievement.value = parseFloat(
+                ((salesResponse.data.result.yearSales * 100) / targetSalesResponse.data.result.yearTargetSales).toFixed(2)
+            );
+        } else {
+            yearAchievement.value = 0;
+        }
+
+        if (salesResponse.data.result.monthSales > 0) {
+            monthAchievement.value = parseFloat(
+                ((salesResponse.data.result.monthSales * 100) / targetSalesResponse.data.result.monthTargetSales).toFixed(2)
+            );
+        } else {
+            monthAchievement.value = 0;
+        }
     } catch (error) {
         console.error('Error fetching data:', error);
     }
@@ -164,7 +179,7 @@ onMounted(() => {
 <template>
     <v-container fluid>
         <v-row>
-            <v-col cols="12" md="3">
+            <v-col cols="12" md="2">
                 <v-card elevation="0" class="pa-4">
                     <v-card-title class="title font-weight-bold">검색 조건</v-card-title>
                     <v-text-field label="날짜" v-model="searchDate" type="date" outlined></v-text-field>
@@ -189,7 +204,7 @@ onMounted(() => {
                     <v-btn class="search_btn" color="primary" variant="flat" @click="fetchData">검색</v-btn>
                 </v-card>
             </v-col>
-            <v-col cols="12" md="9">
+            <v-col cols="12" md="10">
                 <v-card elevation="0" class="pa-4">
                     <v-card-title class="title font-weight-bold">종합현황</v-card-title>
                     <v-divider :thickness="3" class="border-opacity-50 mb-5" color="primary"></v-divider>

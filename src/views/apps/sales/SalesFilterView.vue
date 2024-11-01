@@ -57,7 +57,7 @@ export default {
             filterStartDate: this.modelValue.startDate,
             filterEndDate: this.modelValue.endDate,
             businessTypes: ['공공', '민간', '기업', '해외'],
-            taxClassifications: ['Y', 'N'],
+            taxClassifications: ['매출 면세', '매출 과세', '수출 영세'],
         };
     },
     methods: {
