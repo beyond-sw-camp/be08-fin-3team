@@ -52,7 +52,6 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useTaskStore } from '@/stores/apps/todo/tasktodo';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import TodoModal from '@/components/modal/TodoModal.vue';
 import api from '@/api/axiosinterceptor';
