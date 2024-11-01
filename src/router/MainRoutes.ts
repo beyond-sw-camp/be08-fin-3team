@@ -191,6 +191,21 @@ const MainRoutes = {
             component: () => import('@/views/apps/sbChart/ActChart.vue')
         },
         {
+            name: 'contractChart',
+            path: '/apps/chart/status',
+            component: () => import('@/views/apps/statusChart/contractChart.vue')
+        },
+        {
+            name: 'TodoList',
+            path: '/apps/todo/list',
+            component: () => import('@/views/apps/todo/TodoList.vue')
+        },
+        {
+            name: 'PlanList',
+            path: '/apps/plan/list',
+            component: () => import('@/views/apps/plan/PlanList.vue')
+        },
+        {
             name: 'Kanban',
             path: '/apps/kanban',
             component: () => import('@/views/apps/kanban/Kanban.vue')
@@ -617,6 +632,11 @@ const MainRoutes = {
             component: () => import('@/views/apps/sales/SalesStatusChartView.vue')
         },
         {
+            name: 'TargetSaleChartView',
+            path: '/apps/chart/targetsales/status',
+            component: () => import('@/views/apps/targetSale/TargetSaleChartView.vue')
+        },
+        {
             name: 'SalesPridictionsChart',
             path: '/apps/chart/sales/pridictions',
             component: () => import('@/views/apps/sales/SalesPredictionChartView.vue')
@@ -658,6 +678,7 @@ const MainRoutes = {
             path: '/apps/sales/editer/:salesNo',
             component: () => import('@/views/apps/sales/SalesEdit.vue')
         },
+
 
     ]
 };

@@ -1,6 +1,6 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, watch, onMounted, reactive } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import api from '@/api/axiosinterceptor';
@@ -9,8 +9,8 @@ import AlertComponent from '@/components/shared/AlertComponent.vue';
 
 const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
-
 const router = useRouter();
+const route = useRoute();
 
 const page = ref({ title: '제안 등록' });
 const breadcrumbs = ref([
@@ -24,7 +24,7 @@ const loading = ref(false);
 
 const form = ref(null);
 
-const editedItem = ref({
+const editedItem = reactive({
     propNo: null,
     leadNo: null,
     leadName: '',
@@ -35,11 +35,44 @@ const editedItem = ref({
     endDate: '',
     submitDate: '',
     prDate: '',
-    note: ''
+    note: '',
+    cont: ''
 });
 
 const leads = ref([]);
 const leadModal = ref(false);
+const leadDialog = ref(false);
+const searchCond = reactive({
+    selectedItem: '영업기회명',
+    searchQuery: null
+});
+const headers = ref([
+    { title: '영업기회명', key: 'leadName', sortable: false },
+    { title: '고객명', key: 'customerName', sortable: false },
+    { title: '담당자', key: 'userName', sortable: false }
+]);
+const leadList = ref([]);
+const selectedLead = ref(null);
+
+const handleRowClick = (lead) => {
+    selectedLead.value = lead;
+};
+
+const handleRowDbClick = () => {
+    if (selectedLead.value != null) {
+        console.log('Selected Lead:', selectedLead.value); // Debugging line
+        selectLead(selectedLead.value);
+    } else {
+        alert('영업기회를 선택하지 않았습니다.');
+    }
+};
+
+const selectLead = (lead) => {
+    editedItem.leadNo = lead.leadNo;
+    editedItem.leadName = lead.name;
+    console.log('Lead selected:', editedItem.leadNo); // Debugging line
+    leadDialog.value = false;
+};
 
 onMounted(async () => {
     try {
@@ -58,19 +91,25 @@ onMounted(async () => {
         console.error('failed to fetch leads: ', error);
     }
 });
+watch(
+    () => leadDialog.value,
+    (newVal) => {
+        if (newVal) {
+            fetchLeads();
+        } else {
+            searchCond.searchQuery = '';
+            selectedLead.value = null;
+        }
+    }
+);
 
-const openLeadModal = () => {
-    leadModal.value = true;
-};
-
-const closeLeadModal = () => {
-    leadModal.value = false;
-};
-
-const selectLead = (lead) => {
-    editedItem.value.leadNo = lead.leadNo;
-    editedItem.value.leadName = lead.name;
-    leadModal.value = false;
+const fetchLeads = async () => {
+    try {
+        const response = await api.post('/leads/filter', searchCond);
+        leadList.value = response.data.result;
+    } catch (error) {
+        console.error('영업기회 정보를 불러오는 중 오류가 발생했습니다:', error);
+    }
 };
 
 const save = async () => {
@@ -81,23 +120,18 @@ const save = async () => {
             return;
         }
     }
-    console.log('Edited Item before saving:', editedItem.value);
+    console.log('Edited Item before saving:', editedItem); // Ensure leadNo is set
 
     loading.value = true;
 
     try {
-        const res = await api.post('/proposals', editedItem.value);
+        const res = await api.post('/proposals', editedItem);
         if (res.status === 200 || res.status === 201) {
-            triggerAlert('제안이 추가되었습니다.', 'success', 2000,'/proposals');
-            // successAlert.value = true;
-            // alertDialog.value = true;
-            // setTimeout(() => router.push('/proposals'), 1500);
+            triggerAlert('제안이 추가되었습니다.', 'success', 2000, '/proposals');
         }
     } catch (error) {
         console.error('등록 실패:', error);
-        triggerAlert('제안 등록에 실패했습니다.', 'success');
-        errorAlert.value = true;
-        alertDialog.value = true;
+        triggerAlert('제안 등록에 실패했습니다.', 'error');
     } finally {
         loading.value = false;
     }
@@ -106,11 +140,6 @@ const save = async () => {
 const cancel = () => {
     router.push('/proposals');
 };
-
-const alertDialog = ref(false);
-const successAlert = ref(false);
-const errorAlert = ref(false);
-const warningAlert = ref(false);
 </script>
 <template>
     <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
@@ -118,126 +147,145 @@ const warningAlert = ref(false);
         <BaseBreadcrumb :title="page.title" class="" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
 
         <v-container>
-            <UiParentCard title="">
+            <UiParentCard title="제안등록">
                 <v-form ref="form" v-model="valid" @submit.prevent="save">
-                    <v-row>
-                        <v-col cols="12" sm="6">
-                            <v-text-field
-                                v-model="editedItem.name"
-                                label="제안명"
-                                :rules="[(v) => !!v || '제안명을 입력해주세요']"
-                                required
-                                outlined
-                            ></v-text-field>
-                        </v-col>
-
-                        <v-col cols="12">
-                            <v-textarea v-model="editedItem.note" label="내용" outlined></v-textarea>
-                        </v-col>
-                    </v-row>
-
                     <v-col cols="12" sm="6">
+                        <v-label class="mb-2 font-weight-medium">제안명<span class="require">*</span></v-label>
                         <v-text-field
-                            v-model="editedItem.reqDate"
-                            label="요청일"
-                            type="date"
-                            :rules="[(v) => !!v || '요청일을 선택해주세요']"
+                            v-model="editedItem.name"
+                            :rules="[(v) => !!v || '제안명을 입력해주세요']"
                             required
                             outlined
                         ></v-text-field>
                     </v-col>
 
                     <!-- 영업기회 -->
-                    <v-row>
-                        <v-col class="ml-3" cols="5" md="2">
-                            <v-text-field
-                            v-model="editedItem.leadName"
-                            :items="leads"
-                            item-text="name"
-                            :rules="[(v) => !!v || '영업기회 버튼을 눌러 선택해주세요']"
-                            readonly
-                            outlined
-                            ></v-text-field>
-                        </v-col>
 
-                        <v-col class="mt-1" cols="3" md="3">
-                            <v-btn
-                            variant="flat"
-                            class="cus-btn"
-                            @click="openLeadModal"
-                            >
-                            <v-icon small class="mr-1">mdi-plus</v-icon>영업기회 가져오기
-                            </v-btn>
-                        </v-col>
-                    </v-row>
-
-                    <v-dialog v-model="leadModal" max-width="600px">
+                    <v-dialog v-model="leadDialog" max-width="800">
                         <v-card>
-                            <v-card-title class="d-flex justify-space-between">
-                                <span>영업기회 리스트</span>
-                                <v-btn icon @click="closeLeadModal">
-                                    <v-icon>mdi-close</v-icon>
-                                </v-btn>
-                            </v-card-title>
+                            <v-card-title class="headline"> 영업기회 조회</v-card-title>
                             <v-card-text>
-                                <v-list>
-                                    <v-list-item-group color="primary">
-                                        <v-list-item v-for="lead in leads" :key="lead.leadNo" @click="selectLead(lead)">
-                                            <v-list-item-content>
-                                                <v-list-item-title>{{ lead.name }}</v-list-item-title>
-                                            </v-list-item-content>
-                                        </v-list-item>
-                                    </v-list-item-group>
-                                </v-list>
+                                <v-row>
+                                    <v-col cols="10">
+                                        <v-text-field label="영업기회명" v-model="searchCond.searchQuery" clearable></v-text-field>
+                                    </v-col>
+                                    <v-col cols="2">
+                                        <v-btn @click="fetchLeads" color="primary">검색</v-btn>
+                                    </v-col>
+                                </v-row>
+                                <v-data-table
+                                    :headers="headers"
+                                    :items="leadList"
+                                    item-value="leadNo"
+                                    class="border rounded-md"
+                                    items-per-page="5"
+                                >
+                                    <template v-slot:item="{ item }">
+                                        <tr
+                                            :class="{ 'highlighted-row': selectedLead && selectedLead.leadNo === item.leadNo }"
+                                            @click="handleRowClick(item)"
+                                            @dblclick="handleRowDbClick"
+                                        >
+                                            <td>{{ item.name }}</td>
+                                            <td>{{ item.customerName }}</td>
+                                            <td>{{ item.userName }}</td>
+                                        </tr>
+                                    </template>
+                                </v-data-table>
                             </v-card-text>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn color="primary" @click="handleRowDbClick">선택</v-btn>
+
+                                <v-btn color="error" @click="leadDialog = false">닫기</v-btn>
+                            </v-card-actions>
                         </v-card>
                     </v-dialog>
 
                     <v-col cols="12" sm="6">
+                        <v-label class="mb-2 font-weight-medium">영업기회<span class="require">*</span></v-label>
+                        <v-text-field
+                            v-model="editedItem.leadName"
+                            :rules="[(v) => !!v || '영업기회를 선택해주세요']"
+                            append-inner-icon="mdi-magnify"
+                            @click:append-inner="leadDialog = true"
+                            class="clickable-field"
+                        ></v-text-field>
+                    </v-col>
+
+                    <v-col cols="12" sm="6">
+                        <v-label class="mb-2 font-weight-medium">요청일<span class="require">*</span></v-label>
+                        <v-text-field
+                            v-model="editedItem.reqDate"
+                            type="date"
+                            :rules="[(v) => !!v || '요청일을 선택해주세요']"
+                            outlined
+                        ></v-text-field>
+                    </v-col>
+
+                    <v-col cols="12" sm="6">
+                        <v-label class="mb-2 font-weight-medium">제안 시작일<span class="require">*</span></v-label>
                         <v-text-field
                             v-model="editedItem.startDate"
-                            label="제안 시작일"
                             type="date"
                             :rules="[(v) => !!v || '제안 시작일을 선택해주세요']"
-                            required
                             outlined
                         ></v-text-field>
                     </v-col>
 
                     <v-col cols="12" sm="6">
+                        <v-label class="mb-2 font-weight-medium">제안 종료일<span class="require">*</span></v-label>
                         <v-text-field
                             v-model="editedItem.endDate"
-                            label="제안 종료일"
                             type="date"
                             :rules="[(v) => !!v || '제안 종료일을 선택해주세요']"
+                            outlined
+                        ></v-text-field>
+                    </v-col>
+
+                    <v-col cols="12" sm="6">
+                        <v-label class="mb-2 font-weight-medium">제출일<span class="require">*</span></v-label>
+                        <v-text-field
+                            v-model="editedItem.submitDate"
+                            type="date"
+                            :rules="[(v) => !!v || '제출일을 선택해주세요']"
                             required
                             outlined
                         ></v-text-field>
                     </v-col>
 
                     <v-col cols="12" sm="6">
+                        <v-label class="mb-2 font-weight-medium">발표일<span class="require">*</span></v-label>
                         <v-text-field
                             v-model="editedItem.prDate"
-                            label="발표일"
                             type="date"
                             :rules="[(v) => !!v || '발표일을 선택해주세요']"
-                            required
                             outlined
                         ></v-text-field>
                     </v-col>
 
                     <v-col cols="12">
-                        <v-textarea v-model="editedItem.note" label="비고" outlined></v-textarea>
+                        <v-label class="font-weight-medium mb-2">내용</v-label>
+                        <v-textarea v-model="editedItem.cont" outlined></v-textarea>
                     </v-col>
 
-                    <v-row>
-                        <v-col cols="12">
-                            <v-btn color="primary" flat type="submit" :disabled="!valid || loading">
-                                <v-progress-circular v-if="loading" indeterminate color="white" size="20"></v-progress-circular>
-                                저장
-                            </v-btn>
-                            <v-btn class="ml-2"  variant="outlined" color="primary" flat @click="cancel">목록으로 돌아가기</v-btn>
-                        </v-col>
+                    <v-col cols="12">
+                        <v-label class="font-weight-medium mb-2">비고</v-label>
+                        <v-textarea v-model="editedItem.note" outlined></v-textarea>
+                    </v-col>
+
+                    <v-row justify="end">
+                        <v-btn class="mr-2 mt-2" color="primary" variant="flat" style="font-size: 15px; font-weight: 600" @click="save"
+                            >저장</v-btn
+                        >
+                        <v-btn
+                            class="mr-7 mt-2"
+                            color="primary"
+                            variant="outlined"
+                            style="font-size: 15px; font-weight: 600"
+                            @click="cancel"
+                            >목록으로 돌아가기</v-btn
+                        >
                     </v-row>
                 </v-form>
             </UiParentCard>
@@ -245,18 +293,16 @@ const warningAlert = ref(false);
     </div>
 </template>
 
-<style scoped>
+<style>
+.require {
+    color: red;
+}
 
-.cus-btn {
-    background-color: #3f99f3;
-    color: white;
-    margin-left: 20px;
-    margin-bottom: 8px;
-    height: 30px;
-    line-height: 30px;
-    padding: 2px 10px 30px 5px;
-    border-radius: 8px;
-    transition: background-color 0.3s, color 0.3s;
-    box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.1);
+.clickable-field {
+    cursor: pointer;
+}
+
+.highlighted-row {
+    background-color: #e0f7fa;
 }
 </style>

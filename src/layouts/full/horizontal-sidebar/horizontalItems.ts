@@ -110,7 +110,7 @@ const horizontalItems: menu[] = [
                 to: '/apps/calendar',
             },
             {
-                title: 'Todo',
+                title: '할 일',
                 icon: CircleDotIcon,
                 to: '/apps/todo/list'
             },
@@ -210,10 +210,15 @@ const horizontalItems: menu[] = [
                         to: '/apps/chart/sales/status'
                     },
                     {
+                        title: '목표 매출 차트',
+                        icon: ChartAreaIcon,
+                        to: '/apps/chart/targetsales/status'
+                    },
+                    {
                         title: '매출 예측 차트',
                         icon: ChartAreaIcon,
                         to: '/apps/chart/sales/pridictions'
-                    },
+                    }
                 ]
             },
             {
@@ -221,6 +226,11 @@ const horizontalItems: menu[] = [
                 icon: CircleDotIcon,
                 to: '/apps/chart/act'
             },
+            {
+                title: '계약 차트',
+                icon: CircleDotIcon,
+                to: '/apps/chart/status'
+            }
         ]
     },
 

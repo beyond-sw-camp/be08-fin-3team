@@ -33,3 +33,12 @@ export const categoryMapping = {
   'SALES': 'sales_plan',
   'CONTRACT': 'contract_plan'
 };
+
+export const chipColors = {
+  'PERSONAL': { color: '#cda500', text: '#7d6000608' },
+  'COMPANY': { color: '#909b25', text: '#3d3d00' },
+  'PROPOSAL': { color: '#58b070', text: '#000' },
+  'ESTIMATE': { color: '#9ea7b3', text: '#000' },
+  'SALES': { color: '#5b8db8', text: '#000' },
+  'CONTRACT': { color: '#3498db', text: '#fff' }
+};

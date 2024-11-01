@@ -74,14 +74,13 @@ api.interceptors.response.use(
             alert("세션이 만료되었습니다.");
             authStore.logout();
         }else{
-          alert("세션이 만료되었습니다.");
             authStore.logout();
         }
     }
-    // else{
-    //         alert("세션이 만료되었습니다.");
-    //         authStore.logout();
-    // }
+    else{
+            alert("세션이 만료되었습니다.");
+            authStore.logout();
+    }
 
     return Promise.reject(error); 
   }

@@ -6,6 +6,21 @@ import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
 
 import { useAlert } from '@/utils/useAlert';
 import AlertComponent from '@/components/shared/AlertComponent.vue';
+import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
+
+const page = ref({ title: '프로세스 관리' });
+const breadcrumbs = ref([
+    {
+        text: '관리자',
+        disabled: false,
+        href: '#'
+    },
+    {
+        text: '프로세스 관리',
+        disabled: true,
+        href: '#'
+    }
+]);
 
 const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
@@ -15,7 +30,7 @@ const headers1 = ref([
     { title: '성공 확률(%)', align: 'start', key: 'successRate' },
     { title: '내용', align: 'start', key: 'description' },
     { title: '예상 소요 기간(일)', align: 'start', key: 'expectedDuration' },
-    { title: '', align: 'start' },
+    { title: ' ', align: 'start' },
 ]);
 
 const headers2 = ref([
@@ -23,11 +38,10 @@ const headers2 = ref([
     { title: '기본 프로세스', key: 'isDefault' },
     { title: '내용', key: 'description' },
     { title: '예상 소요기간', key: 'expectedDuration' },
-    { title: '', align: 'start' },
+    { title: ' ', align: 'start' },
 ]);
 
 const dialog = ref(false);
-// const dialogDelete = ref(false);
 const showConfirmDialog = ref(false);
 const processes = ref([]);
 const subProcesses = ref([]);
@@ -35,6 +49,7 @@ const editedItem = ref(null);
 const dialogMode = ref('');
 const selectedProcess = ref(null);
 const formValid = ref(false);
+const isLoading = ref(false);
 
 watch(editedItem, validateForm, { deep: true });
 
@@ -44,20 +59,26 @@ async function fetchProcesses() {
         const response = await api.get('/admin/processes');
         processes.value = response.data.result;
     } catch (error) {
-        console.error('Error fetching processes:', error.message || error);
+        console.error('Error fetching Sub processes:', error.message || error);
+        triggerAlert('프로세스 가져오는 것을 실패했습니다.', 'error', 2000);
     }
 }
 
 // 하위 프로세스를 API로 가져오는 함수
 async function fetchSubProcesses(processName) {
+    isLoading.value = true;
     try {
         const response = await api.get(`/admin/subprocesses/${processName}`);
         subProcesses.value = response.data.result;
     } catch (error) {
-        console.error('Error fetching sub processes:', error.message || error);
+        console.error('Error fetching Sub processes:', error.message || error);
+        triggerAlert('하위 프로세스 가져오것을 실패했습니다.', 'error', 2000);
+    } finally {
+        setTimeout(() => {
+            isLoading.value = false;
+        }, 1000);
     }
 }
-
 // 행 클릭 시 하위 프로세스 로드 및 선택된 프로세스 저장
 function selectRow(process) {
     if (process && process.processName) {
@@ -82,7 +103,6 @@ function addParentProcess() {
 // 하위 프로세스 추가 함수
 function addSubProcess() {
     if (!selectedProcess.value) {
-        // alert('상위 프로세스를 선택한 후 하위 프로세스를 추가하세요.');
         triggerAlert('상위 프로세스를 선택한 후 하위 프로세스를 추가하세요.', 'warning', 2000);
         return;
     }
@@ -108,6 +128,8 @@ async function saveParentProcess() {
             const response = await api.post(`/admin/processes`, editedItem.value);
             console.log('Parent process 추가 성공:', response.data);
             triggerAlert('프로세스가 등록되었습니다.', 'success', 2000);
+
+            await fetchSubProcesses(editedItem.value.processName);
         } else if (dialogMode.value === 'edit-parent') {
             const response = await api.patch(`/admin/processes/${editedItem.value.processNo}`, editedItem.value);
             console.log('Parent process 수정 성공:', response.data);
@@ -130,7 +152,7 @@ async function saveSubProcess() {
             console.log('Subprocess 추가 성공:', response.data);
             triggerAlert('하위 프로세스가 등록되었습니다.', 'success', 2000);
         } else if (dialogMode.value === 'edit-sub') {
-            console.log("hihi");
+            console.log("하위 프로세스 번호 : ", editedItem.value.subProcessNo);
             const response = await api.patch(`/admin/subprocesses/${editedItem.value.subProcessNo}`, editedItem.value);
             console.log('Subprocess 수정 성공:', response.data);
             triggerAlert('하위 프로세스가 수정되었습니다.', 'success', 2000);
@@ -138,7 +160,7 @@ async function saveSubProcess() {
 
         dialog.value = false;
 
-        await fetchSubProcesses(selectedProcess.value.processName);
+        fetchSubProcesses(selectedProcess.value.processName);
         fetchProcesses();
     } catch (error) {
         console.error('하위 프로세스 저장 중 오류:', error.message || error);
@@ -161,9 +183,11 @@ function validateForm() {
         formValid.value = !!editedItem.value.processName;
     } else if (dialogMode.value === 'add-sub' || dialogMode.value === 'edit-sub') {
         formValid.value = !!(
-            editedItem.value.subProcessName &&
+            editedItem.value.subProcessName && 
             editedItem.value.progressStep &&
-            editedItem.value.expectedDuration
+            /^[0-9]+$/.test(editedItem.value.successRate) &&
+            editedItem.value.expectedDuration && 
+            /^[0-9]+$/.test(editedItem.value.expectedDuration)
         );
     }
 }
@@ -182,11 +206,9 @@ async function confirmDelete() {
 
         editedItem.value = null;
 
-        if (dialogMode.value.includes('sub')) {
-            await fetchSubProcesses(selectedProcess.value.processName);
-        } else {
-            await fetchProcesses();
-        }
+        await fetchSubProcesses(selectedProcess.value.processName);
+        await fetchProcesses();
+
     } catch (error) {
         console.error('Error deleting item:', error.message || error);
         triggerAlert('프로세스 삭제에 실패했습니다.', 'error', 2000);
@@ -208,10 +230,19 @@ onMounted(() => {
 </script>
 
 <template>
+    <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
     <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
     <v-row>
+
         <v-col cols="12">
             <UiParentCard title="프로세스 관리">
+                <v-progress-circular
+                    v-if="isLoading"
+                    indeterminate
+                    color="primary"
+                    size="50"
+                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"
+                ></v-progress-circular>
                 <v-data-table
                     class="border rounded-md"
                     :headers="headers2"
@@ -253,6 +284,9 @@ onMounted(() => {
                             <v-spacer></v-spacer>
                             <v-btn class="mr-3" color="primary" variant="tonal" dark @click="addParentProcess">프로세스 생성</v-btn>
                         </v-toolbar>
+                        <v-col cols="12">
+                            <p style = "font-weight: bold;">검색 결과: {{ processes.length }}건</p>
+                        </v-col>
                     </template>
                 </v-data-table>
 
@@ -292,6 +326,9 @@ onMounted(() => {
                             <v-spacer></v-spacer>
                             <v-btn class="mr-3" color="primary" variant="tonal" dark @click="addSubProcess">하위 프로세스 생성</v-btn>
                         </v-toolbar>
+                        <v-col cols="12">
+                            <p style = "font-weight: bold;">검색 결과: {{ subProcesses.length }}건</p>
+                        </v-col>
                     </template>
                 </v-data-table>
             </UiParentCard>
@@ -311,26 +348,29 @@ onMounted(() => {
                             <v-switch label="프로세스 기본 여부" color="primary" v-model="editedItem.isDefault"></v-switch>
                         </v-col>
                         <v-col cols="12">
-                            <v-text-field v-model="editedItem.processName" label="Process Name"
+                            <v-text-field v-model="editedItem.processName" label="프로세스 명"
                                 :rules="[v => !!v || '프로세스 명은 필수 입니다.']"
                                 @input="validateForm"/>
                         </v-col>
                         <v-col cols="12">
-                            <v-text-field v-model="editedItem.description" label="Description" />
+                            <v-text-field v-model="editedItem.description" label="내용" />
                         </v-col>
                     </v-row>
                     <v-row v-else>
                         <v-col cols="12">
-                            <v-text-field v-model="editedItem.subProcessName" label="Sub Process Name"
+                            <v-text-field v-model="editedItem.subProcessName" label="하위 프로세스 명"
                                 :rules="[v => !!v || '프로세스 명은 필수 입니다.']"
                                 @input="validateForm"/>
-                            <v-text-field v-model="editedItem.progressStep" label="Progress Step"
-                                :rules="[v => !!v || '프로세스 단계는 필수 입니다.']"
+                            <v-text-field v-model="editedItem.progressStep" label="진행 단계"
+                                :rules="[v => !!v || '프로세스 진행 단계는 필수 입니다.']"
                                 @input="validateForm"/>
-                            <v-text-field v-model="editedItem.successRate" label="Success Rate (%)" />
-                            <v-text-field v-model="editedItem.description" label="Description" />
-                            <v-text-field v-model="editedItem.expectedDuration" label="Expected Duration"
-                                :rules="[v => !!v || '예상 소요기간은 필수 입니다.']"
+                            <v-text-field v-model="editedItem.successRate" label="성공 확률 (%)" :rules="[v => /^[0-9]+$/.test(v) || '숫자만 입력하세요']" required/>
+                            <v-text-field v-model="editedItem.description" label="내용"  required/>
+                            <v-text-field v-model="editedItem.expectedDuration" label="예상 소요 시간"
+                                :rules="[
+                                        v => !!v || '예상 소요기간은 필수 입니다.',
+                                        v => /^[0-9]+$/.test(v) || '숫자만 입력하세요'
+                                    ]"
                                 @input="validateForm"/>
                         </v-col>
                     </v-row>

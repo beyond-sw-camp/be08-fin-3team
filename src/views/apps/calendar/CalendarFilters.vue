@@ -7,12 +7,12 @@ const store = useCalendarStore();
 
 const categoryColors = {
   todo: { color: '#e8b0a4', label: '할 일' },
-  act: { color: '#f1a1ae', label: '영업 활동' },
   personal_plan: { color: '#f7eaa4', label: '개인 일정' },
   company_plan: { color: '#dde2a9', label: '전사 일정' },
   proposal_plan: { color: '#9ed7a9', label: '제안' },
   contract_plan: { color: '#a4cbe8', label: '계약' },
   sales_plan: { color: '#a4bbe1', label: '매출' },
+  act: { color: '#a9acd8', label: '영업 활동' },
   estimate_plan: { color: '#ccd5db', label: '견적' },
 };
 

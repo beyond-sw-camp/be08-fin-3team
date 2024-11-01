@@ -1,6 +1,6 @@
 <template>
   <v-alert v-if="show" :type="type" class="alert" variant="tonal" >
-    <h5 class="text-h5 text-capitalize">{{ type === 'success' ? 'Success' : 'Warning' }}</h5>
+    <h5 class="text-h6 text-capitalize">{{ type === 'success' ? 'Success' : 'Warning' }}</h5>
     <div>{{ message }}</div>
   </v-alert>
 </template>
@@ -40,8 +40,8 @@ export default {
   transform: translateX(-50%);
   z-index: 3000;
   width: 100%;
-  max-width: 16%;
+  max-width: 17%;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  font-size: 1rem;
+  font-size: 15px;
 }
 </style>
