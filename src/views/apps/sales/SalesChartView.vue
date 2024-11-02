@@ -23,16 +23,15 @@ const breadcrumbs = ref([
 
 const page = ref({ title: '매출 분석 차트' });
 
-const selectedOption = ref('monthlySales');  // v-model과 직접 연결된 값
+const selectedOption = ref('monthlySales');  
 
 const chartOptions = [
     { text: '년도별 매출 현황', value: 'monthlySales' },
     { text: '매출 예측 차트', value: 'salesPrediction' }
-];  // 드롭다운에서 사용할 items 배열
+];  
 
-const currentChartView = ref(SalesStatusChartView);  // 초기값 설정
+const currentChartView = ref(SalesStatusChartView); 
 
-// 드롭다운 변경 시 호출되는 함수
 const onChartChange = (value: string) => {
     currentChartView.value = value === 'monthlySales' 
         ? SalesStatusChartView 

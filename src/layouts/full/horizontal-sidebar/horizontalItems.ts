@@ -162,7 +162,7 @@ const horizontalItems: menu[] = [
             {
                 title: '계약',
                 icon: CircleDotIcon,
-                to: '/apps/contracts'
+                to: '/apps/contract'
             },
             {
                 title: '매출',
