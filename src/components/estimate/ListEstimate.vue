@@ -82,23 +82,15 @@ const navigateToCreate = () => {
     router.push('/estimates/create');
 };
 
-const displayedEstimates = computed(() => estimates.value);
-
 const deleteEstimateApi = async () => {
     try {
         await api.delete(`/estimates/${editedItem.value.estNo}`);
-
-        // successAlert.value = true;
-        // alertDialog.value = true;
 
         triggerAlert('견적이 삭제되었습니다.', 'success', 2000, '/estimates');
 
         estimates.value.splice(editedIndex.value, 1);
         resetForm();
-        // router.push('/estimates');
     } catch (error) {
-        // errorAlert.value = true;
-        // alertDialog.value = true;
         triggerAlert('견적 삭제를 실패했습니다.', 'error', 2000);
     }
 };
@@ -111,27 +103,40 @@ const resetForm = () => {
 const deleteItem = (item) => {
     editedItem.value = { ...item };
     editedIndex.value = estimates.value.indexOf(item);
-    // dialogDelete.value = true;
     showConfirmDialogs.value = true;
 };
 
 const confirmDelete = async () => {
     await deleteEstimateApi();
-    // dialogDelete.value = false;
+
     showConfirmDialogs.value = false;
 };
 
 const closeDeleteDialog = () => {
-    // dialogDelete.value = false;
     showConfirmDialogs.value = false;
 };
 
+const displayedEstimates = computed(() => estimates.value);
+
 initialize();
 
-const alertDialog = ref(false);
-const successAlert = ref(false);
-const errorAlert = ref(false);
-const warningAlert = ref(false);
+const estName = ref('');
+const propName = ref('');
+const estDate = ref('');
+
+const search = async () => {
+    try {
+        const response = await api.post('/estimates/search', {
+            propName: propName.value || undefined,
+            estName: estName.value || undefined,
+            estDate: estDate.value || undefined
+        });
+        estimates.value = response.data.result;
+    } catch (error) {
+        console.error('Failed to search proposals:', error);
+        triggerAlert('검색에 실패했습니다.', 'error');
+    }
+};
 </script>
 
 <template>
@@ -142,18 +147,25 @@ const warningAlert = ref(false);
         <v-col cols="12" md="2">
             <v-card elevation="0" class="pa-4">
                 <v-card-title class="title font-weight-bold">검색 조건</v-card-title>
-                <v-text-field color="primary" variant="outlined" type="text" placeholder="견적명" hide-details class="mb-4"></v-text-field>
-                <v-text-field color="primary" variant="outlined" type="text" placeholder="제안명" hide-details class="mb-4"></v-text-field>
-                <v-select
-                    v-model="selectedStatus"
-                    :items="statuses"
-                    item-props="true"
-                    item-title="text"
-                    item-value="value"
-                    label="제안서"
-                    class="mt-4"
-                ></v-select>
-                <v-text-field v-model="startDate" label="견적일" type="date"></v-text-field>
+                <v-text-field
+                    v-model="estName"
+                    color="primary"
+                    variant="outlined"
+                    type="text"
+                    placeholder="견적명"
+                    hide-details
+                    class="mb-4"
+                ></v-text-field>
+                <v-text-field
+                    v-model="propName"
+                    color="primary"
+                    variant="outlined"
+                    type="text"
+                    placeholder="제안명"
+                    hide-details
+                    class="mb-4"
+                ></v-text-field>
+                <v-text-field v-model="estDate" label="견적일" type="date"></v-text-field>
                 <v-btn class="search_btn" variant="flat" color="primary" @click="search">
                     <v-icon left class="mr-1">mdi-search-web</v-icon>
                     검색
@@ -170,13 +182,14 @@ const warningAlert = ref(false);
                     </v-col>
                     <v-spacer></v-spacer>
                     <v-col cols="auto">
-                        <v-btn color="primary" variant="tonal" class="mr-8" @click="navigateToCreate">견적 생성</v-btn>
+                        <v-btn color="primary" variant="tonal" class="mr-2" @click="navigateToCreate">견적 생성</v-btn>
                     </v-col>
                 </v-row>
 
                 <v-divider :thickness="3" class="border-opacity-50 thick-divider" color="info"></v-divider>
 
                 <v-data-table
+                    :key="estimates.length"
                     :headers="headers"
                     :items="displayedEstimates"
                     :sort-by="[{ key: 'estDate', order: 'asc' }]"

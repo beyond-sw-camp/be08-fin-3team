@@ -161,7 +161,7 @@ const MainRoutes = {
         },
         {
             name: 'Contract',
-            path: '/apps/contracts',
+            path: '/apps/contract',
             component: () => import('@/views/apps/contract/ContractView.vue')
         },
         {
@@ -656,7 +656,27 @@ const MainRoutes = {
         {
             name: 'MyPCustomers',
             path: '/apps/user/mypage/pcustomers',
-           component: () => import('@/views/apps/user/MyPCustomers.vue')
+            component: () => import('@/views/apps/user/MyPCustomers.vue')
+        },
+        {
+            name: 'ContractCreate',
+            path: '/apps/contract/edit',
+            component: () => import('@/views/apps/contract/ContractEdit.vue')
+        },
+        {
+            name: 'ContractEdit',
+            path: '/apps/contract/edit/:contractNo',
+            component: () => import('@/views/apps/contract/ContractEdit.vue')
+        },
+        {
+            name: 'SalesCreate',
+            path: '/apps/sales/editer',
+            component: () => import('@/views/apps/sales/SalesEdit.vue')
+        },
+        {
+            name: 'SalesEdit',
+            path: '/apps/sales/editer/:salesNo',
+            component: () => import('@/views/apps/sales/SalesEdit.vue')
         },
 
 

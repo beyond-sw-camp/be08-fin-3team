@@ -19,11 +19,10 @@ const breadcrumbs = ref([
     { text: '제안', disabled: true, href: '#' }
 ]);
 
-// const dialogDelete = ref(false);
 const proposals = ref([]);
-// const leads = ref([]);
 const dialogEdit = ref(false);
 const editedIndex = ref(-1);
+const router = useRouter();
 
 const defaultItem = ref({
     propNo: null,
@@ -72,10 +71,7 @@ const headers = ref([
 ]);
 
 const dataSize = computed(() => proposals.value.length);
-
 const formTitle = computed(() => (editedIndex.value === -1 ? '제안 추가' : '제안 수정'));
-
-const router = useRouter();
 
 async function initialize() {
     try {
@@ -95,9 +91,6 @@ const submitProposalApi = async () => {
         console.log(res);
         if (res.status === 200) {
             triggerAlert('제안이 추가되었습니다.', 'success', 2000, '/proposals');
-            // successAlert.value = true;
-            // alertDialog.value = true;
-            // setTimeout(() => router.push('proposals'), 1500);
             await initialize();
             resetForm();
             dialogEdit.value = false;
@@ -151,19 +144,16 @@ const createNewProposal = () => {
 
 const confirmDelete = async () => {
     await deleteProposalApi();
-    // dialogDelete.value = false;
     showConfirmDialogs.value = false;
 };
 
 const deleteItem = (item) => {
     editedItem.value = { ...item };
     editedIndex.value = proposals.value.indexOf(item);
-    // dialogDelete.value = true;
     showConfirmDialogs.value = true;
 };
 
 const closeDeleteDialog = () => {
-    // dialogDelete.value = false;
     showConfirmDialogs.value = false;
 };
 
@@ -190,9 +180,24 @@ const displayedProposals = computed(() => proposals.value);
 initialize();
 
 const alertDialog = ref(false);
-const successAlert = ref(false);
-const errorAlert = ref(false);
-const warningAlert = ref(false);
+
+const propName = ref('');
+const reqDate = ref('');
+const startDate = ref('');
+
+const search = async () => {
+    try {
+        const response = await api.post('/proposals/search', {
+            propName: propName.value || undefined,
+            reqDate: reqDate.value || undefined,
+            startDate: startDate.value || undefined
+        });
+        proposals.value = response.data.result;
+    } catch (error) {
+        console.error('Failed to search proposals:', error);
+        triggerAlert('검색에 실패했습니다.', 'error');
+    }
+};
 </script>
 
 <template>
@@ -214,16 +219,16 @@ const warningAlert = ref(false);
         <v-col cols="12" md="2">
             <v-card elevation="0" class="pa-4">
                 <v-card-title class="title font-weight-bold">검색 조건</v-card-title>
-                <v-text-field color="primary" variant="outlined" type="text" placeholder="제안명" hide-details class="mb-4"></v-text-field>
                 <v-text-field
+                    v-model="propName"
                     color="primary"
                     variant="outlined"
                     type="text"
-                    placeholder="영업기회명"
+                    placeholder="제안명"
                     hide-details
                     class="mb-4"
                 ></v-text-field>
-                <v-text-field v-model="startDate" label="요청일" type="date"></v-text-field>
+                <v-text-field v-model="reqDate" label="요청일" type="date"></v-text-field>
                 <v-text-field v-model="startDate" label="제안시작일" type="date"></v-text-field>
                 <v-btn class="search_btn" variant="flat" color="primary" @click="search">
                     <v-icon left class="mr-1">mdi-search-web</v-icon>
@@ -247,6 +252,7 @@ const warningAlert = ref(false);
                 <v-divider :thickness="3" class="border-opacity-50 thick-divider" color="info"></v-divider>
 
                 <v-data-table
+                    :key="proposals.length"
                     :headers="headers"
                     :items="displayedProposals"
                     :sort-by="[{ key: 'reqDate', order: 'asc' }]"
@@ -282,7 +288,7 @@ const warningAlert = ref(false);
             <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="primary" variant="outlined" style="font-size: 15px; font-weight: 600" @click="save">수정</v-btn>
-                <v-btn color="close" variant="plain" style="font-size: 15px; font-weight: 600" @click="closeEditDialog">닫기</v-btn>
+                <v-btn color="close" variant="outlined" style="font-size: 15px; font-weight: 600" @click="closeEditDialog">닫기</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
