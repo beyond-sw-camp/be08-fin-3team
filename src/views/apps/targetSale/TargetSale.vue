@@ -53,7 +53,7 @@ const headers = ref([
   { title: '10월', key: 'month10' },
   { title: '11월', key: 'month11' },
   { title: '12월', key: 'month12' },
-  { title: ' ', align: 'start' },
+  { title: '', align: 'start' },
 ]);
 
 function groupDataByProduct(data) {
@@ -135,6 +135,7 @@ function openDialog() {
   newTargetSale.value.userName = searchSalesperson.value;
   newTargetSale.value.year = searchYear.value;
   isEditMode.value = false;
+    
   dialog.value = true;
 }
 
@@ -165,26 +166,27 @@ function editTargetSale(item) {
   newTargetSale.value = {
     userName: searchSalesperson.value,
     prodName: item.prodName,
-    sum: item.sum,
+    sum: formatNumberWithCommas(item.sum),
     year: searchYear.value,
     monthTargets: [
-      item.month01,
-      item.month02,
-      item.month03,
-      item.month04,
-      item.month05,
-      item.month06,
-      item.month07,
-      item.month08,
-      item.month09,
-      item.month10,
-      item.month11,
-      item.month12,
+      formatNumberWithCommas(item.month01),
+      formatNumberWithCommas(item.month02),
+      formatNumberWithCommas(item.month03),
+      formatNumberWithCommas(item.month04),
+      formatNumberWithCommas(item.month05),
+      formatNumberWithCommas(item.month06),
+      formatNumberWithCommas(item.month07),
+      formatNumberWithCommas(item.month08),
+      formatNumberWithCommas(item.month09),
+      formatNumberWithCommas(item.month10),
+      formatNumberWithCommas(item.month11),
+      formatNumberWithCommas(item.month12),
     ],
   };
   isEditMode.value = true;
   dialog.value = true;
 }
+
 
 function closeDialog() {
   dialog.value = false;
