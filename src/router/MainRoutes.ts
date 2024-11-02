@@ -33,6 +33,11 @@ const MainRoutes = {
             component: () => import('@/views/apps/lead/LeadDetail.vue')
         },
         {
+            name: 'LeadChart',
+            path: '/apps/chart/lead',
+            component: () => import('@/views/apps/lead/LeadChart.vue')
+        },
+        {
             name: 'SalesNotice',
             path: '/sales/notice',
             component: () => import('@/views/sales/Notice.vue')
@@ -543,73 +548,82 @@ const MainRoutes = {
         },
 
         // -------- 추가 by kuk329 ------------
-      
-          { // 고객
-            name: "Customer",
-            path: "/sales/contact",
-            component: () => import("@/views/apps/customer/Customer.vue"),
-          },
-          { // 고객 등록
-            name: "CustomerAdd",
-            path: "/sales/customer-add",
-            component: () => import("@/views/apps/customer/CustomerAdd.vue"),
-          },
 
-          { // 고객 상세 조회 및 수정
-            name: "CustomerDetail",
-            path: "/sales/customer-detail/:id",
-            component: () => import("@/views/apps/customer/CustomerDetail.vue"),
-            props:true
-          },
+        {
+            // 고객
+            name: 'Customer',
+            path: '/sales/contact',
+            component: () => import('@/views/apps/customer/Customer.vue')
+        },
+        {
+            // 고객 등록
+            name: 'CustomerAdd',
+            path: '/sales/customer-add',
+            component: () => import('@/views/apps/customer/CustomerAdd.vue')
+        },
 
-          { // 잠재고객
+        {
+            // 고객 상세 조회 및 수정
+            name: 'CustomerDetail',
+            path: '/sales/customer-detail/:id',
+            component: () => import('@/views/apps/customer/CustomerDetail.vue'),
+            props: true
+        },
+
+        {
+            // 잠재고객
             name: 'pCustomer',
             path: '/sales/prospect',
-            component: ()=> import('@/views/apps/pCustomer/pCustomer.vue')
-            },
+            component: () => import('@/views/apps/pCustomer/pCustomer.vue')
+        },
 
-          { // 잠재고객 등록
-            name: "pCustomerAdd",
-            path: "/sales/prospect/add",
-            component: ()=> import("@/views/apps/pCustomer/pCustomerAdd.vue")
-          },
+        {
+            // 잠재고객 등록
+            name: 'pCustomerAdd',
+            path: '/sales/prospect/add',
+            component: () => import('@/views/apps/pCustomer/pCustomerAdd.vue')
+        },
 
-          { // 잠재고객 상세 조회 및 수정
-            name: "pCustomerDetail",
-            path: "/sales/prospect/:id",
-            component: ()=> import("@/views/apps/pCustomer/pCustomerDetail.vue")
-          },
+        {
+            // 잠재고객 상세 조회 및 수정
+            name: 'pCustomerDetail',
+            path: '/sales/prospect/:id',
+            component: () => import('@/views/apps/pCustomer/pCustomerDetail.vue')
+        },
 
-   
-          { // 부서
-            name: "Department",
-            path: "/admin/departments",
-            component: () => import("@/views/apps/department/Department.vue"),
-            props:true
-          },
+        {
+            // 부서
+            name: 'Department',
+            path: '/admin/departments',
+            component: () => import('@/views/apps/department/Department.vue'),
+            props: true
+        },
 
-          { // 제품
-            name: "Product",
-            path: "/admin/products",
-            component: () => import("@/views/apps/product/Product.vue"),
-            props:true,
-            meta:{requiresAdmin:true}
-          },
-          { // 프로세스
-            name: "Process",
-            path: "/admin/processes",
-            component: () => import("@/views/apps/process/Process.vue"),
-            props:true,
-            meta:{requiresAdmin:true}
-          },
-          
-          { // 목표 매출
-            name: "TargetSale",
-            path: "/admin/targetsales",
-            component: () => import("@/views/apps/targetSale/TargetSale.vue"),
-            props:true,
-            meta:{requiresAdmin:true}
-          },
+        {
+            // 제품
+            name: 'Product',
+            path: '/admin/products',
+            component: () => import('@/views/apps/product/Product.vue'),
+            props: true,
+            meta: { requiresAdmin: true }
+        },
+        {
+            // 프로세스
+            name: 'Process',
+            path: '/admin/processes',
+            component: () => import('@/views/apps/process/Process.vue'),
+            props: true,
+            meta: { requiresAdmin: true }
+        },
+
+        {
+            // 목표 매출
+            name: 'TargetSale',
+            path: '/admin/targetsales',
+            component: () => import('@/views/apps/targetSale/TargetSale.vue'),
+            props: true,
+            meta: { requiresAdmin: true }
+        },
 
         {
             name: 'Material',
@@ -640,9 +654,8 @@ const MainRoutes = {
             name: 'SalesPridictionsChart',
             path: '/apps/chart/sales/pridictions',
             component: () => import('@/views/apps/sales/SalesPredictionChartView.vue')
-        }
-
-        ,   {
+        },
+        {
             name: 'MyPage',
             path: '/apps/user/mypage',
             component: () => import('@/views/apps/user/MyPage.vue')
@@ -677,9 +690,7 @@ const MainRoutes = {
             name: 'SalesEdit',
             path: '/apps/sales/editer/:salesNo',
             component: () => import('@/views/apps/sales/SalesEdit.vue')
-        },
-
-
+        }
     ]
 };
 
