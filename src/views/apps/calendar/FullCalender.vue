@@ -209,10 +209,7 @@ export default defineComponent({
         store.setCalendarData([...todos, ...plans, ...acts]);
         this.applyFilter(store.filteredData);
 
-        }else{
-          alert(data.message);
         }
-
       } catch (e) {
         console.error(e);
       }
@@ -282,7 +279,6 @@ export default defineComponent({
           classNames: [className], 
         });
         this.closePlanModal();
-        await this.fetchCalendarData();
     } catch (e) {
       console.error(e);
     }
@@ -308,7 +304,10 @@ export default defineComponent({
 
     if (event) {
       event.setProp('title', updatedPlan.title);
-      event.setStart(updatedPlan.dueDate);
+      event.setDates(
+        `${updatedPlan.planDate}T${updatedPlan.startTime}`,
+        `${updatedPlan.planDate}T${updatedPlan.endTime}`
+      );
       event.setExtendedProp('planCls', updatedPlan.planCls);
       }
     },
@@ -359,6 +358,43 @@ export default defineComponent({
       };
       this.isPersonal = false;
     },
+
+    async loadDomainDetails(planCls, domainNo) {
+    console.log('loadDomainDetails 호출?',planCls, domainNo)
+    if (!['제안', '견적', '계약', '매출'].includes(planCls) || !domainNo) return;
+
+    let apiUrl = '';
+    switch (planCls) {
+      case '제안':
+        apiUrl = `/proposals/${domainNo}`;
+        break;
+      case '견적':
+        apiUrl = `/estimates/${domainNo}`;
+        break;
+      case '계약':
+        apiUrl = `/contract/${domainNo}`;
+        break;
+      case '매출':
+        apiUrl = `/sales/${domainNo}`;
+        break;
+      default:
+        console.error("올바른 planCls가 아닙니다.");
+        return;
+    }
+
+    try {
+      const response = await api.get(apiUrl);
+      this.planDetails = {
+        title: response.data.result.title || response.data.result.name,
+        note: response.data.result.note || response.data.result.description,
+      };
+      console.log("도메인 데이터 로드 완료:", this.planDetails);
+      console.log('this.plan',this.plan)
+    } catch (error) {
+      console.error('도메인 데이터 불러오기 실패:', error);
+    }
+  },
+
   // 클릭 이벤트
     handleDateSelect(selectInfo) {
       this.AddTodoModal = true;
@@ -383,13 +419,14 @@ export default defineComponent({
         LOW: '낮음',
       };
 
-
       if (eventClassNames.some(className => className.includes('plan'))) {
         this.AddPlanModal = true;
         this.mode = 'edit';
         try {        
           const response = await api.get(`/plans/${eventId}`);  
           const planDetails = response.data.result;
+          await this.loadDomainDetails(reversePlanCls[planDetails.planCls], planDetails.domainNo);
+          console.log('loadDomainDetails', reversePlanCls[planDetails.planCls], planDetails.domainNo, this.planDetails)
           this.plan = {     
             planNo: planDetails.planNo,
             calendarNo: planDetails.calendarNo,
@@ -400,6 +437,10 @@ export default defineComponent({
             endTime: planDetails.endTime,
             personalYn: planDetails.personalYn,     
             content: planDetails.content,
+            planDetails : {
+              title: this.planDetails.title,
+              note: this.planDetails.note,
+            },
           };
           this.DetailPlanShow = false;
         } catch (e) {        
@@ -482,11 +523,12 @@ export default defineComponent({
         if (event) {
           event.remove();
         }
-        this.closePlanModal();
         this.handleAlert({
           message: '일정이 삭제되었습니다.',
           type: 'success',
         });
+        this.closePlanModal();
+        window.location.reload();
       } catch (e) {
         console.error(e);
       }
@@ -546,9 +588,9 @@ export default defineComponent({
         :todo="todo" :priorityOptions="priorityOptions" :statusOptions="statusOptions" :mode="mode"
         @close="closeTodoModal" @add="addTodo" @delete="deleteTodo" @update="updateTodo" @show-alert="handleAlert"
       />
-      <PlanModal v-model="AddPlanModal" 
+      <PlanModal v-model="AddPlanModal"
       :plan="plan" :planClsOptions="planClsOptions" :statusOptions="statusOptions" :mode="mode"
-      @close="closePlanModal" @add="addPlan" @delete="deletePlan" @update="updatePlan" @show-alert="handleAlert"/>
+      @close="closePlanModal" @add="addPlan" @delete="deletePlan" @update="updatePlan" @show-alert="handleAlert" />
 
       <v-alert v-if="showSuccessAlert" type="success" variant="tonal" :class="['alert', alertType]">
         <h5 class="text-h5 text-capitalize">Success</h5>
