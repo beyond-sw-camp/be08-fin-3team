@@ -532,7 +532,13 @@ export default defineComponent({
 
       <FullCalendar ref="calendar" class='demo-app-calendar rounded-md':options="calendarOptions">
         <template v-slot:eventContent="arg">
-          <div class="text-subtitle-1 pa-1 text-truncate">{{ arg.event.title }}</div>
+          <!-- <div class="text-subtitle-1 pa-1 text-truncate">{{ arg.event.title }}</div> -->
+          <div class="event-content">
+            <span v-if="arg.event.start && arg.event.startStr.includes('T')" class="event-time">
+              {{ arg.event.startStr.split('T')[1].slice(0, 5) }}
+            </span>
+            <span class="event-title">{{ arg.event.title }}</span>
+          </div>
         </template>
       </FullCalendar>
 
@@ -586,5 +592,16 @@ export default defineComponent({
 .label-bold .v-input__control .v-label {
   font-size: 14px;
   font-weight: bold;
+}
+
+.event-time {
+  font-weight: bold;
+  font-size: 15px;
+}
+.event-title {
+  margin-left: 5px;
+  font-size: 15px;
+  font-weight: bold;
+
 }
 </style>
