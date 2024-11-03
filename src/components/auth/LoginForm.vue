@@ -56,6 +56,7 @@ const loginApi = async () => {
                 withCredentials: true
             }
         );
+    //    console.log(res);
         if (res.data.code == 200) {
             alert('로그인을 완료했습니다.');
             const result = res.data.result;
@@ -65,7 +66,7 @@ const loginApi = async () => {
             router.push('/');
         }
     } catch (err) {
-        console.log(err);
+        alert("로그인 정보를 다시 확인해주세요");
     } finally {
         isLoading.value = false;
     }
