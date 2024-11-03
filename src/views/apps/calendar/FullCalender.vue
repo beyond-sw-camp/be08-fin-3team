@@ -8,6 +8,7 @@ import TodoModal from '@/components/modal/TodoModal.vue';
 import PlanModal from '@/components/modal/PlanModal.vue';
 import './calendar.css';
 import { useCalendarStore } from '@/stores/apps/calendar/calendar';
+import { useCompanyCalendarStore } from '@/stores/apps/calendar/calendarStore';
 import api from '@/api/axiosinterceptor';
 import { reverseActStatus, actStatus } from '@/utils/ActStatusMappings';
 import {categoryMapping, reversePlanCls} from '@/utils/PlanMappings'
@@ -31,6 +32,7 @@ export default defineComponent({
       statusOptions: ['TODO', 'INPROGRESS', 'DONE'],
       priorityOptions: ['높음', '중간', '낮음'],
       planClsOptions: ['개인', '전사', '제안', '견적','매출', '계약'],
+      showCompanyEvents: false, // 전사일정 토글 상태
       todo: {
         calendarNo: null,
         title: '',
@@ -71,6 +73,7 @@ export default defineComponent({
         select: this.handleDateSelect,
         eventClick: this.handleEventClick,
         eventsSet: this.handleEvents,
+        events: this.currentEvents, 
       },
       currentEvents: [],
     };
@@ -78,10 +81,33 @@ export default defineComponent({
   created() {
     this.checkCalendarExists();
     const store = useCalendarStore();
+    const companyCalendarStore = useCompanyCalendarStore();
     
     watch(() => store.filteredData, (newEvents) => {
       this.applyFilter(newEvents);
     }, { deep: true });
+
+    // 전사일정 반영
+    watch(
+      () => companyCalendarStore.events,
+      (newEvents) => {
+        this.currentEvents = newEvents;
+        this.updateCalendarEvents();
+      },
+      { immediate: true }
+    );
+
+    watch(
+      () => this.showCompanyEvents,
+      async (newVal) => {
+        companyCalendarStore.showCompanyEvents = newVal;
+        if (newVal) {
+          await companyCalendarStore.fetchCompanyEvents();
+        } else {
+          await this.fetchCalendarData();
+        }
+      }
+    );
   },
 
   methods: {
@@ -130,6 +156,14 @@ export default defineComponent({
     
     mapPlanClsToCategory(planCls) {
       return categoryMapping[planCls] || 'plan'; 
+    },
+    // 전사일정 관련 업데이트 
+    updateCalendarEvents() {
+      this.calendarOptions.events = this.currentEvents.map(event => ({
+        ...event,
+        classNames: event.classNames || [event.category + '-event'],
+        eventClick: this.handleEventClick,
+      }));
     },
 
     // 조회
@@ -333,8 +367,23 @@ export default defineComponent({
       this.plan.planDate = selectInfo.startStr;
     },
     async handleEventClick(clickInfo) {
-      const eventId = clickInfo.event.id;    
+      console.log('clickInfo',clickInfo)
+      const eventId = clickInfo.event.id.replace(/^(plan-|todo-)/, '');
       const eventClassNames = clickInfo.event.classNames;
+
+      const statusMapping = {
+        TODO: '진행 전',
+        INPROGRESS: '진행 중',
+        DONE: '완료',
+      };
+      
+      const priorityMapping = {
+        HIGH: '높음',
+        MEDIUM: '중간',
+        LOW: '낮음',
+      };
+
+
       if (eventClassNames.some(className => className.includes('plan'))) {
         this.AddPlanModal = true;
         this.mode = 'edit';
@@ -369,9 +418,9 @@ export default defineComponent({
             calendarNo: todoDetails.calendarNo,
             title: todoDetails.title,
             todoCls: todoDetails.todoCls,
-            priority: todoDetails.priority,
+            priority: priorityMapping[todoDetails.priority] || todoDetails.priority,
             dueDate: todoDetails.dueDate,
-            status: todoDetails.status,
+            status: statusMapping[todoDetails.status] || todoDetails.status, 
             privateYn: todoDetails.privateYn,
             content: todoDetails.content,
           };
@@ -461,14 +510,25 @@ export default defineComponent({
 <template>
   <div class='demo-app'>
     <div class='demo-app-main'>
-        <v-select
-        v-model="selectedOption"
-        :items="items"
-        label="일정 생성"
-        hide-details
-        outlined
-        class="select-item"
-      ></v-select>
+      <v-row >
+        <v-col cols="2">
+          <v-select
+            v-model="selectedOption"
+            :items="items"
+            label="일정 생성"
+            outlined
+          ></v-select>
+        </v-col>
+        <v-col class="d-flex justify-end">
+          <v-switch
+            v-model="showCompanyEvents"
+            label="전사 일정만 보기"
+            inset
+            color="primary" 
+            class="label-bold"
+          />
+        </v-col>
+      </v-row>
 
       <FullCalendar ref="calendar" class='demo-app-calendar rounded-md':options="calendarOptions">
         <template v-slot:eventContent="arg">
@@ -521,5 +581,10 @@ export default defineComponent({
   max-width: 17%;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   font-size: 15px;
+}
+
+.label-bold .v-input__control .v-label {
+  font-size: 14px;
+  font-weight: bold;
 }
 </style>
