@@ -69,13 +69,21 @@ export default {
 	},
 	data() {
 		return {
-      priorityOptions: ['높음', '중간', '낮음'],
+      		priorityOptions: ['높음', '중간', '낮음'],
 			showAlert: false,
 			showSuccessAlert: false,
 			showConfirmDialogs: false,
 			alertMessage: '',
 			alertType: '',
 			isPrivate: this.todo.privateYn === 'Y',
+			statusMapping: {
+				"진행 전": "TODO",
+				"진행 중": "INPROGRESS",
+				"완료": "DONE",
+				"TODO": "진행 전",
+				"INPROGRESS": "진행 중",
+				"DONE": "완료"
+			},
 		};
 	},
 	watch: {
@@ -91,6 +99,9 @@ export default {
 	},
 	
 	methods: {
+		mapStatusToEnum(status) {
+			return this.statusMapping[status] || status;
+		},
     validateTodo() {
 			const isValid = this.$refs.form.validate();
       if (!this.todo.title || !this.todo.todoCls || !this.todo.priority || !this.todo.dueDate || !this.todo.status) {
@@ -122,9 +133,13 @@ export default {
 			if (!this.validateTodo()) {
 				return;
 			}
+			const todoData = {
+				...this.todo,
+				status: this.mapStatusToEnum(this.todo.status),
+			};
 
 			try {
-				const response = await api.patch(`/todos/${this.todo.todoNo}`, this.todo);
+				const response = await api.patch(`/todos/${this.todo.todoNo}`, todoData);
 				const updatedTodo = response.data.result;
 
 				this.$emit('update', updatedTodo);

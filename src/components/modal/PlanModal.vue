@@ -26,16 +26,16 @@
 							></v-select>
 						</v-col>
 						<v-col cols="12" v-if="plan.planCls && !['개인', '전사'].includes(this.plan.planCls)">
-							<v-text-field 
-								v-model="planDetails.title" 
-								:label="dynamicTitleLabel" 
-								readonly
-							></v-text-field>
-							<v-text-field 
-								v-model="planDetails.note" 
-								:label="dynamicNoteLabel" 
-								readonly
-							></v-text-field>
+              <v-text-field 
+                v-model="plan.planDetails.title" 
+                :label="dynamicTitleLabel" 
+                readonly
+              ></v-text-field>
+              <v-text-field 
+                v-model="plan.planDetails.note" 
+                :label="dynamicNoteLabel" 
+                readonly
+              ></v-text-field>
 						</v-col>
 						<v-col cols="12">
 							<v-text-field v-model="plan.planDate" label="일자*" type="date" 
@@ -125,6 +125,7 @@ export default {
 	props: {
 		AddPlanModal: Boolean,
 		plan: Object,
+    planDetails: Object,
 		statusOptions: Array,
 		planClsOptions: Array,
 		mode: {
@@ -242,14 +243,38 @@ export default {
 				this.domainList = [];
 			}
 		},
-		selectDomain(item) {
-			this.planDetails = {
-				title: item[this.titleField] || '',
-				note: item[this.noteField] || '',
-			};	
-			this.isSelected = false;
-			this.domainList = [];
-		},
+
+    selectDomain(item) {
+      console.log("item:", item);
+
+      this.planDetails = {
+        title: item[this.titleField] || '',
+        note: item[this.noteField] || '',
+      };
+
+      switch (this.plan.planCls) {
+        case '계약':
+          this.plan.domainNo = item.contractNo;
+          break;
+        case '매출':
+          this.plan.domainNo = item.salesNo;
+          break;
+        case '견적':
+          this.plan.domainNo = item.estNo;
+          break;
+        case '제안':
+          this.plan.domainNo = item.propNo;
+          break;
+        default:
+          this.plan.domainNo = null;
+      }
+
+      console.log("Selected domainNo:", this.plan.domainNo);
+
+      this.isSelected = false;
+      this.domainList = [];
+    },
+
 		generateTimeOptions() {
 			const options = [];
 			for (let hour = 0; hour < 24; hour++) {
@@ -292,12 +317,17 @@ export default {
 				this.plan.backgroundColor = categoryColor;
 				const response = await api.patch(`/plans/${this.plan.planNo}`, this.plan);
 				const updatedPlan = response.data.result;
+
+				this.closeModal();
+        setTimeout(() => {
+          window.location.reload();
+          }, 1000);
+          
 				this.$emit('show-alert', {
 					message: '일정이 수정되었습니다.',
 					type: 'success',
 				});
 				this.$emit('update', updatedPlan);
-				this.closeModal();
 			} catch (error) {
 				console.error(error);
 			}

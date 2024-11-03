@@ -8,6 +8,7 @@ import TodoModal from '@/components/modal/TodoModal.vue';
 import PlanModal from '@/components/modal/PlanModal.vue';
 import './calendar.css';
 import { useCalendarStore } from '@/stores/apps/calendar/calendar';
+import { useCompanyCalendarStore } from '@/stores/apps/calendar/calendarStore';
 import api from '@/api/axiosinterceptor';
 import { reverseActStatus, actStatus } from '@/utils/ActStatusMappings';
 import {categoryMapping, reversePlanCls} from '@/utils/PlanMappings'
@@ -31,6 +32,7 @@ export default defineComponent({
       statusOptions: ['TODO', 'INPROGRESS', 'DONE'],
       priorityOptions: ['높음', '중간', '낮음'],
       planClsOptions: ['개인', '전사', '제안', '견적','매출', '계약'],
+      showCompanyEvents: false, // 전사일정 토글 상태
       todo: {
         calendarNo: null,
         title: '',
@@ -71,6 +73,7 @@ export default defineComponent({
         select: this.handleDateSelect,
         eventClick: this.handleEventClick,
         eventsSet: this.handleEvents,
+        events: this.currentEvents, 
       },
       currentEvents: [],
     };
@@ -78,10 +81,33 @@ export default defineComponent({
   created() {
     this.checkCalendarExists();
     const store = useCalendarStore();
+    const companyCalendarStore = useCompanyCalendarStore();
     
     watch(() => store.filteredData, (newEvents) => {
       this.applyFilter(newEvents);
     }, { deep: true });
+
+    // 전사일정 반영
+    watch(
+      () => companyCalendarStore.events,
+      (newEvents) => {
+        this.currentEvents = newEvents;
+        this.updateCalendarEvents();
+      },
+      { immediate: true }
+    );
+
+    watch(
+      () => this.showCompanyEvents,
+      async (newVal) => {
+        companyCalendarStore.showCompanyEvents = newVal;
+        if (newVal) {
+          await companyCalendarStore.fetchCompanyEvents();
+        } else {
+          await this.fetchCalendarData();
+        }
+      }
+    );
   },
 
   methods: {
@@ -131,6 +157,14 @@ export default defineComponent({
     mapPlanClsToCategory(planCls) {
       return categoryMapping[planCls] || 'plan'; 
     },
+    // 전사일정 관련 업데이트 
+    updateCalendarEvents() {
+      this.calendarOptions.events = this.currentEvents.map(event => ({
+        ...event,
+        classNames: event.classNames || [event.category + '-event'],
+        eventClick: this.handleEventClick,
+      }));
+    },
 
     // 조회
     async fetchCalendarData() {
@@ -175,10 +209,7 @@ export default defineComponent({
         store.setCalendarData([...todos, ...plans, ...acts]);
         this.applyFilter(store.filteredData);
 
-        }else{
-          alert(data.message);
         }
-
       } catch (e) {
         console.error(e);
       }
@@ -248,7 +279,6 @@ export default defineComponent({
           classNames: [className], 
         });
         this.closePlanModal();
-        await this.fetchCalendarData();
     } catch (e) {
       console.error(e);
     }
@@ -274,7 +304,10 @@ export default defineComponent({
 
     if (event) {
       event.setProp('title', updatedPlan.title);
-      event.setStart(updatedPlan.dueDate);
+      event.setDates(
+        `${updatedPlan.planDate}T${updatedPlan.startTime}`,
+        `${updatedPlan.planDate}T${updatedPlan.endTime}`
+      );
       event.setExtendedProp('planCls', updatedPlan.planCls);
       }
     },
@@ -325,6 +358,43 @@ export default defineComponent({
       };
       this.isPersonal = false;
     },
+
+    async loadDomainDetails(planCls, domainNo) {
+    console.log('loadDomainDetails 호출?',planCls, domainNo)
+    if (!['제안', '견적', '계약', '매출'].includes(planCls) || !domainNo) return;
+
+    let apiUrl = '';
+    switch (planCls) {
+      case '제안':
+        apiUrl = `/proposals/${domainNo}`;
+        break;
+      case '견적':
+        apiUrl = `/estimates/${domainNo}`;
+        break;
+      case '계약':
+        apiUrl = `/contract/${domainNo}`;
+        break;
+      case '매출':
+        apiUrl = `/sales/${domainNo}`;
+        break;
+      default:
+        console.error("올바른 planCls가 아닙니다.");
+        return;
+    }
+
+    try {
+      const response = await api.get(apiUrl);
+      this.planDetails = {
+        title: response.data.result.title || response.data.result.name,
+        note: response.data.result.note || response.data.result.description,
+      };
+      console.log("도메인 데이터 로드 완료:", this.planDetails);
+      console.log('this.plan',this.plan)
+    } catch (error) {
+      console.error('도메인 데이터 불러오기 실패:', error);
+    }
+  },
+
   // 클릭 이벤트
     handleDateSelect(selectInfo) {
       this.AddTodoModal = true;
@@ -333,14 +403,30 @@ export default defineComponent({
       this.plan.planDate = selectInfo.startStr;
     },
     async handleEventClick(clickInfo) {
-      const eventId = clickInfo.event.id;    
+      console.log('clickInfo',clickInfo)
+      const eventId = clickInfo.event.id.replace(/^(plan-|todo-)/, '');
       const eventClassNames = clickInfo.event.classNames;
+
+      const statusMapping = {
+        TODO: '진행 전',
+        INPROGRESS: '진행 중',
+        DONE: '완료',
+      };
+      
+      const priorityMapping = {
+        HIGH: '높음',
+        MEDIUM: '중간',
+        LOW: '낮음',
+      };
+
       if (eventClassNames.some(className => className.includes('plan'))) {
         this.AddPlanModal = true;
         this.mode = 'edit';
         try {        
           const response = await api.get(`/plans/${eventId}`);  
           const planDetails = response.data.result;
+          await this.loadDomainDetails(reversePlanCls[planDetails.planCls], planDetails.domainNo);
+          console.log('loadDomainDetails', reversePlanCls[planDetails.planCls], planDetails.domainNo, this.planDetails)
           this.plan = {     
             planNo: planDetails.planNo,
             calendarNo: planDetails.calendarNo,
@@ -351,6 +437,10 @@ export default defineComponent({
             endTime: planDetails.endTime,
             personalYn: planDetails.personalYn,     
             content: planDetails.content,
+            planDetails : {
+              title: this.planDetails.title,
+              note: this.planDetails.note,
+            },
           };
           this.DetailPlanShow = false;
         } catch (e) {        
@@ -369,9 +459,9 @@ export default defineComponent({
             calendarNo: todoDetails.calendarNo,
             title: todoDetails.title,
             todoCls: todoDetails.todoCls,
-            priority: todoDetails.priority,
+            priority: priorityMapping[todoDetails.priority] || todoDetails.priority,
             dueDate: todoDetails.dueDate,
-            status: todoDetails.status,
+            status: statusMapping[todoDetails.status] || todoDetails.status, 
             privateYn: todoDetails.privateYn,
             content: todoDetails.content,
           };
@@ -433,11 +523,12 @@ export default defineComponent({
         if (event) {
           event.remove();
         }
-        this.closePlanModal();
         this.handleAlert({
           message: '일정이 삭제되었습니다.',
           type: 'success',
         });
+        this.closePlanModal();
+        window.location.reload();
       } catch (e) {
         console.error(e);
       }
@@ -461,18 +552,35 @@ export default defineComponent({
 <template>
   <div class='demo-app'>
     <div class='demo-app-main'>
-        <v-select
-        v-model="selectedOption"
-        :items="items"
-        label="일정 생성"
-        hide-details
-        outlined
-        class="select-item"
-      ></v-select>
+      <v-row >
+        <v-col cols="2">
+          <v-select
+            v-model="selectedOption"
+            :items="items"
+            label="일정 생성"
+            outlined
+          ></v-select>
+        </v-col>
+        <v-col class="d-flex justify-end">
+          <v-switch
+            v-model="showCompanyEvents"
+            label="전사 일정만 보기"
+            inset
+            color="primary" 
+            class="label-bold"
+          />
+        </v-col>
+      </v-row>
 
       <FullCalendar ref="calendar" class='demo-app-calendar rounded-md':options="calendarOptions">
         <template v-slot:eventContent="arg">
-          <div class="text-subtitle-1 pa-1 text-truncate">{{ arg.event.title }}</div>
+          <!-- <div class="text-subtitle-1 pa-1 text-truncate">{{ arg.event.title }}</div> -->
+          <div class="event-content">
+            <span v-if="arg.event.start && arg.event.startStr.includes('T')" class="event-time">
+              {{ arg.event.startStr.split('T')[1].slice(0, 5) }}
+            </span>
+            <span class="event-title">{{ arg.event.title }}</span>
+          </div>
         </template>
       </FullCalendar>
 
@@ -480,9 +588,9 @@ export default defineComponent({
         :todo="todo" :priorityOptions="priorityOptions" :statusOptions="statusOptions" :mode="mode"
         @close="closeTodoModal" @add="addTodo" @delete="deleteTodo" @update="updateTodo" @show-alert="handleAlert"
       />
-      <PlanModal v-model="AddPlanModal" 
+      <PlanModal v-model="AddPlanModal"
       :plan="plan" :planClsOptions="planClsOptions" :statusOptions="statusOptions" :mode="mode"
-      @close="closePlanModal" @add="addPlan" @delete="deletePlan" @update="updatePlan" @show-alert="handleAlert"/>
+      @close="closePlanModal" @add="addPlan" @delete="deletePlan" @update="updatePlan" @show-alert="handleAlert" />
 
       <v-alert v-if="showSuccessAlert" type="success" variant="tonal" :class="['alert', alertType]">
         <h5 class="text-h5 text-capitalize">Success</h5>
@@ -521,5 +629,21 @@ export default defineComponent({
   max-width: 17%;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   font-size: 15px;
+}
+
+.label-bold .v-input__control .v-label {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.event-time {
+  font-weight: bold;
+  font-size: 15px;
+}
+.event-title {
+  margin-left: 5px;
+  font-size: 15px;
+  font-weight: bold;
+
 }
 </style>
