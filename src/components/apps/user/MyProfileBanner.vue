@@ -12,11 +12,14 @@ const items = shallowRef([
     { tab: '잠재고객 관리', icon: UsersIcon, href: '/apps/user/mypage/pcustomers' },
     // { tab: 'Gallery', icon: PhotoIcon, href: '/apps/user/profile/gallery' }
 ]);
-const props = defineProps({
-    name:String
+// const props = defineProps({
+//     name:String
+// })
+const name = ref();
+
+onMounted(()=>{
+    name.value = localStorage.getItem("loginUserName");
 })
-
-
 </script>
 
 <template>
@@ -27,7 +30,7 @@ const props = defineProps({
                 <v-col cols="12" lg="4" sm="12" class="order-sm-second">
                     <div class="px-4 py-1">
                         <v-row class="justify-center">
-                            <v-col cols="4" class="text-center">
+                            <!-- <v-col cols="4" class="text-center">
                                 <UserCheckIcon size="20" />
                                 <h4 class="text-h4">5</h4>
                                 <h6 class="text-h6 font-weight-regular">담당 고객 수</h6>
@@ -36,7 +39,7 @@ const props = defineProps({
                                 <UserCircleIcon size="20" />
                                 <h4 class="text-h4">2</h4>
                                 <h6 class="text-h6 font-weight-regular">담당 잠재고객 수</h6>
-                            </v-col>    
+                            </v-col>     -->
                         </v-row>
                     </div>
                 </v-col>
@@ -48,7 +51,7 @@ const props = defineProps({
                             </v-avatar>
                         </div>
                         <h5 class="text-h5 mt-3">{{ name }}</h5>
-                        <span class="text-h6 font-weight-regular">영업부</span>
+                        <!-- <span class="text-h6 font-weight-regular">영업부</span> -->
                     </div>
                 </v-col>
                 <!-- <v-col cols="12" lg="4" class="d-flex align-center justify-center justify-lg-end order-sm-third">

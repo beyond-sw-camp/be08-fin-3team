@@ -107,22 +107,11 @@ const goToEditPage = (customerId)=>{
     <v-row class="justify-content-end mt-5">
         <v-col cols="12">
             <div class="d-sm-flex align-center mb-5">
-                <h3 class="text-h3">
+                <h5 class="text-h5">
                     담당 고객
                     <v-chip size="small" class="ml-2 elevation-0" variant="elevated" color="secondary">{{ dataSize }}</v-chip>
-                </h3>
-                <!-- <v-sheet width="250" class="ml-0 ml-sm-auto mt-3 mt-sm-0">
-                    <v-text-field
-                        color="primary"
-                        hide-details
-                        variant="outlined"
-                        placeholder="Search Friends"
-                        density="compact"
-                        prepend-inner-icon="mdi-magnify"
-                        v-model="searchValue"
-                    >
-                    </v-text-field>
-                </v-sheet> -->
+                </h5>
+            
             </div>
 
             <v-row>
