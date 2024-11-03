@@ -85,14 +85,14 @@ export interface menu {
     class?: string;
     extraclass?: string;
     type?: string;
-    adminOnly?:boolean;
+    adminOnly?: boolean;
 }
 
 const horizontalItems: menu[] = [
     {
         title: 'Home',
         icon: HomeIcon,
-        to: '/sales/main',
+        to: '/sales/main'
     },
     {
         title: '영업기회',
@@ -107,7 +107,7 @@ const horizontalItems: menu[] = [
             {
                 title: '캘린더',
                 icon: CalendarIcon,
-                to: '/apps/calendar',
+                to: '/apps/calendar'
             },
             {
                 title: '할 일',
@@ -123,7 +123,7 @@ const horizontalItems: menu[] = [
                 title: '영업활동',
                 icon: CircleDotIcon,
                 to: '/apps/act/list'
-            },
+            }
         ]
     },
 
@@ -135,13 +135,13 @@ const horizontalItems: menu[] = [
             {
                 title: '고객',
                 icon: CircleDotIcon,
-                to: '/sales/contact',
+                to: '/sales/contact'
             },
             {
                 title: '잠재고객',
                 icon: CircleDotIcon,
                 to: '/sales/prospect'
-            },
+            }
         ]
     },
     {
@@ -168,31 +168,31 @@ const horizontalItems: menu[] = [
                 title: '매출',
                 icon: CircleDotIcon,
                 to: '/apps/sales'
-            },
+            }
         ]
     },
-   
+
     {
         title: '영업도구',
         icon: ToolIcon,
         to: '/',
         children: [
-          {
-              title: '보고',
-              icon: CircleDotIcon,
-              to: '/apps/blog/posts'
-          },
-          {
-              title: '공지',
-              icon: CircleDotIcon,
-              to: '/apps/blog/early-black-friday-amazon-deals-cheap-tvs-headphones'
-          },
-          {
-              title: '영업활동',
-              icon: CircleDotIcon,
-              to: '/apps/act/list'
-          }
-      ]
+            {
+                title: '보고',
+                icon: CircleDotIcon,
+                to: '/apps/blog/posts'
+            },
+            {
+                title: '공지',
+                icon: CircleDotIcon,
+                to: '/apps/blog/early-black-friday-amazon-deals-cheap-tvs-headphones'
+            },
+            {
+                title: '영업활동',
+                icon: CircleDotIcon,
+                to: '/apps/act/list'
+            }
+        ]
     },
     {
         title: '차트',
@@ -200,10 +200,25 @@ const horizontalItems: menu[] = [
         to: '/',
         children: [
             {
+                title: '영업 예측',
+                icon: CircleDotIcon,
+                to: '/apps/chart/lead'
+            },
+            {
+                title: '활동 차트',
+                icon: CircleDotIcon,
+                to: '/apps/chart/act'
+            },
+            {
+                title: '계약 차트',
+                icon: CircleDotIcon,
+                to: '/apps/chart/status'
+            },
+            {
                 title: '매출 차트',
                 icon: CircleDotIcon,
                 to: '/',
-                children:[
+                children: [
                     {
                         title: '매출 현황 차트',
                         icon: ChartAreaIcon,
@@ -220,16 +235,6 @@ const horizontalItems: menu[] = [
                         to: '/apps/chart/sales/pridictions'
                     }
                 ]
-            },
-            {
-                title: '활동 차트',
-                icon: CircleDotIcon,
-                to: '/apps/chart/act'
-            },
-            {
-                title: '계약 차트',
-                icon: CircleDotIcon,
-                to: '/apps/chart/status'
             }
         ]
     },
@@ -238,7 +243,7 @@ const horizontalItems: menu[] = [
         title: '관리자',
         icon: SocialIcon,
         to: '/',
-        adminOnly:true,
+        adminOnly: true,
         children: [
             {
                 title: '부서',
@@ -261,7 +266,7 @@ const horizontalItems: menu[] = [
                 to: '/admin/targetsales'
             }
         ]
-    },
+    }
 ];
 
 export default horizontalItems;

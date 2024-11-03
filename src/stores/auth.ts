@@ -7,29 +7,30 @@ const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
 export const useAuthStore = defineStore({
     id: 'auth',
     state: () => ({
-      //  isLoggedIn:localStorage.getItem('isLoggedIn')=='true',
+        //  isLoggedIn:localStorage.getItem('isLoggedIn')=='true',
         // initialize state from local storage to enable user to stay logged in
         // @ts-ignore
         name: localStorage.getItem('loginUserName'),
-        email : localStorage.getItem('loginUserEmail'),
-      //  dept : localStorage.getItem('loginUserDept'),
+        email: localStorage.getItem('loginUserEmail'),
+        //  dept : localStorage.getItem('loginUserDept'),
         user: localStorage.getItem('loginUserName'),
         // role: localStorage.getItem("loginUserRole")||"USER",
         returnUrl: null
     }),
     actions: {
-        setIsLogedIn(){
-            localStorage.setItem('isLoggedIn','true');
+        setIsLogedIn() {
+            localStorage.setItem('isLoggedIn', 'true');
         },
-        
+
         logout() {
             this.user = null;
+            localStorage.removeItem('loginUserNo');
+            localStorage.removeItem('loginDeptNo');
             localStorage.removeItem('loginUserName');
             localStorage.removeItem('loginUserEmail');
             localStorage.removeItem('accessToken');
-            localStorage.setItem('isLoggedIn','false');
-            localStorage.removeItem("loginUserRole"),
-            router.push({name:"Login"});
+            localStorage.setItem('isLoggedIn', 'false');
+            localStorage.removeItem('loginUserRole'), router.push({ name: 'Login' });
         }
     }
 });

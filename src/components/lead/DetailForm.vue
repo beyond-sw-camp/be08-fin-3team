@@ -490,7 +490,7 @@ onMounted(() => {
                                     append-inner-icon="mdi-magnify"
                                     @click:append-inner="customerDialog = true"
                                 ></v-text-field>
-                                <v-label class="mb-2 font-weight-medium">예상매출</v-label>
+                                <v-label class="mb-2 font-weight-medium">예상매출(원)</v-label>
                                 <v-text-field
                                     v-model="expSalesDisplay"
                                     variant="outlined"
@@ -498,7 +498,7 @@ onMounted(() => {
                                     maxlength="14"
                                     @input="updateExpSales"
                                 ></v-text-field>
-                                <v-label class="mb-2 font-weight-medium">예상이익금액</v-label>
+                                <v-label class="mb-2 font-weight-medium">예상이익금액(원)</v-label>
                                 <v-text-field
                                     v-model="expProfitDisplay"
                                     variant="outlined"
@@ -517,7 +517,7 @@ onMounted(() => {
                                     :rules="[requiredRule]"
                                     variant="outlined"
                                 ></v-select>
-                                <v-label class="mb-2 font-weight-medium">예상이익률</v-label>
+                                <v-label class="mb-2 font-weight-medium">예상이익률(%)</v-label>
                                 <v-text-field
                                     v-model="expMarginDisplay"
                                     variant="outlined"
@@ -559,10 +559,11 @@ onMounted(() => {
                                     readonly
                                     variant="outlined"
                                     color="primary"
+                                    :disabled="true"
                                 ></v-text-field>
                             </v-col>
                             <v-col cols="12" md="3">
-                                <v-label class="mb-2 font-weight-medium">성공확률</v-label>
+                                <v-label class="mb-2 font-weight-medium">성공확률(%)</v-label>
                                 <v-text-field
                                     v-model="leadResponseDto.successPer"
                                     variant="outlined"
