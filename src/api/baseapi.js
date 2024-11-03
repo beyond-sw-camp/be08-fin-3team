@@ -5,7 +5,7 @@ import axios from "axios";
 const baseApi = axios.create({
   //  baseURL: 'http://localhost:8080/api',
  // baseURL: 'http://15.164.92.171:8080/api',
- baseURL: 'http://api.salesboost.store/api',
+ baseURL: 'https://api.salesboost.store/api',
 
   });
 
