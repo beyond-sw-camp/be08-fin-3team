@@ -6,6 +6,8 @@ import Customer from '@/components/sales/main/Customer.vue';
 import LeadAct from '@/components/sales/main/LeadAct.vue';
 import Sales from '@/components/sales/main/Sales.vue';
 
+const userRole = ref(true);
+
 const today = new Date();
 const searchDate = ref(today.toISOString().substring(0, 10));
 const selectedDept = ref(0);
@@ -20,6 +22,8 @@ const searchCond = reactive({
     deptNo: selectedManager.value,
     userNo: selectedManager.value
 });
+
+const isMounted = ref(false);
 
 const customerCount = ref(0);
 const potenCustomerCount = ref(0);
@@ -39,10 +43,18 @@ const monthAchievement = ref(0);
 
 const fetchDept = async () => {
     try {
-        const response = await api.get(`/admin/departments`);
-
+        const response = await api.get(`/admin/departments/child`);
+        //123
         state.departments = [{ no: 0, name: '전체' }, ...response.data.result];
-        fetchUser(0);
+
+        if (response.data.isSuccess) {
+            if (userRole.value) {
+                const deptNo = localStorage.getItem('loginDeptNo');
+                selectedDept.value = deptNo ? Number(deptNo) : 0;
+            }
+
+            fetchUser(selectedDept.value);
+        }
     } catch (error) {
         console.error('부서 데이터를 불러오는 중 오류가 발생했습니다:', error);
     }
@@ -50,15 +62,27 @@ const fetchDept = async () => {
 
 const fetchUser = async (deptNo) => {
     try {
+        let response;
+
         if (deptNo != null && deptNo > 1 && deptNo != 'undefined') {
-            const response = await api.get(`/users/by-dept/${deptNo}`);
+            response = await api.get(`/users/by-dept/${deptNo}`);
 
             state.managers = [{ userNo: 0, name: '전체' }, ...response.data.result];
+
+            if (response.data.isSuccess) {
+                if (userRole.value) {
+                    const userNo = localStorage.getItem('loginUserNo');
+                    selectedManager.value = userNo ? Number(userNo) : 0;
+                }
+            }
         } else {
             state.managers = [{ userNo: 0, name: '전체' }];
         }
 
-        fetchData();
+        if (!isMounted.value) {
+            fetchData();
+        }
+        isMounted.value = true;
     } catch (error) {
         console.error('user 데이터를 불러오는 중 오류가 발생했습니다.');
     }
@@ -174,6 +198,10 @@ watch(selectedManager, (newUser) => {
 });
 
 onMounted(() => {
+    if (localStorage.getItem('loginUserRole') == 'ADMIN') {
+        userRole.value = false;
+    }
+
     fetchDept();
 });
 </script>
@@ -193,6 +221,7 @@ onMounted(() => {
                         item-title="name"
                         item-value="no"
                         outlined
+                        :disabled="userRole"
                     ></v-select>
                     <v-select
                         label="담당자"
@@ -202,6 +231,7 @@ onMounted(() => {
                         item-title="name"
                         item-value="userNo"
                         outlined
+                        :disabled="userRole"
                     ></v-select>
                     <v-btn class="search_btn" color="primary" variant="flat" @click="fetchData">검색</v-btn>
                 </v-card>

@@ -1,11 +1,13 @@
 <script setup>
-import { onMounted, computed, ref } from 'vue';
+import { onMounted, computed, ref, reactive, watch } from 'vue';
 import api from '@/api/axiosinterceptor';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
-// 리드 상세 정보 페이지로 이동하는 함수
+const userRole = ref(true);
+const isMounted = ref(false);
+
 const goToLeadDetail = (leadNo) => {
     router.push(`/sales/lead/detail/${leadNo}`);
 };
@@ -38,24 +40,80 @@ endDate.setMonth(endDate.getMonth() + 2);
 endDate.setDate(0);
 const searchEndDate = ref(endDate.toISOString().substring(0, 10));
 
+const selectedDept = ref(0);
+const selectedManager = ref(0);
+const state = reactive({
+    departments: [],
+    managers: []
+});
+
+const searchCond = reactive({
+    status: selectedStatus.value,
+    subProcess: selectedProcess.value,
+    startDate: searchStartDate.value,
+    endDate: searchEndDate.value,
+    deptNo: selectedDept.value,
+    userNo: selectedManager.value
+});
+
 const leads = ref([]);
 const dataSize = computed(() => leads.value.length);
 const loading = ref(true);
 const error = ref(null);
 
-const search = async () => {
+const fetchDept = async () => {
+    try {
+        const response = await api.get(`/admin/departments`);
+
+        state.departments = [{ no: 0, name: '전체' }, ...response.data.result];
+
+        if (response.data.isSuccess) {
+            if (userRole.value) {
+                const deptNo = localStorage.getItem('loginDeptNo');
+                selectedDept.value = deptNo ? Number(deptNo) : 0;
+            }
+
+            fetchUser(selectedDept.value);
+        }
+    } catch (error) {
+        console.error('부서 데이터를 불러오는 중 오류가 발생했습니다:', error);
+    }
+};
+
+const fetchUser = async (deptNo) => {
+    try {
+        let response;
+
+        if (deptNo != null && deptNo > 1 && deptNo != 'undefined') {
+            response = await api.get(`/users/by-dept/${deptNo}`);
+
+            state.managers = [{ userNo: 0, name: '전체' }, ...response.data.result];
+
+            if (response.data.isSuccess) {
+                if (userRole.value) {
+                    const userNo = localStorage.getItem('loginUserNo');
+                    selectedManager.value = userNo ? Number(userNo) : 0;
+                }
+            }
+        } else {
+            state.managers = [{ userNo: 0, name: '전체' }];
+        }
+
+        if (!isMounted.value) {
+            fetchData();
+        }
+        isMounted.value = true;
+    } catch (error) {
+        console.error('user 데이터를 불러오는 중 오류가 발생했습니다.');
+    }
+};
+
+const fetchData = async () => {
     loading.value = true;
     error.value = null;
 
     try {
-        // const response = await api.get('/leads');
-        const response = await api.post('/leads/filter', {
-            status: selectedStatus.value,
-            subProcess: selectedProcess.value,
-            //     unit: selectedUnit.value,
-            startDate: searchStartDate.value,
-            endDate: searchEndDate.value
-        });
+        const response = await api.post('/leads/filter', searchCond);
 
         leads.value = response.data.result;
     } catch (err) {
@@ -99,18 +157,54 @@ const getStepColor = (step) => {
     return 'grey lighten-2'; // 미완료 단계
 };
 
+watch(
+    () => selectedDept.value,
+    (newDept) => {
+        if (newDept != null) {
+            searchCond.deptNo = newDept;
+            selectedManager.value = 0;
+            fetchUser(newDept);
+        }
+    }
+);
+
+watch(searchStartDate, (newDate) => {
+    searchCond.startDate = newDate;
+});
+
+watch(searchEndDate, (newDate) => {
+    searchCond.endDate = newDate;
+});
+
+watch(selectedStatus, (newDate) => {
+    searchCond.status = newDate;
+});
+
+watch(selectedProcess, (newDate) => {
+    searchCond.subProcess = newDate;
+});
+
+watch(selectedManager, (newUser) => {
+    searchCond.userNo = newUser;
+});
+
 onMounted(() => {
-    search();
+    if (localStorage.getItem('loginUserRole') == 'ADMIN') {
+        userRole.value = false;
+    }
+
+    fetchDept();
 });
 </script>
 
 <template>
     <v-container fluid>
         <v-row>
-            <!-- 검색 조건 영역 -->
             <v-col cols="12" md="2">
                 <v-card elevation="0" class="pa-4">
                     <v-card-title class="title font-weight-bold">검색 조건</v-card-title>
+                    <v-text-field v-model="searchStartDate" label="시작일자" type="date"></v-text-field>
+                    <v-text-field v-model="searchEndDate" label="종료일자" type="date"></v-text-field>
                     <v-select
                         v-model="selectedStatus"
                         :items="statuses"
@@ -128,13 +222,29 @@ onMounted(() => {
                         item-value="value"
                         label="진행단계"
                     ></v-select>
-                    <v-text-field v-model="searchStartDate" label="시작일자" type="date"></v-text-field>
-                    <v-text-field v-model="searchEndDate" label="종료일자" type="date"></v-text-field>
-                    <v-btn class="search_btn" variant="flat" color="primary" @click="search">검색</v-btn>
+                    <v-select
+                        label="부서"
+                        v-model="selectedDept"
+                        :items="state.departments"
+                        item-props="true"
+                        item-title="name"
+                        item-value="no"
+                        outlined
+                        :disabled="userRole"
+                    ></v-select>
+                    <v-select
+                        label="담당자"
+                        v-model="selectedManager"
+                        :items="state.managers"
+                        item-props="true"
+                        item-title="name"
+                        item-value="userNo"
+                        outlined
+                        :disabled="userRole"
+                    ></v-select>
+                    <v-btn class="search_btn" variant="flat" color="primary" @click="fetchData">검색</v-btn>
                 </v-card>
             </v-col>
-
-            <!-- 검색 결과 영역 -->
             <v-col cols="12" md="10">
                 <v-card elevation="0" class="pa-4">
                     <v-row class="d-flex align-center">
@@ -153,7 +263,6 @@ onMounted(() => {
                         </v-col>
                     </v-row>
 
-                    <!-- 리드 목록 표시 -->
                     <v-row v-if="!loading && leads.length">
                         <v-col v-for="lead in leads" :key="lead.leadNo" cols="12" md="12">
                             <v-card outlined>
@@ -162,9 +271,7 @@ onMounted(() => {
                                 </v-card-title>
                                 <v-divider></v-divider>
                                 <v-card-text>
-                                    <!-- 리드 세부 정보 표시 -->
                                     <v-row>
-                                        <!-- 프로세스 파이프라인 단계 표시 -->
                                         <v-col cols="12">
                                             <v-row>
                                                 <v-col v-for="step in lead.steps" :key="step.stepNo" cols="auto">
