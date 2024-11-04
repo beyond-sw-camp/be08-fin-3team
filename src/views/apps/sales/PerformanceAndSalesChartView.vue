@@ -27,9 +27,6 @@ const monthSales = ref(0);
 const yearTargetSales = ref(0);
 const monthTargetSales = ref(0);
 
-const monthAttainment = ref(0);
-const yearAttainment = ref(0);
-
 function formatNumberWithCommas(value) {
     if (value === null || value === undefined) return '';
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -87,9 +84,6 @@ const fetchTargetSalesData = async (year: number, month: number) => {
             }
         }
 
-        monthAttainment.value = monthTargetSales.value ? (monthSales.value / monthTargetSales.value) * 100 : 0;
-        yearAttainment.value = yearTargetSales.value ? (yearSales.value / yearTargetSales.value) * 100 : 0;
-
     } catch (error) {
         console.error('데이터 로드 실패:', error);
     }
@@ -98,17 +92,15 @@ const fetchTargetSalesData = async (year: number, month: number) => {
 
 const monthChartOptions = computed(() => {
     return {
-        labels: ['달성률', '당월 매출'],
+        labels: ['목표 매출', '달성률'],
         chart: {
             height: 275,
             type: 'donut',
             foreColor: '#adb0bb',
             fontFamily: `inherit`,
-            toolbar: {
-                show: false
-            }
+            toolbar: { show: false }
         },
-        colors: [getPrimary.value, getLightPrimary.value],
+        colors: [getLightPrimary.value, getPrimary.value],
         plotOptions: {
             pie: {
                 donut: {
@@ -122,32 +114,28 @@ const monthChartOptions = computed(() => {
                             fontSize: '18px',
                             fontWeight: 'bold'
                         },
-                        value: {
-                            show: false
-                        },
+                        value: { show: false },
                         total: {
                             show: true,
                             fontSize: '20px',
-                            fontWeight: '600',
-                            label: formatNumberWithCommas(monthSales.value),
+                            fontWeight: 'bold',
+                            label: formatNumberWithCommas(monthTargetSales.value),
                             color: '#333'
                         }
                     }
                 }
             }
         },
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            show: false
-        },
-        legend: {
-            show: false
-        },
+        dataLabels: { enabled: false },
+        stroke: { show: false },
+        legend: { show: false },
         tooltip: {
             y: {
-                formatter: function (val) {
+                formatter: function (val, { seriesIndex }) {
+                    if (seriesIndex === 1) {
+                        const percentage = (monthSales.value / monthTargetSales.value) * 100;
+                        return `${percentage.toFixed(2)}% 달성`;
+                    }
                     return `${val.toFixed(2)}%`;
                 }
             }
@@ -157,17 +145,15 @@ const monthChartOptions = computed(() => {
 
 const yearChartOptions = computed(() => {
     return {
-        labels: ['달성률', '올 해 매출'],
+        labels: ['목표 매출', '달성률'],
         chart: {
             height: 275,
             type: 'donut',
             foreColor: '#adb0bb',
             fontFamily: `inherit`,
-            toolbar: {
-                show: false
-            }
+            toolbar: { show: false }
         },
-        colors: [getPrimary.value, getLightPrimary.value],
+        colors: [getLightPrimary.value, getPrimary.value],
         plotOptions: {
             pie: {
                 donut: {
@@ -181,32 +167,28 @@ const yearChartOptions = computed(() => {
                             fontSize: '18px',
                             fontWeight: 'bold'
                         },
-                        value: {
-                            show: false
-                        },
+                        value: { show: false },
                         total: {
                             show: true,
                             fontSize: '20px',
-                            fontWeight: '600',
-                            label: formatNumberWithCommas(yearSales.value),
+                            fontWeight: 'bold',
+                            label: formatNumberWithCommas(yearTargetSales.value),
                             color: '#333'
                         }
                     }
                 }
             }
         },
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            show: false
-        },
-        legend: {
-            show: false
-        },
+        dataLabels: { enabled: false },
+        stroke: { show: false },
+        legend: { show: false },
         tooltip: {
             y: {
-                formatter: function (val) {
+                formatter: function (val, { seriesIndex }) {
+                    if (seriesIndex === 1) {
+                        const percentage = (yearSales.value / yearTargetSales.value) * 100;
+                        return `${percentage.toFixed(2)}% 달성`;
+                    }
                     return `${val.toFixed(2)}%`;
                 }
             }
@@ -215,8 +197,15 @@ const yearChartOptions = computed(() => {
 });
 
 
-const monthSeries = computed(() => [100 - monthAttainment.value ,monthAttainment.value]);
-const yearSeries = computed(() => [100 - yearAttainment.value, yearAttainment.value]);
+const monthSeries = computed(() => [
+    monthTargetSales.value - monthSales.value,
+    monthSales.value
+]);
+
+const yearSeries = computed(() => [
+    yearTargetSales.value - yearSales.value,
+    yearSales.value
+]);
 
 
 
