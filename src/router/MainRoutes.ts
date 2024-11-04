@@ -626,6 +626,14 @@ const MainRoutes = {
         },
 
         {
+            name: 'PerformanceAndSales',
+            path: '/apps/chart/status/performanceandsales',
+            component: () => import('@/views/apps/sales/PerformanceAndSalesChartView.vue'),
+            props: true,
+            meta: { requiresAdmin: true }
+        },
+
+        {
             name: 'Material',
             path: '/icons/material',
             component: () => import('@/views/icons/MaterialIcons.vue')
