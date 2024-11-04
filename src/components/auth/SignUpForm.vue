@@ -90,8 +90,9 @@ const sendEmail = async()=>{
     if (loading.value) return;
 
     try{
+        isLoading.value = true;
         loading.value = true;
-       const res = await baseApi.post("/users/email/code-request",{
+        const res = await baseApi.post("/users/email/code-request",{
         email: email.value
        });
        console.log(res.data);
@@ -107,6 +108,7 @@ const sendEmail = async()=>{
 
     }finally{
         loading.value = false;
+        isLoading.value = false;
     }
 }
 
