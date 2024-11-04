@@ -157,7 +157,7 @@ const horizontalItems: menu[] = [
             {
                 title: '견적',
                 icon: CircleDotIcon,
-                to: '/estimates'
+                to: '/sales/estimates'
             },
             {
                 title: '계약',
