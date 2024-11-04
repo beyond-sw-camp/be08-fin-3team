@@ -215,6 +215,11 @@ const horizontalItems: menu[] = [
                 to: '/apps/chart/status'
             },
             {
+                title: '실적 매출 차트',
+                icon: CircleDotIcon,
+                to: '/apps/chart/status/performanceandsales'
+            },
+            {
                 title: '매출 차트',
                 icon: CircleDotIcon,
                 to: '/',
