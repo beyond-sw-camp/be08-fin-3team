@@ -78,6 +78,7 @@ const saveLocalStorage = (result: any) => {
     localStorage.setItem('loginUserEmail', result.email);
     localStorage.setItem('accessToken', result.accessToken);
     localStorage.setItem('loginUserRole', result.role);
+    localStorage.setItem('profileUrl', result.profileUrl);
 };
 
 // const findPassword = ()=>{
