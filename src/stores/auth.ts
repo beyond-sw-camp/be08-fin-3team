@@ -29,6 +29,7 @@ export const useAuthStore = defineStore({
             localStorage.removeItem('loginUserName');
             localStorage.removeItem('loginUserEmail');
             localStorage.removeItem('accessToken');
+            localStorage.removeItem('profileUrl');
             localStorage.setItem('isLoggedIn', 'false');
             localStorage.removeItem('loginUserRole'), router.push({ name: 'Login' });
         }

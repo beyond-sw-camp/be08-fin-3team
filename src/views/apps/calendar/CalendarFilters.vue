@@ -10,9 +10,9 @@ const categoryColors = {
   personal_plan: { color: '#f7eaa4', label: '개인 일정' },
   company_plan: { color: '#dde2a9', label: '전사 일정' },
   proposal_plan: { color: '#9ed7a9', label: '제안' },
-  contract_plan: { color: '#a4cbe8', label: '계약' },
+  act: { color: '#a4cbe8', label: '영업 활동' },
   sales_plan: { color: '#a4bbe1', label: '매출' },
-  act: { color: '#a9acd8', label: '영업 활동' },
+  contract_plan: { color: '#8bafc5', label: '계약' },
   estimate_plan: { color: '#ccd5db', label: '견적' },
 };
 

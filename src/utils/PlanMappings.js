@@ -40,5 +40,5 @@ export const chipColors = {
   'PROPOSAL': { color: '#58b070', text: '#000' },
   'ESTIMATE': { color: '#9ea7b3', text: '#000' },
   'SALES': { color: '#5b8db8', text: '#000' },
-  'CONTRACT': { color: '#3498db', text: '#fff' }
+  'CONTRACT': { color: '#8bafc5', text: '#fff' }
 };

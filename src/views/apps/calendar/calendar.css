@@ -10,18 +10,26 @@
   cursor: pointer;
   border: none;
 }
+.todo-event .event-time::before {
+  color: white;
+  font-weight: bold;
+}
 
 /* 영업활동 */
 .act-event {
-  background-color: #a9acd8;
+  background-color: #a4cbe8;
   color: white;
   font-size: 14px;
   border: none;
 }
 .act-event:hover {
-  background-color: #9da1d1;
+  background-color: #95bfdf;
   cursor: pointer;
   border: none;
+}
+.act-event .event-time::before {
+  color: white;
+  font-weight: bold;
 }
 
 /* 개인 일정 */
@@ -35,6 +43,11 @@
   background-color: #ebde8f;
   color: #555555;
 }
+.personal_plan-event .event-time::before {
+  color: #555555;
+  font-weight: bold;
+}
+
 
 /* 전사 일정 */
 .company_plan-event {
@@ -46,6 +59,10 @@
 .company_plan-event:hover {
   background-color: #d8de98; 
   color: white;
+}
+.company_plan-event .event-time::before {
+  color: #555555;
+  font-weight: bold;
 }
 
 /* 제안 */
@@ -60,18 +77,27 @@
   cursor: pointer;
   border: none;
 }
+.proposal_plan-event .event-time::before {
+  color: white;
+  font-weight: bold;
+}
+
 
 /* 계약 */
 .contract_plan-event {
-  background-color: #a4cbe8;
+  background-color: #8bafc5;
   color: white;
   font-size: 14px;
   border: none;
 }
 .contract_plan-event:hover {
-  background-color: #95bfdf;
+  background-color: rgb(123, 162, 187);
   cursor: pointer;
   border: none;
+}
+.contract_plan-event .event-time::before {
+  color: white;
+  font-weight: bold;
 }
 
 /* 매출 */
@@ -86,6 +112,10 @@
   cursor: pointer;
   border: none;
 }
+.sales_plan-event .event-time::before {
+  color: white;
+  font-weight: bold;
+}
 
 /* 견적 */
 .estimate_plan-event {
@@ -99,6 +129,16 @@
   cursor: pointer;
   border: none;
 }
+.estimate_plan-event .event-time::before {
+  color: #686565;
+  font-weight: bold;
+}
+.fc-event {
+  padding: 4px 0;
+  min-height: 20px;
+  margin-bottom: 5px;
+}
+
 
 .fc-event-title {
   font-weight: bold;
@@ -112,4 +152,10 @@
 
 .fc-toolbar button:hover {
   background-color: #2a4887;
+}
+.event-time::before {
+  content: "|";
+  margin-right: 3px;
+  margin-left: 4px;
+  font-weight: bold;
 }

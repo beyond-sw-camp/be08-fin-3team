@@ -1,17 +1,18 @@
 <script setup>
 import { MailIcon ,UserIcon} from 'vue-tabler-icons';
 import { profileDD } from '@/_mockApis/headerData';
-
+import { useProfileImageStore } from '@/stores/userInfo';
+import { computed, onMounted, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth';
-import { onMounted, ref } from 'vue'
 
 const authStore = useAuthStore();
+const store = useProfileImageStore();
 const name = ref('');
 const email = ref('');
+const profileImg = computed(()=>store.profileImg);
 
 onMounted(()=>{
-    // name.value = authStore.name;
-    // email.value = authStore.email;
+    store.refreshImg();
     name.value = localStorage.getItem("loginUserName");
     email.value = localStorage.getItem("loginUserEmail");
     
@@ -19,13 +20,11 @@ onMounted(()=>{
 </script>
 
 <template>
-    <!-- ---------------------------------------------- -->
-    <!-- notifications DD -->
-    <!-- ---------------------------------------------- -->
     <v-menu :close-on-content-click="false" class="profile_popup">
         <template v-slot:activator="{ props }">
             <v-btn class="custom-hover-primary" variant="text" v-bind="props" icon>
-                <i class="mr-2 mdi text-h1 mdi-account-circle"></i>
+                <v-img v-if="profileImg" :src=profileImg class="profile-image"/>
+                <i v-else class="mr-2 mdi text-h1 mdi-account-circle"></i>
             </v-btn>
         </template>
         <v-sheet rounded="md" width="360" elevation="10">
@@ -60,19 +59,18 @@ onMounted(()=>{
                     </v-list-item>
                 </v-list>
             </perfect-scrollbar>
-            <!-- <div class="px-8 py-3">
-                <div class="bg-lightprimary rounded-md pa-5 overflow-hidden position-relative">
-                    <h5 class="text-h6">
-                        Unlimited<br />
-                        Access
-                    </h5>
-                    <v-btn variant="flat" color="primary" class="mt-3">Upgrade</v-btn>
-                    <img src="@/assets/images/backgrounds/unlimited-bg.png" alt="bg-img" class="right-pos-img" />
-                </div>
-            </div> -->
             <div class="pt-4 pb-6 px-8 text-center">
                 <v-btn color="primary" variant="outlined" block @click="authStore.logout()">로그아웃</v-btn>
             </div>
         </v-sheet>
     </v-menu>
 </template>
+
+<style>
+.profile-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+</style>
