@@ -36,7 +36,7 @@ const customizer = useCustomizerStore();
                 <v-container fluid class="page-wrapper pb-sm-15 pb-10">
                     <div :class="customizer.boxed ? 'maxWidth' : ''">
                         <RouterView />
-                        <v-btn
+                        <!-- <v-btn
                             class="customizer-btn"
                             size="large"
                             icon
@@ -45,7 +45,7 @@ const customizer = useCustomizerStore();
                             @click.stop="customizer.SET_CUSTOMIZER_DRAWER(!customizer.Customizer_drawer)"
                         >
                             <SettingsIcon />
-                        </v-btn>
+                        </v-btn> -->
                     </div>
                 </v-container>
             </v-main>
@@ -65,13 +65,13 @@ const customizer = useCustomizerStore();
             ]"
         >
             <!---Customizer location right side--->
-            <v-navigation-drawer app temporary elevation="10" location="right" v-model="customizer.Customizer_drawer" width="320">
+            <!-- <v-navigation-drawer app temporary elevation="10" location="right" v-model="customizer.Customizer_drawer" width="320">
                 <Customizer />
-            </v-navigation-drawer>
-            <!-- <VerticalHeaderVue v-if="!customizer.setHorizontalLayout" />
-            <VerticalSidebarVue v-if="!customizer.setHorizontalLayout" /> -->
-            <HorizontalHeader/>
-            <HorizontalSidebar/>
+            </v-navigation-drawer> -->
+            <VerticalHeaderVue v-if="!customizer.setHorizontalLayout" />
+            <VerticalSidebarVue v-if="!customizer.setHorizontalLayout" />
+            <HorizontalHeader v-if="customizer.setHorizontalLayout" />
+            <HorizontalSidebar v-if="customizer.setHorizontalLayout" />
             <v-main>
                 <v-container fluid class="page-wrapper pb-sm-15 pb-10">
                     <div :class="customizer.boxed ? 'maxWidth' : ''">

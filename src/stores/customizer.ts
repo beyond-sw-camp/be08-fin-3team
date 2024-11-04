@@ -20,6 +20,8 @@ export const useCustomizerStore = defineStore({
   actions: {
     SET_SIDEBAR_DRAWER() {
       this.Sidebar_drawer = !this.Sidebar_drawer;
+      // 창 축소할 때 사이드 바 활성화
+      this.setHorizontalLayout = false;
     },
     SET_MINI_SIDEBAR(payload: any) {
       this.mini_sidebar = payload;

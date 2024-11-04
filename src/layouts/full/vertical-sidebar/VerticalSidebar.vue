@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, shallowRef } from 'vue';
+import { ref, shallowRef, onMounted } from 'vue';
 import { useCustomizerStore } from '@/stores/customizer';
 import sidebarItems from './sidebarItem';
 
@@ -9,9 +9,19 @@ import NavCollapse from './NavCollapse/NavCollapse.vue';
 import Logo from '../logo/Logo.vue';
 import { useAuthStore } from '@/stores/auth';
 import { PowerIcon } from 'vue-tabler-icons';
+import { UserIcon } from 'vue-tabler-icons';
+
 const customizer = useCustomizerStore();
 const sidebarMenu = shallowRef(sidebarItems);
 const authStore = useAuthStore();
+
+const name = ref<string | null>(null);
+
+onMounted(() => {
+    name.value = localStorage.getItem("loginUserName");
+});
+
+
 </script>
 
 <template>
@@ -23,13 +33,14 @@ const authStore = useAuthStore();
         <!-- ---------------------------------------------- -->
         <perfect-scrollbar class="scrollnavbar">
             <div class="profile">
-                <div class="profile-pic profile-pic py-7 px-3">
+                <!-- <div class="profile-pic profile-pic py-7 px-3">
                     <v-avatar size="45">
                         <img src="@/assets/images/profile/user2.jpg" width="50" alt="Julia" />
                     </v-avatar>
-                </div>
+                </div> -->
                 <div class="profile-name d-flex align-center px-3">
-                    <h5 class="text-white font-weight-medium">Julia Roberts</h5>
+                    <UserIcon class="text-white mr-2" />
+                    <h4 class="text-white font-weight-medium">{{ name }}</h4>
                     <div class="ml-auto profile-logout">
                         <v-btn variant="text" icon rounded="md" color="white" @click="authStore.logout()">
                             <PowerIcon size="22"/>

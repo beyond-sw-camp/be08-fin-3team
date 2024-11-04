@@ -14,7 +14,8 @@ const config: ConfigProps = {
     Sidebar_drawer: null,
     Customizer_drawer: false,
     mini_sidebar: false,
-    setHorizontalLayout: false, // Horizontal layout
+    // setHorizontalLayout: false, // Horizontal layout
+    setHorizontalLayout: true, // Horizontal layout
     setRTLLayout: false, // RTL layout
     actTheme: 'BLUE_THEME',
     inputBg: 'BLUE_THEME',
