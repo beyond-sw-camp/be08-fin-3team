@@ -79,7 +79,7 @@ export default {
 	},
 	data() {
 		return {
-			priorityOptions: ['높음', '중간', '낮음'],
+      		priorityOptions: ['높음', '중간', '낮음'],
 			showAlert: false,
 			showSuccessAlert: false,
 			showConfirmDialogs: false,
@@ -87,10 +87,13 @@ export default {
 			alertType: '',
 			isPrivate: this.todo.privateYn === 'Y',
 			statusMapping: {
-				TODO: '진행 전',
-				INPROGRESS: '진행 중',
-				DONE: '완료'
-				},
+				"진행 전": "TODO",
+				"진행 중": "INPROGRESS",
+				"완료": "DONE",
+				"TODO": "진행 전",
+				"INPROGRESS": "진행 중",
+				"DONE": "완료"
+			},
 		};
 	},
 	watch: {
