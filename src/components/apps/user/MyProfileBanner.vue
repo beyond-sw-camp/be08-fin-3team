@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { onMounted, ref, shallowRef } from 'vue';
+import { computed, onMounted, ref, shallowRef } from 'vue';
 import { HeartIcon, PhotoIcon, UserCircleIcon, UsersIcon } from 'vue-tabler-icons';
 import profileBg from '@/assets/images/backgrounds/profilebg.jpg';
 import UserImage from '@/assets/images/profile/user-1.jpg';
 import api from '@/api/axiosinterceptor';
+import { useProfileImageStore } from '@/stores/userInfo';
 
+const store = useProfileImageStore();
+const profileImg = computed(()=>store.profileImg);
 const tab = ref(null);
 const items = shallowRef([
     { tab: '내 정보', icon: UserCircleIcon, href: '/apps/user/mypage' },
@@ -12,11 +15,14 @@ const items = shallowRef([
     { tab: '잠재고객 관리', icon: UsersIcon, href: '/apps/user/mypage/pcustomers' },
     // { tab: 'Gallery', icon: PhotoIcon, href: '/apps/user/profile/gallery' }
 ]);
-const props = defineProps({
-    name:String
+// const props = defineProps({
+//     name:String
+// })
+const name = ref();
+
+onMounted(()=>{
+    name.value = localStorage.getItem("loginUserName");
 })
-
-
 </script>
 
 <template>
@@ -27,16 +33,6 @@ const props = defineProps({
                 <v-col cols="12" lg="4" sm="12" class="order-sm-second">
                     <div class="px-4 py-1">
                         <v-row class="justify-center">
-                            <v-col cols="4" class="text-center">
-                                <UserCheckIcon size="20" />
-                                <h4 class="text-h4">5</h4>
-                                <h6 class="text-h6 font-weight-regular">담당 고객 수</h6>
-                            </v-col>
-                            <v-col cols="4" class="text-center">
-                                <UserCircleIcon size="20" />
-                                <h4 class="text-h4">2</h4>
-                                <h6 class="text-h6 font-weight-regular">담당 잠재고객 수</h6>
-                            </v-col>    
                         </v-row>
                     </div>
                 </v-col>
@@ -44,30 +40,14 @@ const props = defineProps({
                     <div class="text-center top-spacer">
                         <div class="avatar-border">
                             <v-avatar size="100" class="userImage">
-                                <img :src="UserImage" width="100" alt="Mathew" />
+                                <img v-if="profileImg" :src="profileImg" width="100" alt="profile-img" />
+                                <img v-else :src="UserImage" width="100" alt="Mathew" />
                             </v-avatar>
                         </div>
                         <h5 class="text-h5 mt-3">{{ name }}</h5>
-                        <span class="text-h6 font-weight-regular">영업부</span>
+                        <!-- <span class="text-h6 font-weight-regular">영업부</span> -->
                     </div>
                 </v-col>
-                <!-- <v-col cols="12" lg="4" class="d-flex align-center justify-center justify-lg-end order-sm-third">
-                    <div class="d-flex align-center justify-space-between px-10 py-1 gap-3">
-                        <v-btn icon variant="flat" size="x-small" color="primary" class="btn-brand-facebook"
-                            ><BrandFacebookIcon size="16"
-                        /></v-btn>
-                        <v-btn icon variant="flat" size="x-small" color="primary" class="btn-brand-twitter"
-                            ><BrandTwitterIcon size="16"
-                        /></v-btn>
-                        <v-btn icon variant="flat" size="x-small" color="primary" class="btn-brand-dribbble"
-                            ><BrandDribbbleIcon size="16"
-                        /></v-btn>
-                        <v-btn icon variant="flat" size="x-small" color="primary" class="btn-brand-youtube"
-                            ><BrandYoutubeIcon size="16"
-                        /></v-btn>
-                        <v-btn variant="flat" color="primary">Add to Story</v-btn>
-                    </div>
-                </v-col> -->
                 <v-col md="12" class="order-sm-last">
                     <v-tabs v-model="tab" color="primary" dark class="profiletab bg-grey100">
                         <v-tab v-for="item in items" :key="item.tab" :to="item.href">

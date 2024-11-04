@@ -44,7 +44,8 @@ const goToEditPage = (customerId)=>{
                     <v-card-item class="card_container">
                         <div class="title_container">
                             <v-avatar size="60" rounded="xl">
-                                <img :src="getRandomImage()" alt="img" width="60">
+                                <!-- <img :src="getRandomImage()" alt="img" width="60"> -->
+                                <i class="mr-2 mdi text-h1 mdi-account-circle"></i>
                             </v-avatar>
                             <div class="name_container">
                                     <div class="customer_name">{{ customer.name }} </div> 
