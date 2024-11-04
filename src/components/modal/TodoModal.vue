@@ -12,19 +12,29 @@
 					</div>
 					<v-row>
 						<v-col cols="12" sm="6" md="4">
-							<v-text-field v-model="todo.title" label="제목*" :rules="[v => !!v || '일정명을 입력하세요.']" required></v-text-field>
+							<v-text-field v-model="todo.title" :rules="[v => !!v || '할 일명을 입력하세요.']" required>
+								<template #label> <span class="bold-label">제목<span class="require">*</span></span></template>
+							</v-text-field>
 						</v-col>
 						<v-col cols="12" sm="6" md="4">
-							<v-text-field v-model="todo.todoCls" label="분류*" :rules="[v => !!v || '분류를 입력하세요.']" required></v-text-field>
+							<v-text-field v-model="todo.todoCls" :rules="[v => !!v || '분류를 입력하세요.']" required>
+								<template #label> <span class="bold-label">분류<span class="require">*</span></span></template>
+							</v-text-field>
 						</v-col>
 						<v-col cols="12" sm="6" md="4">
-							<v-select v-model="todo.priority" :items="priorityOptions" label="우선순위*" :rules="[v => !!v || '우선순위를 선택하세요.']" required></v-select>
+							<v-select v-model="todo.priority" :items="priorityOptions" :rules="[v => !!v || '우선순위를 선택하세요.']" required>
+								<template #label> <span class="bold-label">우선순위<span class="require">*</span></span></template>
+							</v-select>
 						</v-col>
 						<v-col cols="12">
-							<v-text-field v-model="todo.dueDate" label="마감일*" type="date" :rules="[v => !!v || '마감일을 입력하세요.']" required></v-text-field>
+							<v-text-field v-model="todo.dueDate" type="date" :rules="[v => !!v || '마감일을 입력하세요.']" required>
+								<template #label> <span class="bold-label">마감일<span class="require">*</span></span></template>
+							</v-text-field>
 						</v-col>
 						<v-col cols="12">
-							<v-select v-model="todo.status" :items="statusOptions" label="상태*" :rules="[v => !!v || '상태를 선택하세요.']" required></v-select>
+							<v-select v-model="todo.status" :items="statusOptions" :rules="[v => !!v || '상태를 선택하세요.']" required>
+								<template #label> <span class="bold-label">상태<span class="require">*</span></span></template>
+							</v-select>
 						</v-col>
 						<v-col cols="12">
 							<v-switch color="primary" v-model="isPrivate" label="나만보기 여부"></v-switch>
@@ -33,7 +43,7 @@
 							<v-text-field v-model="todo.content" label="내용"></v-text-field>
 						</v-col>
 					</v-row>
-					<small>*필수 입력</small>
+					<small><span class="require">*</span>필수 입력</small>
 				</v-form>
 			</v-card-text>
 			<ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="cancleDelete" />
@@ -69,7 +79,7 @@ export default {
 	},
 	data() {
 		return {
-      		priorityOptions: ['높음', '중간', '낮음'],
+			priorityOptions: ['높음', '중간', '낮음'],
 			showAlert: false,
 			showSuccessAlert: false,
 			showConfirmDialogs: false,
@@ -77,13 +87,10 @@ export default {
 			alertType: '',
 			isPrivate: this.todo.privateYn === 'Y',
 			statusMapping: {
-				"진행 전": "TODO",
-				"진행 중": "INPROGRESS",
-				"완료": "DONE",
-				"TODO": "진행 전",
-				"INPROGRESS": "진행 중",
-				"DONE": "완료"
-			},
+				TODO: '진행 전',
+				INPROGRESS: '진행 중',
+				DONE: '완료'
+				},
 		};
 	},
 	watch: {
@@ -178,4 +185,14 @@ export default {
 	z-index: 3000;
 	width: 60%;
 }
+
+.require {
+  color: red;
+  font-weight: bold;
+}
+.bold-label {
+	font-size: 0.9rem;
+  /* font-weight: bold; */
+}
+
 </style>

@@ -12,54 +12,40 @@
 					</div>
 					<v-row>
 						<v-col cols="12" sm="6" md="6">
-							<v-text-field v-model="plan.title" label="제목*" 
-							:rules="[v => !!v || '일정명을 입력하세요.']" required></v-text-field>
+							<v-text-field v-model="plan.title" :rules="[v => !!v || '일정명을 입력하세요.']" required>
+								<template #label> <span class="bold-label">일정명<span class="require">*</span></span></template>
+							</v-text-field>
 						</v-col>
 						<v-col cols="12" sm="6" md="6">
-							<v-select
-								v-model="plan.planCls"
-								:items="planClsOptions"
-								label="분류*" outlined
-								@update:model-value ="fetchDomainDetails"
-								:rules="[v => !!v || '분류를 선택하세요.']"
-								required
-							></v-select>
+							<v-select v-model="plan.planCls" :items="planClsOptions" outlined @update:model-value ="fetchDomainDetails" :rules="[v => !!v || '분류를 선택하세요.']" required>
+							<template #label> <span class="bold-label">분류<span class="require">*</span></span></template></v-select>
 						</v-col>
-						<v-col cols="12" v-if="plan.planCls && !['개인', '전사'].includes(this.plan.planCls)">
-              <v-text-field 
-                v-model="plan.planDetails.title" 
-                :label="dynamicTitleLabel" 
-                readonly
-              ></v-text-field>
-              <v-text-field 
-                v-model="plan.planDetails.note" 
-                :label="dynamicNoteLabel" 
-                readonly
-              ></v-text-field>
-						</v-col>
+							<v-col cols="12" v-if="plan.planCls && !['개인', '전사'].includes(this.plan.planCls)">
+								<v-text-field 
+									v-model="plan.planDetails.title" 
+									:label="dynamicTitleLabel" 
+									readonly
+								></v-text-field>
+								<v-text-field 
+									v-model="plan.planDetails.note" 
+									:label="dynamicNoteLabel" 
+									readonly
+								></v-text-field>
+							</v-col>
 						<v-col cols="12">
-							<v-text-field v-model="plan.planDate" label="일자*" type="date" 
-							:rules="[v => !!v || '일자를 입력하세요.']" required></v-text-field>
+							<v-text-field v-model="plan.planDate" type="date" :rules="[v => !!v || '일자를 입력하세요.']" required>
+								<template #label> <span class="bold-label">일자<span class="require">*</span></span></template>
+						</v-text-field>
 						</v-col>
 							<v-col cols="12" sm="6" md="6">
-								<v-select
-									label="시작 시간"
-									v-model="plan.startTime"
-									:items="timeOptions"
-									outlined
-									:rules="[v => !!v || '시작 시간을 선택하세요.']"
-									required
-								></v-select>
+								<v-select v-model="plan.startTime" :items="timeOptions" outlined :rules="[v => !!v || '시작 시간을 선택하세요.']" required>
+									<template #label> <span class="bold-label">시작 시간<span class="require">*</span></span></template>
+							</v-select>
 							</v-col>
 							<v-col cols="12" sm="6" md="6">
-								<v-select
-									label="종료 시간"
-									v-model="plan.endTime"
-									:items="timeOptions"
-									outlined
-									:rules="[v => !!v || '종료 시간을 선택하세요.']"
-									required
-								></v-select>
+								<v-select v-model="plan.endTime" :items="timeOptions" outlined :rules="[v => !!v || '종료 시간을 선택하세요.']">
+									<template #label> <span class="bold-label">종료 시간<span class="require">*</span></span></template>
+								</v-select>
 							</v-col>
 						<v-col cols="12">
 							<v-switch color="primary" v-model="isPersonal" label="나만보기 여부"></v-switch>
@@ -68,7 +54,7 @@
 							<v-text-field v-model="plan.content" label="내용"></v-text-field>
 						</v-col>
 					</v-row>
-					<small>*필수 입력</small>
+					<small><span class="require">*</span>필수 입력</small>
 				</v-form>
 			</v-card-text>
 			<ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="cancleDelete" />
@@ -387,6 +373,15 @@ export default {
 	font-size: 0.9rem;
 	margin-left: 37px;
 	color: #464646;
+}
+
+.require {
+  color: red;
+  font-weight: bold;
+}
+.bold-label {
+	font-size: 0.9rem;
+  /* font-weight: bold; */
 }
 
 </style>
