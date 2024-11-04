@@ -119,7 +119,7 @@ const monthChartOptions = computed(() => {
                             show: true,
                             fontSize: '20px',
                             fontWeight: 'bold',
-                            label: formatNumberWithCommas(monthTargetSales.value),
+                            label: `₩${formatNumberWithCommas(monthTargetSales.value)}`,
                             color: '#333'
                         }
                     }
@@ -172,7 +172,7 @@ const yearChartOptions = computed(() => {
                             show: true,
                             fontSize: '20px',
                             fontWeight: 'bold',
-                            label: formatNumberWithCommas(yearTargetSales.value),
+                            label: `₩${formatNumberWithCommas(yearTargetSales.value)}`,
                             color: '#333'
                         }
                     }
