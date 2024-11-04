@@ -638,11 +638,11 @@ export default defineComponent({
 
 .event-time {
   font-weight: bold;
-  font-size: 15px;
+  font-size: 14px;
 }
 .event-title {
   margin-left: 5px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: bold;
 
 }

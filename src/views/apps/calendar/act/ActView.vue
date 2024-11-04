@@ -27,39 +27,47 @@
               :disabled="isEditMode"
             ></v-text-field>
           </div>
+          <v-dialog v-model="showLeadsModal" max-width="800">
+          <v-card>
+            <v-card-title class="headline">영업기회 목록</v-card-title>
+            <v-card-text>
+              <v-row>
+                <v-col cols="10">
+                  <v-text-field label="검색" v-model="searchQuery" clearable></v-text-field>
+                </v-col>
+                <v-col cols="2">
+                  <v-btn @click="fetchLeads" color="primary">검색</v-btn>
+                </v-col>
+              </v-row>
+              <v-data-table
+                :headers="leadHeaders"
+                :items="filteredLeads"
+                item-value="leadNo"
+                class="border rounded-md"
+                items-per-page="5"
+              >
+                <template v-slot:item="{ item }">
+                  <tr
+                    :class="{ 'highlighted-row': selectedLead && selectedLead.leadNo === item.leadNo }"
+                    @click="handleRowClick(item)"
+                    @dblclick="selectLead(item)"
+                  >
+                <td>{{ item.leadNo }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.note }}</td>
+                  </tr>
+                </template>
+              </v-data-table>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="primary" @click="selectLead(selectedLead)">선택</v-btn>
+              <v-btn color="error" @click="showLeadsModal = false">닫기</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
 
-          <v-dialog v-model="showLeadsModal" width="500">
-            <v-card>
-              <v-card-title class="headline">영업기회 목록</v-card-title>
-              <v-card-text>
-                <perfect-scrollbar style="max-height: 250px">
-                  <v-list shaped>
-                    <v-list-item
-                      v-for="(lead, index) in leads"
-                      :key="lead.leadNo"
-                      @click="selectLead(lead)"
-                      class="hover:bg-primary-light list-item-spacing"
-                    >
-                      <v-list-item-content>
-                        <v-list-item-title class="list-item-title">
-                          <v-icon small class="mr-2">mdi-check</v-icon>
-                          {{ lead.name }}
-                        </v-list-item-title>
-                        <v-list-item-subtitle class="note-text">
-                          {{ lead.note }}
-                        </v-list-item-subtitle>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </v-list>
-                </perfect-scrollbar>
-              </v-card-text>
-              <v-card-actions>
-                <v-btn text @click="showLeadsModal = false">닫기</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-
-            <v-label class="custom-label">활동명</v-label>
+            <v-label class="custom-label">활동명<span class="require">*</span></v-label>
             <v-text-field
               v-model="act.name"
               outlined
@@ -67,7 +75,7 @@
               required
             ></v-text-field>
 
-            <v-label class="custom-label">활동분류</v-label>
+            <v-label class="custom-label">활동분류<span class="require">*</span></v-label>
             <v-select
               v-model="act.cls"
               :items="actStatusOptions"
@@ -76,7 +84,7 @@
               required
             ></v-select>
 
-            <v-label class="custom-label">활동목적</v-label>
+            <v-label class="custom-label">활동목적<span class="require">*</span></v-label>
             <v-text-field
               v-model="act.purpose"
               outlined
@@ -84,7 +92,7 @@
               required
             ></v-text-field>
 
-            <v-label class="custom-label">활동일자</v-label>
+            <v-label class="custom-label">활동일자<span class="require">*</span></v-label>
             <v-text-field
               v-model="act.actDate"
               type="date"
@@ -95,7 +103,7 @@
 
             <v-row>
               <v-col>
-                <v-label class="custom-label">시작 시간</v-label>
+                <v-label class="custom-label">시작 시간<span class="require">*</span></v-label>
                 <v-select 
                   v-model="act.startTime" 
                   :items="timeOptions"
@@ -105,7 +113,7 @@
                 ></v-select>
               </v-col>
               <v-col>
-                <v-label class="custom-label">종료 시간</v-label>
+                <v-label class="custom-label">종료 시간<span class="require">*</span></v-label>
                 <v-select 
                   v-model="act.endTime" 
                   :items="timeOptions"
@@ -135,7 +143,7 @@
 </template>
 
 <script>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import api from '@/api/axiosinterceptor';
 import { actStatus } from '@/utils/ActStatusMappings';
@@ -180,7 +188,27 @@ export default {
       planContent: '',
       actContent: ''
     });
+    const searchQuery = ref('');
+    const selectedLead = ref(null);
 
+    const filteredLeads = computed(() => {
+      if (!searchQuery.value) {
+        return leads.value;
+      }
+      
+      return leads.value.filter(
+        (lead) =>
+          lead.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+          lead.note.toLowerCase().includes(searchQuery.value.toLowerCase())
+      );
+    });
+
+    const leadHeaders = ref([
+      { title: '번호', key: 'leadNo', width: '100px' },
+      { title: '이름', key: 'name' },
+      { title: '메모', key: 'note' }
+    ]);
+    
     onMounted(() => {
       const actNo = route.params.actNo; // actNo가 있으면 수정 모드로 간주
       isEditMode.value = !!actNo; // actNo가 있으면 true, 없으면 false
@@ -197,21 +225,25 @@ export default {
       }
     };
 
-    const selectLead = (lead) => {
-      act.value.leadNo = lead.leadNo;
-      act.value.leadName = lead.name;
-      act.value.leadNote = lead.note;
-      showLeadsModal.value = false;
+    const selectLead = (lead = selectedLead.value) => {
+      console.log('act.lead',act.value)
+      if (lead) {
+        act.value.leadNo = lead.leadNo;
+        act.value.leadName = lead.name;
+        act.value.note = lead.note;
+        showLeadsModal.value = false;
+      }
     };
 
     const fetchLeads = async () => {
       try {
         const response = await api.get('/leads');
         if (response.data.code === 200) {
+          console.log('response.data.result',response.data.result)
           leads.value = response.data.result.map((lead) => ({
             leadNo: lead.leadNo,
             name: lead.name,
-            note: lead.note
+            note: lead.note,
           }));
         }
       } catch (e) {
@@ -238,6 +270,16 @@ export default {
     onMounted(fetchActDetails);
 
     const actStatusOptions = ref(Object.keys(actStatus));
+
+    const handleRowClick = (item) => {
+      selectedLead.value = item;
+    };
+
+    const handleRowDblClick = () => {
+      if (selectedLead.value) {
+        selectLead(showLeadsModal.value);
+      }
+    };
 
     const generateTimeOptions = () => {
       const options = [];
@@ -396,7 +438,28 @@ export default {
       confirmDelete,
       cancleDelete,
       showConfirmDialogs,
+      handleRowClick,
+      handleRowDblClick,
+      filteredLeads,
+      searchQuery,
+      leadHeaders,
     };
   }
 };
 </script>
+
+<style>
+
+.hidden-field {
+    visibility: hidden;
+}
+
+.headline {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.highlighted-row {
+    background-color: #e0f7fa;
+}
+</style>
