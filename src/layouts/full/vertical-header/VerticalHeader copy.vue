@@ -3,10 +3,14 @@ import { ref, watch, computed } from 'vue';
 import { useCustomizerStore } from '../../../stores/customizer';
 import { useEcomStore } from '@/stores/apps/eCommerce';
 import {  Menu2Icon} from 'vue-tabler-icons';
+import LanguageDD from './LanguageDD.vue';
+import NotificationDD from './NotificationDD.vue';
 import ProfileDD from './ProfileDD.vue';
+import Searchbar from './Searchbar.vue';
 import Logo from '../logo/Logo.vue';
 import RtlLogo from '../logo/RtlLogo.vue';
 import LogoIcon from '../logo/LogoIcon.vue'
+import ThemeToggler from './ThemeToggler.vue';
 
 const customizer = useCustomizerStore();
 const showSearch = ref(false);
@@ -53,8 +57,46 @@ const getCart = computed(() => {
             <Menu2Icon size="25" />
         </v-btn>
 
+        <!-- ---------------------------------------------- -->
+        <!-- Search part -->
+        <!-- ---------------------------------------------- -->
+
+        <Searchbar />
+
+
+        <!---/Search part -->
+
         <v-spacer />
+        <!-- ---------------------------------------------- -->
+        <!---right part -->
+        <!-- ---------------------------------------------- -->
+        <!-- ---------------------------------------------- -->
+        <!-- translate -->
+        <!-- ---------------------------------------------- -->
+
+        <div class="me-1">
+            <ThemeToggler />
+        </div>
+
+        <LanguageDD />
+
+        <!-- ---------------------------------------------- -->
+        <!-- ShoppingCart -->
+        <!-- ---------------------------------------------- -->
+        <v-btn icon variant="text" color="primary" to="/ecommerce/checkout">
+            <v-badge color="error" :content="getCart?.length">
+                <v-icon size="22">mdi-cart</v-icon>
+            </v-badge>
+        </v-btn>
+
+
+        <!-- ---------------------------------------------- -->
+        <!-- Notification -->
+        <!-- ---------------------------------------------- -->
+        <NotificationDD />
+        <!-- ---------------------------------------------- -->
         <!-- User Profile -->
+        <!-- ---------------------------------------------- -->
         <div class="ml-2">
             <ProfileDD />
         </div>
