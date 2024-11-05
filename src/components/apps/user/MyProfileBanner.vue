@@ -41,7 +41,7 @@ onMounted(()=>{
                         <div class="avatar-border">
                             <v-avatar size="100" class="userImage">
                                 <img v-if="profileImg" :src="profileImg" width="100" alt="profile-img" />
-                                <img v-else :src="UserImage" width="100" alt="Mathew" />
+                                <img v-else :src="UserImage" width="100" alt="Mathew" /> 
                             </v-avatar>
                         </div>
                         <h5 class="text-h5 mt-3">{{ name }}</h5>

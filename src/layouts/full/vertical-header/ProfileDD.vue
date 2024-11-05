@@ -66,11 +66,11 @@ onMounted(()=>{
     </v-menu>
 </template>
 
-<style>
+<style scoped>
 .profile-image {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    object-fit: cover;
+    object-fit: contain;
 }
 </style>
