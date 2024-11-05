@@ -188,7 +188,6 @@ export default {
 	},
   computed: {
     isEditable() {
-			console.log('plan-isEditable', this.plan.calendarNo, this.currentUserCalendarNo);
       return this.plan.calendarNo === this.currentUserCalendarNo;
     },
   },
@@ -252,7 +251,7 @@ export default {
 		},
 
     selectDomain(item) {
-      console.log("selectDomain item:", item);
+      // console.log("selectDomain item:", item);
 
       this.planDetails = {
         title: item[this.titleField] || '',

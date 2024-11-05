@@ -112,7 +112,7 @@ const MainRoutes = {
         {
             name: 'ActChart',
             path: '/apps/chart/act',
-            component: () => import('@/views/apps/sbChart/ActChart.vue')
+            component: () => import('@/views/apps/ActChart/ActChart.vue')
         },
         {
             name: 'contractChart',

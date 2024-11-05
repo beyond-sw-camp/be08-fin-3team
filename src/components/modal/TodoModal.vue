@@ -110,7 +110,6 @@ export default {
 	},
   computed: {
     isEditable() {
-			console.log('isEditable', this.todo.calendarNo, this.currentUserCalendarNo);
       return this.todo.calendarNo === this.currentUserCalendarNo;
     },
   },
