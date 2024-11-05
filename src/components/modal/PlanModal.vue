@@ -59,12 +59,12 @@
 			</v-card-text>
 			<ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="cancleDelete" />
 			<v-card-actions>
-					<v-btn v-if="mode === 'edit'" color="primary" variant="outlined" @click="updatePlan" flat style="font-size: 15px; font-weight: 600;">수정</v-btn>
-					<v-btn v-if="mode === 'edit'" color="error" variant="outlined" @click="deletePlan" flat style="font-size: 15px; font-weight: 600;">삭제</v-btn>
+				<v-btn v-if="mode === 'edit'" color="primary" variant="outlined" @click="updatePlan" flat style="font-size: 15px; font-weight: 600;" :disabled="!isEditable">수정</v-btn>
+				<v-btn v-if="mode === 'edit'" color="error" variant="outlined" @click="deletePlan" flat style="font-size: 15px; font-weight: 600;" :disabled="!isEditable">삭제</v-btn>
 				<v-spacer></v-spacer>
-					<v-btn v-if="mode === 'add'" color="primary"@click="submitPlan" flat style="font-size: 15px; font-weight: 600;">저장</v-btn>
-					<v-btn color="close" @click="closeModal" style="font-size: 15px; font-weight: 600;">닫기</v-btn>
-					<ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="cancleDelete" />
+				<v-btn v-if="mode === 'add'" color="primary"@click="submitPlan" flat style="font-size: 15px; font-weight: 600;">저장</v-btn>
+				<v-btn color="close" @click="closeModal" style="font-size: 15px; font-weight: 600;">닫기</v-btn>
+				<ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="cancleDelete" />
 			</v-card-actions>
 		</v-card>
 		
@@ -112,6 +112,7 @@ export default {
 	props: {
 		AddPlanModal: Boolean,
 		plan: Object,
+    currentUserCalendarNo: Number,
 		statusOptions: Array,
 		planClsOptions: Array,
 		mode: {
@@ -185,6 +186,12 @@ export default {
 			immediate: true,
 		},
 	},
+  computed: {
+    isEditable() {
+			console.log('plan-isEditable', this.plan.calendarNo, this.currentUserCalendarNo);
+      return this.plan.calendarNo === this.currentUserCalendarNo;
+    },
+  },
 	methods: {
 		validatePlan(){
 			const isValid = this.$refs.form.validate();

@@ -58,6 +58,7 @@ export default defineComponent({
           note: '',
         },
       },
+      currentUserCalendarNo: null,
       calendarOptions: {
         plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
         headerToolbar: {
@@ -182,6 +183,7 @@ export default defineComponent({
       try {
         const response = await api.get('/calendars/user/data');
         const data = response.data;
+        this.currentUserCalendarNo = response.data.result.calendarNo;
         // console.log("캘린더 조회")
         // console.log(response);
         if(data.code== 200){
@@ -571,11 +573,14 @@ export default defineComponent({
 
       <TodoModal v-model="AddTodoModal"
         :todo="todo" :priorityOptions="priorityOptions" :statusOptions="statusOptions" :mode="mode"
+        :currentUserCalendarNo="currentUserCalendarNo" 
         @close="closeTodoModal" @add="addTodo" @delete="deleteTodo" @update="updateTodo" @show-alert="handleAlert"
       />
       <PlanModal v-model="AddPlanModal"
-      :plan="plan" :planClsOptions="planClsOptions" :statusOptions="statusOptions" :mode="mode"
-      @close="closePlanModal" @add="addPlan" @delete="deletePlan" @update="updatePlan" @show-alert="handleAlert" />
+        :plan="plan" :planClsOptions="planClsOptions" :statusOptions="statusOptions" :mode="mode"
+        :currentUserCalendarNo="currentUserCalendarNo" 
+        @close="closePlanModal" @add="addPlan" @delete="deletePlan" @update="updatePlan" @show-alert="handleAlert" 
+      />
 
       <v-alert v-if="showSuccessAlert" type="success" variant="tonal" :class="['alert', alertType]">
         <h5 class="text-h5 text-capitalize">Success</h5>
