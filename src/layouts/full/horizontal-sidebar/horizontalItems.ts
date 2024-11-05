@@ -171,29 +171,28 @@ const horizontalItems: menu[] = [
             }
         ]
     },
-
-    {
-        title: '영업도구',
-        icon: ToolIcon,
-        to: '/',
-        children: [
-            {
-                title: '보고',
-                icon: CircleDotIcon,
-                to: '/apps/blog/posts'
-            },
-            {
-                title: '공지',
-                icon: CircleDotIcon,
-                to: '/apps/blog/early-black-friday-amazon-deals-cheap-tvs-headphones'
-            },
-            {
-                title: '영업활동',
-                icon: CircleDotIcon,
-                to: '/apps/act/list'
-            }
-        ]
-    },
+    // {
+    //     title: '영업도구',
+    //     icon: ToolIcon,
+    //     to: '/',
+    //     children: [
+    //         {
+    //             title: '보고',
+    //             icon: CircleDotIcon,
+    //             to: '/apps/blog/posts'
+    //         },
+    //         {
+    //             title: '공지',
+    //             icon: CircleDotIcon,
+    //             to: '/apps/blog/early-black-friday-amazon-deals-cheap-tvs-headphones'
+    //         },
+    //         {
+    //             title: '영업활동',
+    //             icon: CircleDotIcon,
+    //             to: '/apps/act/list'
+    //         }
+    //     ]
+    // },
     {
         title: '차트',
         icon: ChartBarIcon,
