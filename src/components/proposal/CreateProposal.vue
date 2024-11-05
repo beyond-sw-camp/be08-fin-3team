@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted, reactive } from 'vue';
+import { ref, watch, onMounted, reactive, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
@@ -60,7 +60,7 @@ const handleRowClick = (lead) => {
 
 const handleRowDbClick = () => {
     if (selectedLead.value != null) {
-        console.log('Selected Lead:', selectedLead.value); // Debugging line
+        console.log('Selected Lead:', selectedLead.value);
         selectLead(selectedLead.value);
     } else {
         alert('영업기회를 선택하지 않았습니다.');
@@ -70,7 +70,7 @@ const handleRowDbClick = () => {
 const selectLead = (lead) => {
     editedItem.leadNo = lead.leadNo;
     editedItem.leadName = lead.name;
-    console.log('Lead selected:', editedItem.leadNo); // Debugging line
+    console.log('Lead selected:', editedItem.leadNo);
     leadDialog.value = false;
 };
 
@@ -82,7 +82,9 @@ onMounted(async () => {
         if (response.data.isSuccess && Array.isArray(response.data.result)) {
             leads.value = response.data.result.map((lead) => ({
                 leadNo: lead.leadNo,
-                name: lead.name
+                name: lead.name,
+                customerName: lead.customerName,
+                userName: lead.userName
             }));
         } else {
             console.error('Expected an array but got:', response.data);
@@ -99,16 +101,28 @@ watch(
         } else {
             searchCond.searchQuery = '';
             selectedLead.value = null;
+            leadList.value = [];
         }
     }
 );
 
+const displayedLeads = computed(() => leads.value);
+const leadName = ref('');
+
 const fetchLeads = async () => {
+    console.log('Searching leads with:', searchCond);
     try {
-        const response = await api.post('/leads/filter', searchCond);
-        leadList.value = response.data.result;
+        const response = await api.post('/leads/filter', {
+            name: searchCond.searchQuery || undefined
+        });
+        if (response.data.isSuccess) {
+            leads.value = response.data.result;
+        } else {
+            console.error('Error fetching leads:', response.data);
+        }
     } catch (error) {
-        console.error('영업기회 정보를 불러오는 중 오류가 발생했습니다:', error);
+        console.error('Failed to search leads:', error);
+        triggerAlert('검색에 실패했습니다.', 'error');
     }
 };
 
@@ -120,7 +134,7 @@ const save = async () => {
             return;
         }
     }
-    console.log('Edited Item before saving:', editedItem); // Ensure leadNo is set
+    console.log('Edited Item before saving:', editedItem);
 
     loading.value = true;
 
@@ -174,8 +188,9 @@ const cancel = () => {
                                     </v-col>
                                 </v-row>
                                 <v-data-table
+                                    :key="leads.length"
                                     :headers="headers"
-                                    :items="leadList"
+                                    :items="displayedLeads"
                                     item-value="leadNo"
                                     class="border rounded-md"
                                     items-per-page="5"
