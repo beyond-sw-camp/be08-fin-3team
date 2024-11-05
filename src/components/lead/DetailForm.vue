@@ -6,7 +6,7 @@ import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
 import { useAlert } from '@/utils/useAlert';
 import AlertComponent from '../shared/AlertComponent.vue';
 
-const showConfirmDialogs = ref(false); // 열림 상태 관리
+const showConfirmDialogs = ref(false);
 const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
 const route = useRoute();
@@ -231,7 +231,7 @@ const submitForm = async () => {
 
                 if (response.data.isSuccess) {
                     leadResponseDto.leadNo = response.data.result.leadNo;
-                    triggerAlert('저장이 완료되었습니다.', 'success', 1500, '/sales/lead');
+                    triggerAlert('저장이 완료됐습니다.', 'success', 1500, '/sales/lead');
                 }
             } else {
                 response = await api.patch(`/leads/${leadResponseDto.leadNo}`, {
@@ -265,8 +265,6 @@ const submitForm = async () => {
         triggerAlert('필수값이 입력되지 않았습니다.', 'warning');
     }
 };
-
-const deleteDialog = ref(false);
 
 const deleteLead = async () => {
     const leadNo = leadResponseDto.leadNo;
