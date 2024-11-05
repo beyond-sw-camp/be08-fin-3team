@@ -346,6 +346,11 @@ const MainRoutes = {
             component: () => import('@/components/proposal/CreateProposal.vue')
         },
         {
+            name: 'ProposalDetail',
+            path: '/proposals/:propNo',
+            component: () => import('@/components/proposal/DetailProposal.vue')
+        },
+        {
             name: 'EstimateList',
             path: '/sales/estimates',
             component: () => import('@/views/apps/estimate/EstimateList.vue')
