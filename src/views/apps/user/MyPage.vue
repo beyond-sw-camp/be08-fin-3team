@@ -59,9 +59,5 @@ const name = ref('')
             <IntroCard />
             <MyIntroCard :name="name" :email="email" :dept="dept" :employeeId="employeeId" :joinDate="joinDate"/>
         </v-col>
-        <!-- <v-col cols="12" lg="8" md="8">
-            <AddPost />
-            <PostListing />
-        </v-col> -->
     </v-row>
 </template>
