@@ -1,6 +1,4 @@
 <script setup>
-// import { ref } from 'vue';
-
 import DetailForm from '@/components/lead/DetailForm.vue';
 import Timeline from '@/components/lead/Timeline.vue';
 </script>

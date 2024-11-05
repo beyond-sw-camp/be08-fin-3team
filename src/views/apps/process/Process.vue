@@ -50,6 +50,7 @@ const dialogMode = ref('');
 const selectedProcess = ref(null);
 const formValid = ref(false);
 const isLoading = ref(false);
+const subProcessStep = ref(["기회인지", "상담", "제안", " 협상", "계약"]);
 
 watch(editedItem, validateForm, { deep: true });
 
@@ -361,9 +362,13 @@ onMounted(() => {
                             <v-text-field v-model="editedItem.subProcessName" label="하위 프로세스 명"
                                 :rules="[v => !!v || '프로세스 명은 필수 입니다.']"
                                 @input="validateForm"/>
-                            <v-text-field v-model="editedItem.progressStep" label="진행 단계"
+                            <v-select
+                                v-model="editedItem.progressStep"
+                                :items="subProcessStep"
+                                label="진행 단계"
                                 :rules="[v => !!v || '프로세스 진행 단계는 필수 입니다.']"
-                                @input="validateForm"/>
+                                @input="validateForm"
+                            ></v-select>
                             <v-text-field v-model="editedItem.successRate" label="성공 확률 (%)" :rules="[v => /^[0-9]+$/.test(v) || '숫자만 입력하세요']" required/>
                             <v-text-field v-model="editedItem.description" label="내용"  required/>
                             <v-text-field v-model="editedItem.expectedDuration" label="예상 소요 시간"
