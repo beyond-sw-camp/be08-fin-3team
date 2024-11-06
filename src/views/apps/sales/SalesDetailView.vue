@@ -17,12 +17,12 @@
             <v-col v-for="(sale, index) in paginatedSales" :key="index" cols="12" md="4">
                 <v-card @click="openEditSalesPage(sale.salesNo)" class="sales-card">
                     <v-card-title class="sales-title">{{ sale.salesName }}</v-card-title>
-                    <v-card-subtitle class="sales-subtitle">매출 번호: {{ sale.salesNo }}</v-card-subtitle>
+                    <!-- <v-card-subtitle class="sales-subtitle">매출 번호: {{ sale.salesNo }}</v-card-subtitle> -->
                     <v-card-text class="sales-text">
                         <div>수량: <span class="highlight">{{ sale.productCount }}</span></div>
                         <div>합계 금액: <span class="highlight">{{ sale.price.toLocaleString() }} 원</span></div>
                         <div>사업 유형: <span class="highlight">{{ sale.busiType }}</span></div>
-                        <div>계약 번호: <span class="highlight">{{ sale.contractNo }}</span></div>
+                        <div>계약명: <span class="highlight">{{ sale.contractName }}</span></div>
                     </v-card-text>
                 </v-card>
             </v-col>
