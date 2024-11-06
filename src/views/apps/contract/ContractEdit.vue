@@ -15,23 +15,55 @@
               label="계약명"
               required
               :rules="[validateName]"
-              :class="{ 'error-border': !contract.name && showErrors }"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <v-text-field
-              v-model="contract.estimateNo"
-              label="견적 번호"
+              v-model="contract.estimateName"
+              label="견적명"
+              append-inner-icon="mdi-magnify"
+              @click:append-inner="openEstimateDialog"
+              class="clickable-field"
               required
-              :rules="[validateEstimate]"
-              :class="{ 'error-border': !contract.estimateNo && showErrors }"
-            />
+              :rules="[validateEstName]"
+              readonly
+            ></v-text-field>
           </v-col>
+          <v-dialog v-model="estimateDialog" max-width="800">
+            <v-card>
+              <v-card-title class="headline">견적 조회</v-card-title>
+              <v-card-text>
+                <v-data-table
+                  :headers="headers"
+                  :items="estimates"
+                  item-value="estNo"
+                  class="border rounded-md"
+                  items-per-page="5"
+                  @click:row="handleRowClick"
+                >
+                  <template v-slot:item="{ item }">
+                    <tr
+                      :class="{
+                        'highlighted-row': selectedEstimate && selectedEstimate.estNo === item.estNo
+                      }"
+                      @click="selectEstimate(item)"
+                      @dblclick="confirmEstimateSelection(item)"
+                    >
+                      <td>{{ item.name }}</td>
+                      <td>{{ item.estDate }}</td>
+                    </tr>
+                  </template>
+                </v-data-table>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" @click="confirmEstimateSelection">선택</v-btn>
+                <v-btn color="error" @click="closeEstimateDialog">닫기</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="contract.startDate" label="시작 날짜" type="date" required />
-          </v-col>
-          <v-col cols="12" sm="6">
-            <v-text-field v-model="contract.endDate" label="종료 날짜" type="date" required />
+            <v-text-field v-model="contract.contractDate" label="시작 날짜" type="date" required />
           </v-col>
           <v-col cols="12" sm="6">
             <v-select
@@ -49,16 +81,16 @@
             />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="contract.productCount" label="수량" type="number" @input="calculateTaxAndPrice" />
+            <v-text-field v-model="contract.productCount" label="수량" type="text" @input="calculateTaxAndPrice" />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="contract.supplyPrice" label="공급 가격" type="number" @input="calculateTaxAndPrice" />
+            <v-text-field v-model="contract.supplyPrice" label="공급 가격" type="text" @input="calculateTaxAndPrice" />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="contract.tax" label="세금" type="number" readonly />
+            <v-text-field v-model="contract.tax" label="세금" type="text" readonly />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="contract.totalPrice" label="총 가격" type="number" readonly />
+            <v-text-field v-model="contract.totalPrice" label="총 가격" type="text" readonly />
           </v-col>
           <v-col cols="12" sm="6">
             <v-text-field v-model="contract.paymentTerms" label="결제 조건" />
@@ -93,7 +125,7 @@
     <v-card-actions>
       <v-btn class="m-button" color="primary" variant="outlined" @click="saveContract" flat style="font-size: 15px; font-weight: 600;">저장</v-btn>
       <v-btn class="m-button" color="error" variant="outlined" @click="deleteContract(contract.contractNo)" style="font-size: 15px; font-weight: 600;" v-if="isEditMode">삭제</v-btn>
-      <v-btn class="m-button" color="close" variant="outlined" @click="handleClose" style="font-size: 15px; font-weight: 600;">닫기</v-btn>
+      <v-btn class="m-button" color="close" variant="outlined" @click="handleClose" style="font-size: 15px; font-weight: 600;">목록으로 이동</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -109,19 +141,22 @@ export default {
       showErrors: false,
       nameError: '',
       estimateError: '',
-      isEditMode: false, 
+      isEditMode: false,
+      estimateDialog: false,
+      selectedEstimate: null,
+      loadingEstimates: false,
       contract: {
         contractNo: null,
         name: '',
-        estimateNo: '',
-        startDate: '',
-        endDate: '',
+        estimateNo: null,
+        estimateName: '',
+        contractDate: '',
         taxCls: '',
         surtaxYn: '',
-        productCount: 0,
-        supplyPrice: 0,
-        tax: 0,
-        totalPrice: 0,
+        productCount: '',
+        supplyPrice: '',
+        tax: '',
+        totalPrice: '',
         paymentTerms: '',
         warrenty: 0,
         contractCls: '',
@@ -132,22 +167,85 @@ export default {
         renewalNotificationDay: 0,
         note: '',
       },
+      estimates: [], 
+      headers: [
+        { title: '견적명', key: 'name' },
+        { title: '제출일자', key: 'estDate' },
+      ],
     };
   },
   mounted() {
-    const contractNo = this.$route.params.contractNo; 
+    const contractNo = this.$route.params.contractNo;
     if (contractNo) {
-      this.isEditMode = true; // 수정 모드 활성화
-      this.loadContractData(contractNo); 
+      this.isEditMode = true;
+      this.loadContractData(contractNo);
     } else {
-      this.isEditMode = false; // 생성 모드
+      this.isEditMode = false;
     }
     this.updateSurtaxYn();
+    this.loadEstimates(); 
   },
   watch: {
     'contract.taxCls': 'updateSurtaxYn',
   },
   methods: {
+    selectEstimate(estimate) {
+      this.selectedEstimate = estimate;
+    },
+    handleEstimateSelected(selectedEstimate) {
+      this.contract.estimateNo = selectedEstimate.estNo;
+      this.contract.estimateName = selectedEstimate.name;
+      console.log('name:',this.contract.estimateName)
+    },
+    openEstimateDialog() {
+      this.estimateDialog = true;
+    },
+    closeEstimateDialog() {
+      this.estimateDialog = false;
+    },
+    async loadEstimates() {
+      this.loadingEstimates = true;
+      try {
+        const response = await api.get('/estimates/without-contract');
+        console.log('데이터 확인 !! : ',response.data); // 응답 데이터 확인
+        if (response.data) {
+          this.estimates = response.data.result;
+        }
+      } catch (error) {
+        console.error('견적 리스트를 불러오는 중 오류 발생:', error);
+      } finally {
+        this.loadingEstimates = false;
+      }
+    },
+    handleRowClick(item) {
+      this.selectedEstimate = item;
+    },
+    confirmEstimateSelection() {
+    console.log('Selected Estimate:', this.selectedEstimate);
+    
+      if (this.selectedEstimate) {
+        this.handleEstimateSelected(this.selectedEstimate); // 선택한 견적 정보를 업데이트
+      } else {
+        console.warn("No estimate selected.");
+      }
+      this.closeEstimateDialog();
+    },
+
+
+    async loadContractData(contractNo) {
+      try {
+        const response = await api.get(`/contract/${contractNo}`);
+        if (response.data) {
+          this.contract = response.data.result;
+          this.contract.estimateName = response.data.result.estimateName;
+        } else {
+          this.errorMessage = '계약 정보를 가져오는 데 실패했습니다.';
+        }
+      } catch (error) {
+        console.error('계약 정보를 불러오는 중 오류 발생:', error);
+        this.errorMessage = '계약 정보를 불러오는 데 실패했습니다. 다시 시도해주세요.';
+      }
+    },
     updateSurtaxYn() {
       if (this.contract.taxCls === '매출 과세') {
         this.contract.surtaxYn = 'Y';
@@ -157,42 +255,55 @@ export default {
       this.calculateTaxAndPrice();
     },
     calculateTaxAndPrice() {
-      const supplyPrice = parseFloat(this.contract.supplyPrice) || 0;
-      const productCount = parseInt(this.contract.productCount) || 0;
+      const supplyPrice = parseInt(this.contract.supplyPrice.replace(/,/g, '')) || 0; // 쉼표 제거
+      const productCount = parseInt(this.contract.productCount.replace(/,/g, '')) || 0; // 쉼표 제거
       const surtaxYn = this.contract.surtaxYn.toUpperCase();
 
-      this.contract.tax = surtaxYn === 'Y' ? supplyPrice * 0.1 : 0;
-      this.contract.totalPrice = surtaxYn === 'Y' 
-        ? (supplyPrice + this.contract.tax) * productCount 
-        : supplyPrice * productCount;
+      // 세금과 총 가격 계산, 소수점 이하 버림
+      this.contract.tax = surtaxYn === 'Y' ? Math.floor(supplyPrice * 0.1) : 0;
+      this.contract.totalPrice = surtaxYn === 'Y'
+        ? Math.floor((supplyPrice + this.contract.tax) * productCount)
+        : Math.floor(supplyPrice * productCount);
+
+      // 세자리마다 쉼표가 포함된 값으로 포맷
+      this.contract.productCount = this.formatNumber(productCount);
+      this.contract.tax = this.formatNumber(this.contract.tax);
+      this.contract.supplyPrice = this.formatNumber(supplyPrice);
+      this.contract.totalPrice = this.formatNumber(this.contract.totalPrice);
     },
-    async loadContractData(contractNo) {
-      try {
-        const response = await api.get(`/contract/${contractNo}`); 
-        if (response.data) {
-          this.contract = response.data.result; 
-        } else {
-          this.errorMessage = '계약 정보를 가져오는 데 실패했습니다.';
-        }
-      } catch (error) {
-        console.error('계약 정보를 불러오는 중 오류 발생:', error);
-        this.errorMessage = '계약 정보를 불러오는 데 실패했습니다. 다시 시도해주세요.';
+
+    formatNumber(value) {
+      // 숫자를 3자리마다 쉼표로 포맷하고, 맨 앞의 3자리는 쉼표 없이 처리
+      if (value === null || value === undefined || isNaN(value)) {
+        return value; // 유효하지 않은 경우 그대로 반환
       }
+
+      // 숫자를 문자열로 변환하고, 정수 부분과 소수 부분 분리
+      const parts = value.toString().split('.');
+      const integerPart = parts[0];
+      const decimalPart = parts.length > 1 ? '.' + parts[1] : '';
+
+      // 정수 부분을 3자리마다 쉼표로 포맷
+      const formattedInteger = integerPart.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+      
+      // 결과 조합
+      return formattedInteger + decimalPart;
     },
+
     async saveContract() {
       this.showErrors = true;
       this.errorMessage = '';
 
-      if (!this.contract.name) {
+      if (!this.contract.name || this.contract.name.trim() === '') {
         this.nameError = '계약명을 입력해 주세요.';
         this.errorMessage = '필수값이 입력되지 않았습니다.';
         this.scrollToField('name');
       }
 
-      if (!this.contract.estimateNo) {
-        this.estimateError = '견적 번호를 입력해 주세요.';
+      if (!this.contract.estimateName || this.contract.estimateName.trim() === '') {
+        this.estimateError = '견적명을 입력해 주세요.';
         this.errorMessage = '필수값이 입력되지 않았습니다.';
-        this.scrollToField('estimateNo');
+        this.scrollToField('estimateName');
       }
       
       const formValid = await this.$refs.form.validate();
@@ -201,15 +312,21 @@ export default {
         await this.triggerAlert('필수 입력값을 확인해주세요.', 'error');
         return;
       }
-
       try {
+        // 저장 시 문자열로 된 수량과 공급 가격을 정수로 변환하여 저장
+        const contractData = {
+          ...this.contract,
+          productCount: parseInt(this.contract.productCount.replace(/,/g, ''), 10) || 0,
+          supplyPrice: parseInt(this.contract.supplyPrice.replace(/,/g, ''), 10) || 0,
+          tax: parseInt(this.contract.tax.replace(/,/g, ''), 10) || 0,
+          totalPrice: parseInt(this.contract.totalPrice.replace(/,/g, ''), 10) || 0,
+        };
+
         let response;
         if (this.isEditMode) {
-          // 수정 모드일 경우 PATCH 요청
-          response = await api.patch(`/contract/${this.contract.contractNo}`, this.contract);
+          response = await api.patch(`/contract/${this.contract.contractNo}`, contractData);
         } else {
-          // 생성 모드일 경우 POST 요청
-          response = await api.post('/contract', this.contract);
+          response = await api.post('/contract', contractData);
         }
 
         if (response.data?.result?.contractNo) {
@@ -223,6 +340,13 @@ export default {
         this.scrollToTop();
         await this.triggerAlert('계약 저장에 실패했습니다. 다시 시도해주세요.', 'error');
       }
+      this.$router.push({ 
+        name: 'Contract',
+        query: { 
+            estimateNo: this.contract.estimateNo,
+            estimateName: this.contract.estimateName 
+        }
+      });
     },
     scrollToTop() {
       document.documentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -236,8 +360,8 @@ export default {
     validateName(value) {
       return !!value || '계약명은 필수입니다.';
     },
-    validateEstimate(value) {
-      return !!value || '견적 번호는 필수입니다.';
+    validateEstName(value) {
+      return !!value || '견적명은 필수입니다.';
     },
     handleClose() {
       this.$router.push('/apps/contract');
@@ -267,11 +391,23 @@ export default {
 };
 </script>
 
+
+
+
 <style>
 .error-border {
   border-color: red;
 }
 .m-button {
   margin-top: 20px;
+}
+.selected-row {
+  border: 2px solid blue;
+}
+.highlighted-row {
+  background-color: #E3F2FD;
+}
+.clickable-field {
+  cursor: pointer;
 }
 </style>

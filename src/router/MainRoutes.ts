@@ -612,7 +612,7 @@ const MainRoutes = {
             name: 'ContractEdit',
             path: '/apps/contract/edit/:contractNo',
             component: () => import('@/views/apps/contract/ContractEdit.vue')
-        },
+        },  
         {
             name: 'SalesCreate',
             path: '/apps/sales/editer',
@@ -622,7 +622,7 @@ const MainRoutes = {
             name: 'SalesEdit',
             path: '/apps/sales/editer/:salesNo',
             component: () => import('@/views/apps/sales/SalesEdit.vue')
-        }
+        },
     ]
 };
 
