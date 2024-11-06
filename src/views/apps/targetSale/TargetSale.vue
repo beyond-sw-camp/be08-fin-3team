@@ -257,6 +257,8 @@ function parseNumber(value) {
 watch(selectedDepartment, (newDeptName) => {
     if (newDeptName) {
         const selectedDept = departmentNames.value.find(dept => dept.name === newDeptName);
+      
+        selectedSalesperson.value = "";
 
         if (selectedDept) fetchUsersByDepartment(selectedDept.no);
     }
