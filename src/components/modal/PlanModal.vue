@@ -82,7 +82,6 @@
 							class="list-item-spacing"
 						>
 							<v-list-item-content>
-								
 								<v-list-item-title class="list-item-title"><v-icon small class="mr-2">mdi-check</v-icon>{{ item[titleField] }}</v-list-item-title>
 								<v-list-item-subtitle class="note-text">{{ item[noteField] }}</v-list-item-subtitle>
 							</v-list-item-content>
@@ -133,15 +132,19 @@ export default {
 			if (!this.plan.planCls) return '내용';
 			return `${this.plan.planCls} 내용`;
 		},
+    isEditable() {
+      return this.plan.calendarNo === this.currentUserCalendarNo;
+    },
     filteredDomainList() {
       if (!this.searchQuery) {
         return this.domainList;
       }
-      return this.domainList.filter(item =>
-        item[this.titleField].toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        item[this.noteField].toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
-    },
+    const filteredList = this.domainList.filter(item =>
+      item[this.titleField].toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+      item[this.noteField].toLowerCase().includes(this.searchQuery.toLowerCase())
+    );
+    return filteredList;
+  }
 	},
 	data() {
 		return {
@@ -186,11 +189,6 @@ export default {
 			immediate: true,
 		},
 	},
-  computed: {
-    isEditable() {
-      return this.plan.calendarNo === this.currentUserCalendarNo;
-    },
-  },
 	methods: {
 		validatePlan(){
 			const isValid = this.$refs.form.validate();
