@@ -270,7 +270,7 @@ onMounted(fetchDept);
                     </v-col>
                     <v-spacer></v-spacer>
                     <v-col cols="auto">
-                        <v-btn variant="tonal" color="success" class="mr-2" @click="excelDown">엑셀 다운</v-btn>
+                        <v-btn variant="tonal" color="success" class="mr-2" @click="excelDown"><v-icon left>mdi-file-excel</v-icon>엑셀 다운</v-btn>
                         <v-btn color="primary" variant="tonal" class="mr-2" @click="navigateToCreate">견적 생성</v-btn>
                     </v-col>
                 </v-row>
