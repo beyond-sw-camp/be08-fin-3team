@@ -3,15 +3,13 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/api/axiosinterceptor';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
-import UiParentCard from '@/components/shared/UiParentCard.vue';
 import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
-import { de } from 'date-fns/locale';
 import { useAlert } from '@/utils/useAlert';
 import AlertComponent from '@/components/shared/AlertComponent.vue';
 
 const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
-const showConfirmDialogs = ref(false); // 열림 상태 관리
+const showConfirmDialogs = ref(false);
 
 const page = ref({ title: '제안 목록' });
 const breadcrumbs = ref([
@@ -19,9 +17,10 @@ const breadcrumbs = ref([
     { text: '제안', disabled: true, href: '#' }
 ]);
 
+const formTitle = computed(() => (defaultItem.value === -1 ? '제안 추가' : '제안 수정'));
+
 const proposals = ref([]);
 const dialogEdit = ref(false);
-const editedIndex = ref(-1);
 const router = useRouter();
 
 const defaultItem = ref({
@@ -38,28 +37,6 @@ const defaultItem = ref({
     note: ''
 });
 
-const editedItem = ref({ ...defaultItem.value });
-
-const editItem = (item) => {
-    if (item) {
-        editedItem.value = {
-            propNo: item.propNo,
-            leadNo: item.leadNo,
-            leadName: item.leadName,
-            name: item.name,
-            cont: item.cont,
-            reqDate: item.reqDate,
-            startDate: item.startDate,
-            endDate: item.endDate,
-            submitDate: item.submitDate,
-            prDate: item.prDate,
-            note: item.note
-        };
-        editedIndex.value = proposals.value.indexOf(item);
-        dialogEdit.value = true;
-    }
-};
-
 const headers = ref([
     { title: '제안명', key: 'name' },
     { title: '영업기회명', key: 'leadName' },
@@ -71,7 +48,6 @@ const headers = ref([
 ]);
 
 const dataSize = computed(() => proposals.value.length);
-const formTitle = computed(() => (editedIndex.value === -1 ? '제안 추가' : '제안 수정'));
 
 async function initialize() {
     try {
@@ -85,61 +61,24 @@ async function initialize() {
     }
 }
 
-const submitProposalApi = async () => {
-    try {
-        const res = await api.post('/proposals', editedItem.value);
-        console.log(res);
-        if (res.status === 200) {
-            triggerAlert('제안이 추가되었습니다.', 'success', 2000, '/proposals');
-            await initialize();
-            resetForm();
-            dialogEdit.value = false;
-        }
-    } catch (error) {
-        console.error('등록 실패:', error);
-        triggerAlert('제안 수정에 실패했습니다.', 'error');
-    }
-};
-
-const updateProposalApi = async () => {
-    try {
-        const res = await api.patch(`/proposals/${editedItem.value.propNo}`, editedItem.value);
-        if (res.status === 200) {
-            triggerAlert('제안이 수정되었습니다.', 'success');
-            await initialize();
-            dialogEdit.value = false;
-        }
-    } catch (error) {
-        console.error('수정 실패:', error);
-        triggerAlert('제안 수정에 실패했습니다.', 'error');
-    }
-};
-
 const deleteProposalApi = async () => {
     try {
-        await api.delete(`/proposals/${editedItem.value.propNo}`);
-        triggerAlert('제안이 삭제되었습니다.', 'success');
-        setTimeout(() => router.push('/proposals'), 1500);
-        proposals.value.splice(editedIndex.value, 1);
+        await api.delete(`/proposals/${defaultItem.value.propNo}`);
+        const index = proposals.value.findIndex((item) => item.propNo === defaultItem.value.propNo);
+        if (index !== -1) {
+            proposals.value.splice(index, 1);
+        }
+
+        triggerAlert('제안이 삭제되었습니다.', 'success', 2000, '/proposals');
         resetForm();
-        router.push('/proposals');
     } catch (error) {
-        console.error('삭제 실패:', error);
-        triggerAlert('제안 삭제에 실패했습니다.', 'error');
-    } finally {
-        showConfirmDialogs.value = false;
+        triggerAlert('제안 삭제를 실패했습니다.', 'error', 2000);
     }
-    close();
 };
 
 const resetForm = () => {
-    editedItem.value = { ...defaultItem.value };
-    editedIndex.value = -1;
-};
-
-const createNewProposal = () => {
-    resetForm();
-    router.push('/proposals/create');
+    defaultItem.value = { ...defaultItem.value };
+    defaultItem.value = -1;
 };
 
 const confirmDelete = async () => {
@@ -147,14 +86,13 @@ const confirmDelete = async () => {
     showConfirmDialogs.value = false;
 };
 
-const deleteItem = (item) => {
-    editedItem.value = { ...item };
-    editedIndex.value = proposals.value.indexOf(item);
-    showConfirmDialogs.value = true;
-};
-
 const closeDeleteDialog = () => {
     showConfirmDialogs.value = false;
+};
+
+const deleteItem = (item) => {
+    defaultItem.value = { ...item };
+    showConfirmDialogs.value = true;
 };
 
 const navigateToCreate = () => {
@@ -166,13 +104,8 @@ const closeEditDialog = () => {
     dialogEdit.value = false;
 };
 
-const save = async () => {
-    if (editedIndex.value === -1) {
-        await submitProposalApi();
-    } else {
-        await updateProposalApi();
-    }
-    closeEditDialog();
+const goToDetailProposal = (propNo) => {
+    router.push(`/proposals/${propNo}`);
 };
 
 const displayedProposals = computed(() => proposals.value);
@@ -201,7 +134,6 @@ const search = async () => {
 </script>
 
 <template>
-    <ConfirmDialogs :dialog="showConfirmDialogs" @agree="deleteProposalApi" @disagree="() => (showConfirmDialogs = false)" />
     <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
 
     <v-dialog v-model="alertDialog" max-width="500" class="dialog-mw">
@@ -260,7 +192,13 @@ const search = async () => {
                     show-actions
                 >
                     <template v-slot:item.actions="{ item }">
-                        <EditIcon height="20" width="20" class="mr-2 text-primary cursor-pointer" size="small" @click="editItem(item)" />
+                        <EditIcon
+                            height="20"
+                            width="20"
+                            class="mr-2 text-primary cursor-pointer"
+                            size="small"
+                            @click="goToDetailProposal(item.propNo)"
+                        />
                         <TrashIcon height="20" width="20" class="text-error cursor-pointer" size="small" @click="deleteItem(item)" />
                     </template>
                 </v-data-table>
@@ -268,30 +206,7 @@ const search = async () => {
         </v-col>
     </v-row>
 
-    <!-- Edit Dialog -->
-    <v-dialog v-model="dialogEdit" max-width="600px">
-        <v-card>
-            <v-card-title>{{ formTitle }}</v-card-title>
-            <v-card-text>
-                <v-form>
-                    <v-text-field v-model="editedItem.leadName" label="영업기회명" disabled></v-text-field>
-                    <v-text-field v-model="editedItem.name" label="제안명" required></v-text-field>
-                    <v-text-field v-model="editedItem.cont" label="내용"></v-text-field>
-                    <v-text-field v-model="editedItem.reqDate" label="요청일" type="date"></v-text-field>
-                    <v-text-field v-model="editedItem.submitDate" label="제출일" type="date"></v-text-field>
-                    <v-text-field v-model="editedItem.startDate" label="제안 시작일" required type="date"></v-text-field>
-                    <v-text-field v-model="editedItem.endDate" label="제안 종료일" type="date"></v-text-field>
-                    <v-text-field v-model="editedItem.prDate" label="발표일" type="date"></v-text-field>
-                    <v-textarea v-model="editedItem.note" label="비고" rows="2"></v-textarea>
-                </v-form>
-            </v-card-text>
-            <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="primary" variant="outlined" style="font-size: 15px; font-weight: 600" @click="save">수정</v-btn>
-                <v-btn color="close" variant="outlined" style="font-size: 15px; font-weight: 600" @click="closeEditDialog">닫기</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    <ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="closeDeleteDialog" />
 </template>
 
 <style>

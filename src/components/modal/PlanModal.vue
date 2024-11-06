@@ -22,12 +22,12 @@
 						</v-col>
 							<v-col cols="12" v-if="plan.planCls && !['개인', '전사'].includes(this.plan.planCls)">
 								<v-text-field 
-									v-model="plan.planDetails.title" 
+									v-model="planDetails.title" 
 									:label="dynamicTitleLabel" 
 									readonly
 								></v-text-field>
 								<v-text-field 
-									v-model="plan.planDetails.note" 
+									v-model="planDetails.note" 
 									:label="dynamicNoteLabel" 
 									readonly
 								></v-text-field>
@@ -59,12 +59,12 @@
 			</v-card-text>
 			<ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="cancleDelete" />
 			<v-card-actions>
-					<v-btn v-if="mode === 'edit'" color="primary" variant="outlined" @click="updatePlan" flat style="font-size: 15px; font-weight: 600;">수정</v-btn>
-					<v-btn v-if="mode === 'edit'" color="error" variant="outlined" @click="deletePlan" flat style="font-size: 15px; font-weight: 600;">삭제</v-btn>
+				<v-btn v-if="mode === 'edit'" color="primary" variant="outlined" @click="updatePlan" flat style="font-size: 15px; font-weight: 600;" :disabled="!isEditable">수정</v-btn>
+				<v-btn v-if="mode === 'edit'" color="error" variant="outlined" @click="deletePlan" flat style="font-size: 15px; font-weight: 600;" :disabled="!isEditable">삭제</v-btn>
 				<v-spacer></v-spacer>
-					<v-btn v-if="mode === 'add'" color="primary"@click="submitPlan" flat style="font-size: 15px; font-weight: 600;">저장</v-btn>
-					<v-btn color="close" @click="closeModal" style="font-size: 15px; font-weight: 600;">닫기</v-btn>
-					<ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="cancleDelete" />
+				<v-btn v-if="mode === 'add'" color="primary"@click="submitPlan" flat style="font-size: 15px; font-weight: 600;">저장</v-btn>
+				<v-btn color="close" @click="closeModal" style="font-size: 15px; font-weight: 600;">닫기</v-btn>
+				<ConfirmDialogs :dialog="showConfirmDialogs" @agree="confirmDelete" @disagree="cancleDelete" />
 			</v-card-actions>
 		</v-card>
 		
@@ -72,10 +72,11 @@
 			<v-card>
 				<v-card-title class="headline">{{ dynamicCardTitle}}</v-card-title>
 				<v-card-text>
+					<v-text-field label="검색" v-model="searchQuery" clearable></v-text-field>
 					<perfect-scrollbar style="max-height: 300px">
 					<v-list>
 						<v-list-item
-							v-for="(item, index) in domainList"
+							v-for="(item, index) in filteredDomainList"
 							:key="index"
 							@click="selectDomain(item)"
 							class="list-item-spacing"
@@ -111,7 +112,7 @@ export default {
 	props: {
 		AddPlanModal: Boolean,
 		plan: Object,
-    planDetails: Object,
+    currentUserCalendarNo: Number,
 		statusOptions: Array,
 		planClsOptions: Array,
 		mode: {
@@ -132,19 +133,29 @@ export default {
 			if (!this.plan.planCls) return '내용';
 			return `${this.plan.planCls} 내용`;
 		},
+    filteredDomainList() {
+      if (!this.searchQuery) {
+        return this.domainList;
+      }
+      return this.domainList.filter(item =>
+        item[this.titleField].toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        item[this.noteField].toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    },
 	},
-
 	data() {
 		return {
 			showAlert: false,
 			showConfirmDialogs: false,
 			isSelected: false,
 			domainList: [],
+      searchQuery: '', 
 			titleField: 'name',
 			noteField: 'note',
 			timeOptions: this.generateTimeOptions(), 
 			planClsOptions: ['개인', '전사', '제안', '견적', '매출', '계약'],
 			planCls: '',
+			domainNo:'',
 			isPersonal: this.plan.personalYn === 'Y',
 			planDetails: {
 				title: '',
@@ -166,11 +177,20 @@ export default {
 		},
 		'plan.personalYn': {
 			handler(newValue) {
+				if (this.mode === 'edit') {
+					// console.log('수정 모드 loadDomainDetails');
+					this.loadDomainDetails(this.plan.planCls, this.plan.domainNo);
+				}
 				this.isPersonal = newValue === 'Y';
 			},
 			immediate: true,
 		},
 	},
+  computed: {
+    isEditable() {
+      return this.plan.calendarNo === this.currentUserCalendarNo;
+    },
+  },
 	methods: {
 		validatePlan(){
 			const isValid = this.$refs.form.validate();
@@ -231,7 +251,7 @@ export default {
 		},
 
     selectDomain(item) {
-      console.log("item:", item);
+      // console.log("selectDomain item:", item);
 
       this.planDetails = {
         title: item[this.titleField] || '',
@@ -260,6 +280,38 @@ export default {
       this.isSelected = false;
       this.domainList = [];
     },
+
+		async loadDomainDetails(planCls, domainNo) {
+			if (!['제안', '견적', '계약', '매출'].includes(planCls) || !domainNo) return;
+
+			let apiUrl = '';
+			switch (planCls) {
+				case '제안':
+					apiUrl = `/proposals/${domainNo}`;
+					break;
+				case '견적':
+					apiUrl = `/estimates/${domainNo}`;
+					break;
+				case '계약':
+					apiUrl = `/contract/${domainNo}`;
+					break;
+				case '매출':
+					apiUrl = `/sales/${domainNo}`;
+					break;
+				default:
+					return;
+			}
+			try {
+				const response = await api.get(apiUrl);
+				this.planDetails = {
+					title: response.data.result.title || response.data.result.name || '',
+					note: response.data.result.note || response.data.result.description || '',
+				};
+				console.log(this.planDetails);
+			} catch (e) {
+				console.error(e);
+			}
+		},
 
 		generateTimeOptions() {
 			const options = [];
@@ -303,16 +355,12 @@ export default {
 				this.plan.backgroundColor = categoryColor;
 				const response = await api.patch(`/plans/${this.plan.planNo}`, this.plan);
 				const updatedPlan = response.data.result;
+				console.log('updatedPlan',updatedPlan)
 
 				this.closeModal();
-        setTimeout(() => {
-          window.location.reload();
-          }, 1000);
+				localStorage.setItem('showAlertAfterReload', '일정이 수정되었습니다.');
+				window.location.reload();
           
-				this.$emit('show-alert', {
-					message: '일정이 수정되었습니다.',
-					type: 'success',
-				});
 				this.$emit('update', updatedPlan);
 			} catch (error) {
 				console.error(error);

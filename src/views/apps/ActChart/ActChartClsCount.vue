@@ -19,7 +19,7 @@ const chartOptions = ref({
         },
     },
     // colors: ['rgba(var(--v-theme-error))', getPrimary.value, getSecondary.value],
-    colors: ['#9bdb4c', '#89ca39', getPrimary.value, getSecondary.value],
+    colors: ['#4CC5DB', '#44BFD6', getPrimary.value, getSecondary.value],
 
     dataLabels: {
       enabled: true,

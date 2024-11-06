@@ -42,87 +42,6 @@ const MainRoutes = {
             path: '/sales/notice',
             component: () => import('@/views/sales/Notice.vue')
         },
-        {
-            name: 'Analytical',
-            path: '/dashboards/analytical',
-            component: () => import('@/views/dashboards/analytical/Analytical.vue')
-        },
-        {
-            name: 'Classic',
-            path: '/dashboards/classic',
-            component: () => import('@/views/dashboards/classic/Classic.vue')
-        },
-        {
-            name: 'Demographical',
-            path: '/dashboards/demographical',
-            component: () => import('@/views/dashboards/demographical/Demographical.vue')
-        },
-        {
-            name: 'Minimal',
-            path: '/dashboards/minimal',
-            component: () => import('@/views/dashboards/minimal/Minimal.vue')
-        },
-        {
-            name: 'Ecommerce',
-            path: '/dashboards/ecommerce',
-            component: () => import('@/views/dashboards/ecommerce/Ecommerce.vue')
-        },
-        {
-            name: 'Modern',
-            path: '/dashboards/modern',
-            component: () => import('@/views/dashboards/modern/Modern.vue')
-        },
-        {
-            name: 'Chats',
-            path: '/apps/chats',
-            component: () => import('@/views/apps/chat/Chats.vue')
-        },
-        {
-            name: 'Email',
-            path: '/apps/email',
-            component: () => import('@/views/apps/email/Email.vue')
-        },
-        {
-            name: 'ecom Products',
-            path: '/ecommerce/products',
-            component: () => import('@/views/apps/eCommerce/Products.vue')
-        },
-        {
-            name: 'Product detail',
-            path: '/ecommerce/product/detail/:id',
-            component: () => import('@/views/apps/eCommerce/ProductDetails.vue')
-        },
-        {
-            name: 'Product Checkout',
-            path: '/ecommerce/checkout',
-            component: () => import('@/views/apps/eCommerce/ProductCheckout.vue')
-        },
-        {
-            name: 'Product Listing',
-            path: '/ecommerce/productlist',
-            component: () => import('@/views/apps/eCommerce/ProductList.vue')
-        },
-
-        {
-            name: 'Add Product',
-            path: '/ecommerce/add-product',
-            component: () => import('@/views/apps/eCommerce/AddProduct.vue')
-        },
-        {
-            name: 'Edit Product',
-            path: '/ecommerce/edit-product',
-            component: () => import('@/views/apps/eCommerce/EditProduct.vue')
-        },
-        {
-            name: 'Posts',
-            path: '/apps/blog/posts',
-            component: () => import('@/views/apps/blog/Posts.vue')
-        },
-        {
-            name: 'Detail',
-            path: '/apps/blog/:id',
-            component: () => import('@/views/apps/blog/Detail.vue')
-        },
 
         {
             name: 'UserProfile',
@@ -193,7 +112,7 @@ const MainRoutes = {
         {
             name: 'ActChart',
             path: '/apps/chart/act',
-            component: () => import('@/views/apps/sbChart/ActChart.vue')
+            component: () => import('@/views/apps/ActChart/ActChart.vue')
         },
         {
             name: 'contractChart',
@@ -427,19 +346,24 @@ const MainRoutes = {
             component: () => import('@/components/proposal/CreateProposal.vue')
         },
         {
+            name: 'ProposalDetail',
+            path: '/proposals/:propNo',
+            component: () => import('@/components/proposal/DetailProposal.vue')
+        },
+        {
             name: 'EstimateList',
-            path: '/estimates',
-            component: () => import('@/components/estimate/ListEstimate.vue')
+            path: '/sales/estimates',
+            component: () => import('@/views/apps/estimate/EstimateList.vue')
         },
         {
             name: 'CreateEstimate',
-            path: '/estimates/create',
-            component: () => import('@/components/estimate/CreateEstimate.vue')
+            path: '/sales/estimates/new',
+            component: () => import('@/views/apps/estimate/EstimateDetail.vue')
         },
         {
-            name: 'DetailEstimate',
-            path: '/estimates/form/:estNo',
-            component: () => import('@/components/estimate/DetailEstimate.vue')
+            name: 'EstimateDetail',
+            path: '/sales/estimates/:estNo',
+            component: () => import('@/views/apps/estimate/EstimateDetail.vue')
         },
         {
             name: 'Gallery Lightbox',
