@@ -107,12 +107,11 @@ const columnChart = ref({
 
 const selectedYear = ref<number>(new Date().getFullYear());
 const yearOptions = ref<number[]>([]);
-const salespersonNames = ref<string[]>([]);
 const selectedDepartment = ref<string | null>("전체");
 const departmentNames = ref<{ no: number, name: string }[]>([]);
 const departmentLabels = ref<string[]>([]);
 const selectedSalesperson = ref<string | null>("전체");
-
+const salespersonNames = ref<string[]>([]);
 
 for (let i = selectedYear.value - 9; i <= selectedYear.value; i++) {
     yearOptions.value.push(i);
@@ -145,14 +144,14 @@ function treeDepartments(departments) {
 async function fetchUsersByDepartment(deptNo: number) {
     try {
         const response = await api.get(`/users/by-dept/${deptNo}`);
-        salespersonNames.value = response.data.result.map(user => user.name);
-        salespersonNames.value.unshift("전체");
+        salespersonNames.value = response.data.result
+            .filter(user => user.name !== "관리자")
+            .map(user => user.name);
 
     } catch (error) {
         console.error('Error:', error.message || error);
     }
 }
-
 const fetchMonthlySalesData = async (year: number, deptName: string | null, salesperson: string | null) => {
     try {
         let url = deptName === "전체"
