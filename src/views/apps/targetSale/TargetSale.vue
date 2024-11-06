@@ -1,5 +1,5 @@
-<script setup>
-import { ref, onMounted} from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, watch} from 'vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import api from '@/api/axiosinterceptor';
 
@@ -23,17 +23,23 @@ const breadcrumbs = ref([
 
 const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
-const searchYear = ref('');
-const searchSalesperson = ref('');
+const searchYear = ref('2024');
 const targetSales = ref([]);
 const canAddTargetSale = ref(false);
-const userNames = ref([]);
 const productNames = ref([]);
 const formValid = ref(false);
 const isEditMode = ref(false);
 
+const selectedDepartment = ref<string | null>();
+const departmentNames = ref<{ no: number, name: string }[]>([]);
+const departmentLabels = ref<string[]>([]);
+
+const selectedSalesperson = ref<string | null>();
+const salespersonNames = ref<string[]>([]);
+
 const currentYear = new Date().getFullYear();
-const yearRange = ref([]);
+const yearRange = ref<number[]>([]);;
+
 for (let i = currentYear - 2; i <= currentYear + 2; i++) {
   yearRange.value.push(i);
 }
@@ -55,6 +61,30 @@ const headers = ref([
   { title: '12월', key: 'month12' },
   { title: '', align: 'start' },
 ]);
+
+async function fetchDepartments() {
+    try {
+        const response = await api.get('/admin/departments');
+
+        departmentNames.value = treeDepartments(response.data.result);
+        departmentLabels.value = departmentNames.value.map(dept => dept.name);
+
+        console.log(departmentLabels);
+    } catch (error) {
+        console.error('Error:', error.message || error);
+    }
+}
+
+function treeDepartments(departments) {
+    const names = [];
+    departments.forEach(department => {
+        names.push({ no: department.no, name: department.name });
+        if (department.children && department.children.length > 0) {
+            names.push(...treeDepartments(department.children));
+        }
+    });
+    return names;
+}
 
 function groupDataByProduct(data) {
   const groupedData = [];
@@ -78,13 +108,18 @@ function groupDataByProduct(data) {
   return groupedData;
 }
 
-async function fetchUsers() {
-  try {
-    const response = await api.get('/users');
-    userNames.value = response.data.result.map(user => user.userName);
-  } catch (error) {
-    console.error('Error:', error.message || error);
-  }
+async function fetchUsersByDepartment(deptNo: number) {
+    try {
+        console.log(deptNo);
+
+        const response = await api.get(`/users/by-dept/${deptNo}`);
+        salespersonNames.value = response.data.result
+            .filter(user => user.name !== "관리자")
+            .map(user => user.name);
+
+    } catch (error) {
+        console.error('Error:', error.message || error);
+    }
 }
 
 async function fetchProducts() {
@@ -98,7 +133,7 @@ async function fetchProducts() {
 
 async function fetchTargetSales() {
   try {
-    const response = await api.get(`/admin/targetsales/${searchSalesperson.value}`, {
+    const response = await api.get(`/admin/targetsales/${selectedSalesperson.value}`, {
       params: {
         year: searchYear.value,
       },
@@ -108,20 +143,19 @@ async function fetchTargetSales() {
       if (Array.isArray(response.data.result)) {
         targetSales.value = groupDataByProduct(response.data.result);
         canAddTargetSale.value = true;
+        
+        const existingProductNames = targetSales.value.map(item => item.prodName);
+        productNames.value = productNames.value.filter(name => !existingProductNames.includes(name));
       }
     } else {
       canAddTargetSale.value = false;
-      
       triggerAlert('년도와 영업사원을 선택해주세요.', 'warning', 2000);
-
       targetSales.value = [];
-      canAddTargetSale.value = false;
     }
   } catch (error) {
     console.error('Error adding target sale:', error.message || error);
   }
 }
-
 const dialog = ref(false);
 const newTargetSale = ref({
   userName: '',
@@ -132,7 +166,7 @@ const newTargetSale = ref({
 })
 
 function openDialog() {
-  newTargetSale.value.userName = searchSalesperson.value;
+  newTargetSale.value.userName = selectedSalesperson.value;
   newTargetSale.value.year = searchYear.value;
   isEditMode.value = false;
     
@@ -164,7 +198,7 @@ async function saveTargetSale() {
 
 function editTargetSale(item) {
   newTargetSale.value = {
-    userName: searchSalesperson.value,
+    userName: selectedSalesperson.value,
     prodName: item.prodName,
     sum: formatNumberWithCommas(item.sum),
     year: searchYear.value,
@@ -220,8 +254,16 @@ function parseNumber(value) {
   return parseInt(value.toString().replace(/,/g, '')) || 0;
 }
 
+watch(selectedDepartment, (newDeptName) => {
+    if (newDeptName) {
+        const selectedDept = departmentNames.value.find(dept => dept.name === newDeptName);
+
+        if (selectedDept) fetchUsersByDepartment(selectedDept.no);
+    }
+});
+
 onMounted(() => {
-  fetchUsers();
+  fetchDepartments();
   fetchProducts();
 });
 </script>
@@ -233,7 +275,7 @@ onMounted(() => {
     <v-col cols="12">
       <UiParentCard title="목표 매출 관리">
         <v-row class="mb-5">
-          <v-col cols="4" sm="4">
+          <v-col cols="3" sm="3">
             <v-select
               label="년도 선택"
               v-model="searchYear"
@@ -241,14 +283,22 @@ onMounted(() => {
               hide-details
             ></v-select>
           </v-col>
-          <v-col cols="4" sm="4">
+          <v-col cols="3" sm="3">
             <v-select
-              v-model="searchSalesperson"
-              :items="userNames"
+              label="부서 선택"
+              v-model="selectedDepartment"
+              :items="departmentLabels"
+              hide-details
+            ></v-select>
+          </v-col>
+          <v-col cols="3" sm="3">
+            <v-select
+              v-model="selectedSalesperson"
+              :items="salespersonNames"
               label="영업사원 선택"
             ></v-select>
           </v-col>
-          <v-col cols="4">
+          <v-col cols="3">
             <v-btn color="primary" @click="search">검색</v-btn>
           </v-col>
           <v-col cols="12">
