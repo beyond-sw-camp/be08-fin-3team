@@ -279,6 +279,7 @@ const cancel = () => {
                             append-inner-icon="mdi-magnify"
                             @click:append-inner="leadDialog = true"
                             class="clickable-field"
+                            readonly
                         ></v-text-field>
                     </v-col>
 
