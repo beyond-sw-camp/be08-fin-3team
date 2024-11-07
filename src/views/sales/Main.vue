@@ -44,7 +44,6 @@ const monthAchievement = ref(0);
 const fetchDept = async () => {
     try {
         const response = await api.get(`/admin/departments/child`);
-        //123
         state.departments = [{ no: 0, name: '전체' }, ...response.data.result];
 
         if (response.data.isSuccess) {
@@ -64,7 +63,7 @@ const fetchUser = async (deptNo) => {
     try {
         let response;
 
-        if (deptNo != null && deptNo > 1 && deptNo != 'undefined') {
+        if (deptNo != null && deptNo > 0 && deptNo != 'undefined') {
             response = await api.get(`/users/by-dept/${deptNo}`);
 
             state.managers = [{ userNo: 0, name: '전체' }, ...response.data.result];
