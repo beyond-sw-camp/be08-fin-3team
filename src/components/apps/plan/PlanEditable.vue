@@ -5,6 +5,10 @@ import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
 import PlanModal from '@/components/modal/PlanModal.vue';
 import api from '@/api/axiosinterceptor';
 import { chipColors, reversePlanCls, categoryColors } from '@/utils/PlanMappings';
+import {useCalendarUserStore} from '@/stores/apps/calendar/calendarStore';
+
+const calendarStore = useCalendarUserStore();
+const userCalendarNo = localStorage.getItem('calendarNo');
 
 const plans = ref([]);
 const search = ref('');
@@ -34,6 +38,15 @@ const defaultItem = ref({
 });
 const planClsOptions = ['개인', '전사', '제안', '견적', '매출', '계약'];
 const mode = ref('add');
+const totalPlansCount = computed(() => plans.value.length);
+const headers = ref([
+  { title: '번호', key: 'planNo'},
+  { title: '제목', key: 'title'},
+  { title: '날짜', key: 'planDate'},
+  { title: '분류', key: 'planCls'},
+  { title: '시간', key: 'startTime'},
+  { title: '', key: 'actions', sortable: false }
+]);
 
 function handleShowAlert(event) {
     showSuccessAlert.value = true;
@@ -45,8 +58,9 @@ async function fetchPlans() {
     try {
         const response = await api.get('/plans');
         console.log(response);
-        if (response.data.isSuccess) {
-            plans.value = response.data.result;
+        if (response.data.code===200) {
+            plans.value = response.data.result.filter((plan) => plan.calendarNo === Number(userCalendarNo));
+            // plans.value = response.data.result;
         } else {
             console.error('데이터 불러오기 실패:', response.data.message);
         }
@@ -56,18 +70,18 @@ async function fetchPlans() {
 }
 
 onMounted(() => {
-		getCalendarNo();
+// getCalendarNo();
     fetchPlans();
 });
 
-const getCalendarNo = async () => {
-			try {
-        const response = await api.get('/calendars/user/data');
-        editedItem.value.calendarNo = response.data.result.calendarNo;
-      } catch (e) {
-        console.error(e);
-      }
-    };
+// const getCalendarNo = async () => {
+// 			try {
+//         const response = await api.get('/calendars/user/data');
+//         editedItem.value.calendarNo = response.data.result.calendarNo;
+//       } catch (e) {
+//         console.error(e);
+//       }
+//     };
 
 // 검색 필터링
 const filteredList = computed(() => {
@@ -186,55 +200,68 @@ function closePlanModal() {
       @show-alert="handleShowAlert"
   />
 
-  <v-table class="mt-5">
-      <thead>
-          <tr>
-              <th class="text-subtitle-1 font-weight-semibold">번호</th>
-              <th class="text-subtitle-1 font-weight-semibold">제목</th>
-              <th class="text-subtitle-1 font-weight-semibold">날짜</th>
-              <th class="text-subtitle-1 font-weight-semibold">분류</th>
-              <th class="text-subtitle-1 font-weight-semibold">시간</th>
-              <th class="text-subtitle-1 font-weight-semibold"></th>
-          </tr>
-      </thead>
-      <tbody>
-          <tr v-for="item in filteredList" :key="item.planNo">
-              <td class="text-subtitle-1">{{ item.planNo }}</td>
-              <td class="text-subtitle-1">{{ item.title }}</td>
-              <td class="text-subtitle-1">{{ item.planDate }}</td>
-              <td>
-                <v-chip 
-                    :color="chipColors[item.planCls]?.color" 
-                    :text-color="chipColors[item.planCls]?.text"
-                    size="small" 
-                    label>
-                    {{ reversePlanCls[item.planCls] || item.planCls }}
-                </v-chip>
-              </td>
-              <td class="text-subtitle-1">{{ item.startTime }} - {{ item.endTime }}</td>
-              <td>
-                  <div class="d-flex align-center">
-                      <v-tooltip text="수정">
-                          <template v-slot:activator="{ props }">
-                              <v-btn icon flat @click="editItem(item)" v-bind="props">
-                                  <PencilIcon stroke-width="1.5" size="20" class="text-primary" />
-                              </v-btn>
-                          </template>
-                      </v-tooltip>
-                      <v-tooltip text="삭제">
-                          <template v-slot:activator="{ props }">
-                              <v-btn icon flat @click="deleteItem(item)" v-bind="props">
-                                  <TrashIcon stroke-width="1.5" size="20" class="text-error" />
-                              </v-btn>
-                          </template>
-                      </v-tooltip>
-                  </div>
-              </td>
-          </tr>
-      </tbody>
-  </v-table>
+  <v-data-table
+    :headers="headers"
+    :items="filteredList"
+    item-value="planNo"
+    class="mt-5"
+    :sort-by="sortBy"
+    :sort-desc.sync="sortDesc"
+  >
+    <template v-slot:footer.prepend>
+        <div>
+          <span class="mb-0 custom-title"> 전체 개수: {{ totalPlansCount }} 개</span>
+        </div>
+    </template>
+    <template v-slot:item.planNo="{ item }">
+      <span>{{ item.planNo }}</span>
+    </template>
+
+    <template v-slot:item.title="{ item }">
+      <span>{{ item.title }}</span>
+    </template>
+
+    <template v-slot:item.planDate="{ item }">
+      <span>{{ item.planDate }}</span>
+    </template>
+
+    <template v-slot:item.planCls="{ item }">
+      <v-chip 
+        :color="chipColors[item.planCls]?.color" 
+        :text-color="chipColors[item.planCls]?.text"
+        size="small" 
+        label>
+        {{ reversePlanCls[item.planCls] || item.planCls }}
+      </v-chip>
+    </template>
+
+    <template v-slot:item.startTime="{ item }">
+      <span>{{ item.startTime }} - {{ item.endTime }}</span>
+    </template>
+
+    <template v-slot:item.actions="{ item }">
+      <div class="d-flex align-center">
+        <v-tooltip text="수정">
+          <template v-slot:activator="{ props }">
+            <v-btn icon flat @click="editItem(item)" v-bind="props">
+              <PencilIcon stroke-width="1.5" size="20" class="text-primary" />
+            </v-btn>
+          </template>
+        </v-tooltip>
+        <v-tooltip text="삭제">
+          <template v-slot:activator="{ props }">
+            <v-btn icon flat @click="deleteItem(item)" v-bind="props">
+              <TrashIcon stroke-width="1.5" size="20" class="text-error" />
+            </v-btn>
+          </template>
+        </v-tooltip>
+      </div>
+    </template>
+  </v-data-table>
+
   <ConfirmDialogs :dialog="dialogDelete" @agree="confirmDelete" @disagree="cancelDelete" />
 </template>
+
 <style scoped>
 .success-alert {
   position: fixed;
@@ -246,5 +273,9 @@ function closePlanModal() {
   max-width: 14%;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   font-size: 16px;
+}
+.custom-title {
+    font-size: 14px;
+    color: rgb(201, 198, 198);
 }
 </style>
