@@ -90,8 +90,6 @@ const fetchSubProcess = async () => {
         } else {
             triggerAlert(response.data.message, 'error');
         }
-
-        console.log(state.subProcesses);
     } catch (error) {
         console.error('진행단계(서브 프로세스) 데이터를 불러오는 중 오류가 발생했습니다:', error);
         triggerAlert('진행단계 정보 조회 중 오류가 발생했습니다', 'error');
@@ -193,10 +191,13 @@ onMounted(() => {
     fetchProcess();
     fetchDept();
 });
+
+const formatNumber = (value) => new Intl.NumberFormat().format(value);
 </script>
 
 <template>
     <v-container fluid>
+        <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
         <v-row>
             <v-col cols="12" md="2">
                 <v-card elevation="0" class="pa-4">
@@ -296,9 +297,9 @@ onMounted(() => {
                                         </v-col>
                                     </v-row>
                                     <v-row>
-                                        <v-col cols="4">고객명: {{ lead.customerName }}</v-col>
-                                        <v-col cols="4">예상 매출: {{ lead.expSales }}</v-col>
-                                        <v-col cols="4">기간: {{ lead.startDate }} ~ {{ lead.endDate }}</v-col>
+                                        <v-col class="text-h5" cols="4">고객명: {{ lead.customerName }}</v-col>
+                                        <v-col class="text-h5" cols="4">예상 매출: {{ formatNumber(lead.expSales) }}</v-col>
+                                        <v-col class="text-h5" cols="4">기간: {{ lead.startDate }} ~ {{ lead.endDate }}</v-col>
                                     </v-row>
                                     <v-row>
                                         <v-col cols="12" class="text-right">

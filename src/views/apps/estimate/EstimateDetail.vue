@@ -27,7 +27,15 @@ const breadcrumbs = ref([
 const showConfirmDialogs = ref(false);
 const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
+const userRole = ref(localStorage.getItem('loginUserRole') !== 'ADMIN');
+
 const formatNumber = (value) => new Intl.NumberFormat().format(value);
+
+const searchCond = reactive({
+    propName: '',
+    deptNo: userRole.value ? localStorage.getItem('loginDeptNo') : 0,
+    userNo: userRole.value ? localStorage.getItem('loginUserNo') : 0
+});
 
 const taxClasses = ref([
     { text: '매출과세', value: '매출과세' },
@@ -90,7 +98,7 @@ const propHeaders = ref([
 
 const fetchProposals = async () => {
     try {
-        const response = await api.get('/proposals/popUp');
+        const response = await api.post('/proposals/popUp', searchCond);
         propData.value = response.data;
     } catch (error) {
         console.error('제안서 정보를 불러오는 중 오류가 발생했습니다:', error);
@@ -123,7 +131,13 @@ const handlePropRowDblClick = () => {
 
 watch(
     () => propDialog.value,
-    (val) => val && fetchProposals()
+    (val) => {
+        if (val) {
+            fetchProposals();
+        } else {
+            searchCond.propName = '';
+        }
+    }
 );
 
 const totalQuantity = computed(() => (isMounted.value ? estimateData.products.reduce((acc, p) => acc + p.qty, 0) : estimateData.prodCnt));
@@ -380,6 +394,14 @@ onMounted(() => {
                         <v-card>
                             <v-card-title class="headline"> 제안 조회 </v-card-title>
                             <v-card-text>
+                                <v-row>
+                                    <v-col cols="10">
+                                        <v-text-field label="제안명" v-model="searchCond.propName" clearable></v-text-field>
+                                    </v-col>
+                                    <v-col cols="2">
+                                        <v-btn @click="fetchProposals" color="primary">검색</v-btn>
+                                    </v-col>
+                                </v-row>
                                 <v-data-table
                                     :headers="propHeaders"
                                     :items="propData"

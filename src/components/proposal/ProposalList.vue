@@ -28,7 +28,7 @@ const dialogEdit = ref(false);
 const router = useRouter();
 
 const searchDates = reactive({
-    startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().substring(0, 10),
+    startDate: new Date(new Date().setMonth(new Date().getMonth() - 5)).toISOString().substring(0, 10),
     endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().substring(0, 10)
 });
 
@@ -175,9 +175,7 @@ const deleteItem = (item) => {
     showConfirmDialogs.value = true;
 };
 
-const navigateToCreate = () => {
-    router.push('/proposals/create');
-};
+const navigateToCreate = () => router.push('/proposals/create');
 
 const closeEditDialog = () => {
     resetForm();

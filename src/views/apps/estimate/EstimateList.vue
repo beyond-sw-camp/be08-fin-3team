@@ -149,7 +149,9 @@ const deleteEstimateApi = async () => {
 
         triggerAlert('견적이 삭제되었습니다.', 'success', 2000, '/sales/estimates');
 
-        estimates.value.splice(editedIndex.value, 1);
+        // estimates.value.splice(editedIndex.value, 1);
+        search();
+
         resetForm();
     } catch (error) {
         triggerAlert('견적 삭제를 실패했습니다.', 'error', 2000);

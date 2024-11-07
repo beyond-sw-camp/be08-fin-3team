@@ -1,212 +1,157 @@
 <script setup>
-import { ref, reactive, watch, onMounted } from 'vue';
+import { ref, reactive, watch, computed, onMounted } from 'vue';
 import api from '@/api/axiosinterceptor';
+import { useAlert } from '@/utils/useAlert';
 
+import AlertComponent from '@/components/shared/AlertComponent.vue';
 import Customer from '@/components/sales/main/Customer.vue';
 import LeadAct from '@/components/sales/main/LeadAct.vue';
 import Sales from '@/components/sales/main/Sales.vue';
 
-const userRole = ref(true);
+const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
+
+const userRole = ref(localStorage.getItem('loginUserRole') !== 'ADMIN');
 
 const today = new Date();
 const searchDate = ref(today.toISOString().substring(0, 10));
-const selectedDept = ref(0);
-const selectedManager = ref(0);
-const state = reactive({
-    departments: [],
-    managers: []
-});
-
-const searchCond = reactive({
-    searchDate: searchDate.value,
-    deptNo: selectedManager.value,
-    userNo: selectedManager.value
-});
-
 const isMounted = ref(false);
 
-const customerCount = ref(0);
-const potenCustomerCount = ref(0);
-const progressCount = ref(0);
-const successCount = ref(0);
-const failCount = ref(0);
-const holdCount = ref(0);
-const planCount = ref(0);
-const completeCount = ref(0);
-const completePercent = ref(0);
-const yearTarget = ref('0');
-const yearResult = ref('0');
-const yearAchievement = ref(0);
-const monthTarget = ref('0');
-const monthResult = ref('0');
-const monthAchievement = ref(0);
+const state = reactive({
+    departments: [],
+    managers: [],
+    selected: {
+        dept: 0,
+        manager: 0
+    },
+    customerCount: 0,
+    potenCustomerCount: 0,
+    leadStatusCounts: {
+        PROGRESS: 0,
+        SUCCESS: 0,
+        FAIL: 0,
+        HOLD: 0
+    },
+    actCounts: {
+        planCount: 0,
+        completeCount: 0,
+        completePercent: 0
+    },
+    salesTargets: {
+        yearTarget: '0',
+        monthTarget: '0',
+        yearResult: '0',
+        monthResult: '0',
+        yearAchievement: 0,
+        monthAchievement: 0
+    }
+});
+
+const searchCond = computed(() => ({
+    searchDate: searchDate.value,
+    deptNo: state.selected.dept,
+    userNo: state.selected.manager
+}));
 
 const fetchDept = async () => {
     try {
         const response = await api.get(`/admin/departments/child`);
+
         state.departments = [{ no: 0, name: '전체' }, ...response.data.result];
 
         if (response.data.isSuccess) {
             if (userRole.value) {
-                const deptNo = localStorage.getItem('loginDeptNo');
-                selectedDept.value = deptNo ? Number(deptNo) : 0;
+                state.selected.dept = Number(localStorage.getItem('loginDeptNo')) || 0;
             }
 
-            fetchUser(selectedDept.value);
+            fetchUser(state.selected.dept);
+        } else {
+            triggerAlert(response.data.message, 'error');
         }
     } catch (error) {
         console.error('부서 데이터를 불러오는 중 오류가 발생했습니다:', error);
+        triggerAlert('부서 정보 조회 중 오류가 발생했습니다', 'error');
     }
 };
 
 const fetchUser = async (deptNo) => {
     try {
-        let response;
-
-        if (deptNo != null && deptNo > 0 && deptNo != 'undefined') {
-            response = await api.get(`/users/by-dept/${deptNo}`);
-
-            state.managers = [{ userNo: 0, name: '전체' }, ...response.data.result];
-
-            if (response.data.isSuccess) {
-                if (userRole.value) {
-                    const userNo = localStorage.getItem('loginUserNo');
-                    selectedManager.value = userNo ? Number(userNo) : 0;
-                }
-            }
-        } else {
-            state.managers = [{ userNo: 0, name: '전체' }];
+        const response = deptNo > 0 ? await api.get(`/users/by-dept/${deptNo}`) : null;
+        state.managers = response ? [{ userNo: 0, name: '전체' }, ...response.data.result] : [{ userNo: 0, name: '전체' }];
+        if (userRole.value) {
+            state.selected.manager = Number(localStorage.getItem('loginUserNo')) || 0;
         }
-
-        if (!isMounted.value) {
-            fetchData();
-        }
+        if (!isMounted.value) fetchData();
         isMounted.value = true;
     } catch (error) {
-        console.error('user 데이터를 불러오는 중 오류가 발생했습니다.');
+        console.error('유저 데이터를 불러오는 중 오류:', error);
     }
-};
-
-const formatNumber = (value) => {
-    return new Intl.NumberFormat().format(value);
 };
 
 const fetchData = async () => {
     try {
         const [customerResponse, potenCustomerResponse, leadResponse, actResponse, salesResponse, targetSalesResponse] = await Promise.all([
-            api.post('/customers/status/main', searchCond),
-            api.post('/pcustomers/status/main', searchCond),
-            api.post('/leads/status/main', searchCond),
-            api.post('/acts/status/main', searchCond),
-            api.post('/sales/status/main', searchCond),
-            api.post('/admin/targetsales/status/main', searchCond)
+            api.post('/customers/status/main', searchCond.value),
+            api.post('/pcustomers/status/main', searchCond.value),
+            api.post('/leads/status/main', searchCond.value),
+            api.post('/acts/status/main', searchCond.value),
+            api.post('/sales/status/main', searchCond.value),
+            api.post('/admin/targetsales/status/main', searchCond.value)
         ]);
 
-        customerCount.value = customerResponse.data.result;
-        potenCustomerCount.value = potenCustomerResponse.data.result;
+        state.customerCount = customerResponse.data.result || 0;
+        state.potenCustomerCount = potenCustomerResponse.data.result || 0;
 
-        if (leadResponse.data.result.find((l) => l.status === 'PROGRESS') != null) {
-            progressCount.value = leadResponse.data.result.find((l) => l.status === 'PROGRESS').count;
-        } else {
-            progressCount.value = 0;
-        }
+        state.leadStatusCounts = leadResponse.data.result.reduce(
+            (acc, { status, count }) => {
+                acc[status] = count || 0;
+                return acc;
+            },
+            { PROGRESS: 0, SUCCESS: 0, FAIL: 0, HOLD: 0 }
+        );
 
-        if (leadResponse.data.result.find((l) => l.status === 'SUCCESS') != null) {
-            successCount.value = leadResponse.data.result.find((l) => l.status === 'SUCCESS').count;
-        } else {
-            successCount.value = 0;
-        }
+        Object.assign(state.actCounts, {
+            planCount: actResponse.data.planCount || 0,
+            completeCount: actResponse.data.completeCount || 0,
+            completePercent: actResponse.data.completePercent || 0
+        });
 
-        if (leadResponse.data.result.find((l) => l.status === 'FAIL') != null) {
-            failCount.value = leadResponse.data.result.find((l) => l.status === 'FAIL').count;
-        } else {
-            failCount.value = 0;
-        }
+        const yearTargetSales = targetSalesResponse.data.result.yearTargetSales || 0;
+        const monthTargetSales = targetSalesResponse.data.result.monthTargetSales || 0;
+        const yearSales = salesResponse.data.result.yearSales || 0;
+        const monthSales = salesResponse.data.result.monthSales || 0;
 
-        if (leadResponse.data.result.find((l) => l.status === 'HOLD') != null) {
-            holdCount.value = leadResponse.data.result.find((l) => l.status === 'HOLD').count;
-        } else {
-            holdCount.value = 0;
-        }
-
-        planCount.value = actResponse.data.planCount;
-        completeCount.value = actResponse.data.completeCount;
-        completePercent.value = actResponse.data.completePercent;
-
-        if (targetSalesResponse.data.result.yearTargetSales > 0) {
-            yearTarget.value = formatNumber(targetSalesResponse.data.result.yearTargetSales);
-        } else {
-            yearTarget.value = '0';
-        }
-
-        if (targetSalesResponse.data.result.monthTargetSales > 0) {
-            monthTarget.value = formatNumber(targetSalesResponse.data.result.monthTargetSales);
-        } else {
-            monthTarget.value = '0';
-        }
-
-        if (salesResponse.data.result.yearSales > 0) {
-            yearResult.value = formatNumber(salesResponse.data.result.yearSales);
-        } else {
-            yearResult.value = '0';
-        }
-
-        if (salesResponse.data.result.monthSales > 0) {
-            monthResult.value = formatNumber(salesResponse.data.result.monthSales);
-        } else {
-            monthResult.value = '0';
-        }
-
-        if (salesResponse.data.result.yearSales > 0) {
-            yearAchievement.value = parseFloat(
-                ((salesResponse.data.result.yearSales * 100) / targetSalesResponse.data.result.yearTargetSales).toFixed(2)
-            );
-        } else {
-            yearAchievement.value = 0;
-        }
-
-        if (salesResponse.data.result.monthSales > 0) {
-            monthAchievement.value = parseFloat(
-                ((salesResponse.data.result.monthSales * 100) / targetSalesResponse.data.result.monthTargetSales).toFixed(2)
-            );
-        } else {
-            monthAchievement.value = 0;
-        }
+        Object.assign(state.salesTargets, {
+            yearTarget: formatNumber(yearTargetSales),
+            monthTarget: formatNumber(monthTargetSales),
+            yearResult: formatNumber(yearSales),
+            monthResult: formatNumber(monthSales),
+            yearAchievement: yearTargetSales > 0 ? parseFloat(((yearSales * 100) / yearTargetSales).toFixed(2)) : 0,
+            monthAchievement: monthTargetSales > 0 ? parseFloat(((monthSales * 100) / monthTargetSales).toFixed(2)) : 0
+        });
     } catch (error) {
-        console.error('Error fetching data:', error);
+        triggerAlert('메인 정보 조회 중 오류가 발생했습니다', 'error');
+        console.error('데이터 조회중 오류 발생', error);
     }
 };
 
+const formatNumber = (value) => new Intl.NumberFormat().format(value);
+
 watch(
-    () => selectedDept.value,
+    () => state.selected.dept,
     (newDept) => {
-        if (newDept != null) {
-            searchCond.deptNo = newDept;
-            selectedManager.value = 0;
-            fetchUser(newDept);
-        }
+        state.selected.manager = 0;
+        fetchUser(newDept);
     }
 );
 
-watch(searchDate, (newDate) => {
-    searchCond.searchDate = newDate;
-});
-
-watch(selectedManager, (newUser) => {
-    searchCond.userNo = newUser;
-});
-
 onMounted(() => {
-    if (localStorage.getItem('loginUserRole') == 'ADMIN') {
-        userRole.value = false;
-    }
-
     fetchDept();
 });
 </script>
 
 <template>
     <v-container fluid>
+        <AlertComponent :show="showAlert" :message="alertMessage" :type="alertType" />
         <v-row>
             <v-col cols="12" md="2">
                 <v-card elevation="0" class="pa-4">
@@ -214,7 +159,7 @@ onMounted(() => {
                     <v-text-field label="날짜" v-model="searchDate" type="date" outlined></v-text-field>
                     <v-select
                         label="부서"
-                        v-model="selectedDept"
+                        v-model="state.selected.dept"
                         :items="state.departments"
                         item-props="true"
                         item-title="name"
@@ -224,7 +169,7 @@ onMounted(() => {
                     ></v-select>
                     <v-select
                         label="담당자"
-                        v-model="selectedManager"
+                        v-model="state.selected.manager"
                         :items="state.managers"
                         item-props="true"
                         item-title="name"
@@ -240,24 +185,24 @@ onMounted(() => {
                     <v-card-title class="title font-weight-bold">종합현황</v-card-title>
                     <v-divider :thickness="3" class="border-opacity-50 mb-5" color="primary"></v-divider>
                     <v-row>
-                        <Customer :customer-count="customerCount" :poten-customer-count="potenCustomerCount" />
+                        <Customer :customer-count="state.customerCount" :poten-customer-count="state.potenCustomerCount" />
                         <LeadAct
-                            :progress-count="progressCount"
-                            :success-count="successCount"
-                            :fail-count="failCount"
-                            :hold-count="holdCount"
-                            :plan-count="planCount"
-                            :complete-count="completeCount"
-                            :complete-percent="completePercent"
+                            :progress-count="state.leadStatusCounts.PROGRESS"
+                            :success-count="state.leadStatusCounts.SUCCESS"
+                            :fail-count="state.leadStatusCounts.FAIL"
+                            :hold-count="state.leadStatusCounts.HOLD"
+                            :plan-count="state.actCounts.planCount"
+                            :complete-count="state.actCounts.completeCount"
+                            :complete-percent="state.actCounts.completePercent"
                         />
                     </v-row>
                     <Sales
-                        :year-target="yearTarget"
-                        :year-result="yearResult"
-                        :year-achievement="yearAchievement"
-                        :month-target="monthTarget"
-                        :month-result="monthResult"
-                        :month-achievement="monthAchievement"
+                        :year-target="state.salesTargets.yearTarget"
+                        :year-result="state.salesTargets.yearResult"
+                        :year-achievement="state.salesTargets.yearAchievement"
+                        :month-target="state.salesTargets.monthTarget"
+                        :month-result="state.salesTargets.monthResult"
+                        :month-achievement="state.salesTargets.monthAchievement"
                     />
                 </v-card>
             </v-col>
