@@ -81,16 +81,16 @@
             />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="contract.productCount" label="수량" type="text" @input="calculateTaxAndPrice" />
+            <v-text-field v-model="contract.productCount" label="수량(EA)" type="text" @input="calculateTaxAndPrice" />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="contract.supplyPrice" label="공급 가격" type="text" @input="calculateTaxAndPrice" />
+            <v-text-field v-model="contract.supplyPrice" label="공급 가격(원)" type="text" @input="calculateTaxAndPrice" />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="contract.tax" label="세금" type="text" readonly />
+            <v-text-field v-model="contract.tax" label="세금(원)" type="text" readonly />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="contract.totalPrice" label="총 가격" type="text" readonly />
+            <v-text-field v-model="contract.totalPrice" label="총 가격(원)" type="text" readonly />
           </v-col>
           <v-col cols="12" sm="6">
             <v-text-field v-model="contract.paymentTerms" label="결제 조건" />
@@ -294,13 +294,13 @@ export default {
       this.showErrors = true;
       this.errorMessage = '';
 
-      if (!this.contract.name || this.contract.name.trim() === '') {
+      if (!this.contract.name && this.contract.name == null) {
         this.nameError = '계약명을 입력해 주세요.';
         this.errorMessage = '필수값이 입력되지 않았습니다.';
         this.scrollToField('name');
       }
 
-      if (!this.contract.estimateName || this.contract.estimateName.trim() === '') {
+      if (!this.contract.estimateName) {
         this.estimateError = '견적명을 입력해 주세요.';
         this.errorMessage = '필수값이 입력되지 않았습니다.';
         this.scrollToField('estimateName');
@@ -312,21 +312,13 @@ export default {
         await this.triggerAlert('필수 입력값을 확인해주세요.', 'error');
         return;
       }
-      try {
-        // 저장 시 문자열로 된 수량과 공급 가격을 정수로 변환하여 저장
-        const contractData = {
-          ...this.contract,
-          productCount: parseInt(this.contract.productCount.replace(/,/g, ''), 10) || 0,
-          supplyPrice: parseInt(this.contract.supplyPrice.replace(/,/g, ''), 10) || 0,
-          tax: parseInt(this.contract.tax.replace(/,/g, ''), 10) || 0,
-          totalPrice: parseInt(this.contract.totalPrice.replace(/,/g, ''), 10) || 0,
-        };
 
+      try {
         let response;
         if (this.isEditMode) {
-          response = await api.patch(`/contract/${this.contract.contractNo}`, contractData);
+          response = await api.patch(`/contract/${this.contract.contractNo}`, this.contract);
         } else {
-          response = await api.post('/contract', contractData);
+          response = await api.post('/contract', this.contract);
         }
 
         if (response.data?.result?.contractNo) {
@@ -341,12 +333,13 @@ export default {
         await this.triggerAlert('계약 저장에 실패했습니다. 다시 시도해주세요.', 'error');
       }
       this.$router.push({ 
-        name: 'Contract',
+        name: 'ContractView',
         query: { 
             estimateNo: this.contract.estimateNo,
             estimateName: this.contract.estimateName 
         }
       });
+
     },
     scrollToTop() {
       document.documentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
