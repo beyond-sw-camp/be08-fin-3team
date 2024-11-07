@@ -36,7 +36,7 @@ const quarterlyResponseBody = ref<any>(null);
 
 const fetchMonthlySalesPredictions = async () => {
     try {
-        const response = await api.get('/sales/forecast/month');
+        const response = await api.get('/testsales/forecast/month');
         if (response.data.isSuccess) {
             monthlyResponseBody.value = response.data.result;
             updateMonthlyChartData();
@@ -50,7 +50,7 @@ const fetchMonthlySalesPredictions = async () => {
 
 const fetchQuarterlySalesPredictions = async () => {
     try {
-        const response = await api.get('/sales/forecast/quarter');
+        const response = await api.get('/testsales/forecast/quarter');
         if (response.data.isSuccess) {
             quarterlyResponseBody.value = response.data.result;
             updateQuarterlyChartData();
@@ -159,7 +159,7 @@ const monthlyChartOptions = computed(() => {
             opposite: false,
             labels: {
                 show: true,
-                formatter: (value: number) => formatCurrency(value)
+                formatter: (value: number) => `${formatCurrency(value)} 원`
             }
         },
         legend: {
@@ -209,7 +209,7 @@ const quarterlyChartOptions = computed(() => {
             opposite: false,
             labels: {
                 show: true,
-                formatter: (value: number) => formatCurrency(value)
+                formatter: (value: number) => `${formatCurrency(value)} 원`
             }
         },
         legend: {

@@ -113,7 +113,7 @@ const chartOptions = computed(() => {
 
 const fetchMonthlySalesData = async (year: number) => {
     try {
-        const response = await api.get(`/sales/count/monthly?year=${year}`);
+        const response = await api.get(`/testsales/count/monthly?year=${year}`);
         const data = response.data.result || {};
         const allMonths = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
         const currentSalesData = allMonths.map(month => data[month] || 0);
@@ -122,7 +122,7 @@ const fetchMonthlySalesData = async (year: number) => {
         areaChart.value.series = [{ name: '매출액', data: currentSalesData }];
 
         // 전년도 데이터 가져오기
-        const prevYearResponse = await api.get(`/sales/count/monthly?year=${year - 1}`);
+        const prevYearResponse = await api.get(`/testsales/count/monthly?year=${year - 1}`);
         const prevYearData = prevYearResponse.data.result || {};
         const prevYearMonths = Array.from({ length: 12 }, (_, i) => `${year - 1}-${String(i + 1).padStart(2, '0')}`);
         const previousSalesData = prevYearMonths.map(month => prevYearData[month] || 0);
