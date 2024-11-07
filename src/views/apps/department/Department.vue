@@ -333,11 +333,18 @@ export default {
             try {
                 const apiUrl = `/admin/departments/${this.selected.no}`;
                 const response = await api.delete(apiUrl);
-                console.log('Delete successful:', response.data);
-                this.triggerAlert('부서가 삭제되었습니다.', 'success', 2000);
 
-                this.clearForm();
-                await this.fetchDepartments();
+
+                if(response.data.code == 400){
+                    this.triggerAlert(response.data.message, 'error', 2000);
+                }else{
+                    console.log('Delete successful:', response.data);
+                    this.triggerAlert('부서가 삭제되었습니다.', 'success', 2000);
+
+                    this.clearForm();
+                    await this.fetchDepartments();
+                }
+
             } catch (error) {
                 console.error('Error deleting item:', error.message || error);
             } finally {
@@ -357,7 +364,7 @@ export default {
                 await this.fetchDepartments();
             } catch (error) {
                 console.error('부서 저장 중 오류 발생:', error);
-                this.triggerAlert('부서 삭제에 실패했습니다.', 'error', 2000);
+                this.triggerAlert('부서 저징에 실패했습니다.', 'error', 2000);
             }
         },
 

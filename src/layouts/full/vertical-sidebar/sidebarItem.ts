@@ -140,12 +140,18 @@ const sidebarItem: menu[] = [
 				{
 						title: '활동 차트',
 						icon: ChartDonut3Icon,
-						to: '/apps/chart/act'
+						to: '/apps/chart/act',
 				},
 				{
 						title: '계약 차트',
 						icon: ChartLineIcon,
 						to: '/apps/chart/status'
+				},
+				{
+					title: '실적 매출 차트',
+					icon: ChartLineIcon,
+					to: '/apps/chart/status/performanceandsales',
+					adminOnly: true
 				},
 				{
 						title: '매출 차트',
@@ -155,12 +161,14 @@ const sidebarItem: menu[] = [
 								{
 										title: '매출 현황 차트',
 										icon: ChartAreaLineIcon,
-										to: '/apps/chart/sales/status'
+										to: '/apps/chart/sales/status',
+										adminOnly: true
 								},
 								{
 										title: '목표 매출 차트',
 										icon: ChartBarIcon,
-										to: '/apps/chart/targetsales/status'
+										to: '/apps/chart/targetsales/status',
+										adminOnly: true
 								},
 								{
 										title: '매출 예측 차트',
