@@ -4,6 +4,8 @@ import ContractChartClsCount from './ContractChartClsCount.vue';
 import ContractChartAmt from './ContractChartAmt.vue';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
+import ContractCardAmt from './ContractCardAmt.vue';
+import ContractCardCount from './ContractCardCount.vue';
 
 const page = ref({ title: '차트' });
 const breadcrumbs = ref([
@@ -13,7 +15,15 @@ const breadcrumbs = ref([
 </script>
 <template>
     <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
+
     <v-row>
+        <v-col cols="12" lg="6" class="pr-8">
+            <ContractCardCount />
+        </v-col>
+        <v-col cols="12" lg="6" class="pr-4">
+            <ContractCardAmt />
+        </v-col>
+
         <v-col cols="12">
             <!-- AREA Chart -->
             <UiParentCard title="월별 계약 총액 집계">
