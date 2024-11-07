@@ -187,6 +187,9 @@ export default {
   },
   watch: {
     'contract.taxCls': 'updateSurtaxYn',
+    '$route.params.contractNo': async function(newContractNo) {
+      await this.fetchContractInfo(newContractNo);  // contractNo가 변경될 때마다 호출
+    }
   },
   methods: {
     selectEstimate(estimate) {
