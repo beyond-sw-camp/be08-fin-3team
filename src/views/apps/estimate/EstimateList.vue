@@ -147,7 +147,7 @@ const deleteEstimateApi = async () => {
     try {
         await api.delete(`/estimates/${editedItem.value.estNo}`);
 
-        triggerAlert('견적이 삭제되었습니다.', 'success', 2000, 'sales/estimates');
+        triggerAlert('견적이 삭제되었습니다.', 'success', 2000, '/sales/estimates');
 
         estimates.value.splice(editedIndex.value, 1);
         resetForm();
