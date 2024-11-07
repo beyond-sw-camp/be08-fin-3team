@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { useCalendarStore } from '@/stores/apps/calendar/calendar';
+import { useCalendarFilterStore } from '@/stores/apps/calendar/calendarFilterStore';
 
 const panel = ref([0, 1, 2, 3, 4]);
-const store = useCalendarStore();
+const store = useCalendarFilterStore();
 
 const categoryColors = {
   todo: { color: '#e8b0a4', label: '할 일' },

@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { EditIcon, PointFilledIcon, TrashIcon } from 'vue-tabler-icons';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
@@ -9,6 +9,10 @@ import { reverseActStatus, actStatus } from '@/utils/ActStatusMappings';
 import ConfirmDialogs from '@/components/shared/ConfirmDialogs.vue';
 import { useAlert } from '@/utils/useAlert';
 import AlertComponent from '@/components/shared/AlertComponent.vue';
+import {useCalendarUserStore} from '@/stores/apps/calendar/calendarStore';
+
+const calendarStore = useCalendarUserStore();
+const userCalendarNo = localStorage.getItem('calendarNo');
 
 const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
@@ -39,11 +43,14 @@ const headers = ref([
 
 const actList = ref([]);
 const editedItem = ref(null);
+const totalActsCount = computed(() => actList.value.length);
 
 async function initialize() {
     try {
         const response = await api.get('/acts');
-        actList.value = response.data.result;
+        actList.value = response.data.result.filter((act) => act.calendarNo === Number(userCalendarNo));
+        // console.log(actList.value,'영업활동 userCalendarNo',userCalendarNo)
+        // actList.value = response.data.result;
     } catch (error) {
         console.error(error);
     }
@@ -113,6 +120,11 @@ onMounted(() => {
                     color="primary"
                     show-select
                 >
+                    <template v-slot:footer.prepend>
+                        <div>
+                            <span class="custom-title">전체 개수: {{ totalActsCount }} 개</span>
+                        </div>
+                    </template>
                     <template v-slot:item.name="{ item }">
                         <h6 class="text-h6 cursor-pointer" @click="goToActDetails(item.actNo, item.cls)">{{ item.name }}</h6>
                     </template>
@@ -182,5 +194,11 @@ onMounted(() => {
     max-width: 17%;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     font-size: 15px;
+}
+.custom-title {
+    font-size: 14px;
+    color: rgb(201, 198, 198);
+
+    margin-right: 16px; 
 }
 </style>
