@@ -281,6 +281,11 @@ onMounted(() => {
                     item-key="propNo"
                     show-actions
                 >
+                    <template v-slot:[`item.name`]="{ item }">
+                        <span class="text-primary cursor-pointer" @click="goToDetailProposal(item.propNo)">
+                            {{ item.name }}
+                        </span>
+                    </template>
                     <template v-slot:item.actions="{ item }">
                         <EditIcon
                             height="20"
