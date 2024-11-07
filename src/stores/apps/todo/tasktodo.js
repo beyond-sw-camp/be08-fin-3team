@@ -18,6 +18,7 @@ export const useTaskStore = defineStore({
         const response = await api.get('/todos');
         if (response.data.isSuccess) {
           this.tasks = response.data.result.map(todo => ({
+            calendarNo: todo.calendarNo,
             priority: todo.priority,
             status: statusMapping[todo.status] || todo.status, 
             name: todo.title,
