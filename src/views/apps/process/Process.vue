@@ -205,14 +205,13 @@ async function confirmDelete() {
         console.log('Delete successful:', response.data);
         triggerAlert('프로세스가 삭제되었습니다.', 'success', 2000);
 
-        editedItem.value = null;
-
         if (dialogMode.value.includes('parent')) {
             selectedProcess.value = null;
             subProcesses.value = [];
+            await fetchProcesses();
+        } else {
+            await fetchSubProcesses(selectedProcess.value?.processName || 0);
         }
-
-        await fetchProcesses();
     } catch (error) {
         console.error('Error deleting item:', error.message || error);
         triggerAlert('프로세스 삭제에 실패했습니다.', 'error', 2000);
