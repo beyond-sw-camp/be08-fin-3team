@@ -20,13 +20,40 @@ const sidebarMenu = ref();
 //     return originMenu.value.filter((item)=>!item.adminOnly);
 // });
 
-const changeMenu=()=>{
-    if(localStorage.getItem("loginUserRole") ==="ADMIN"){
-        sidebarMenu.value =  originMenu.value;
-    }else{
-        sidebarMenu.value =  originMenu.value.filter((item)=>!item.adminOnly);
-    }
+// const changeMenu=()=>{
+//     if(localStorage.getItem("loginUserRole") ==="ADMIN"){
+//         sidebarMenu.value =  originMenu.value;
+//     }else{
+//         sidebarMenu.value =  originMenu.value.filter((item)=>!item.adminOnly);
+//     }
+
+//     console.log(sidebarMenu);
+// }
+
+const filterMenu = (menuItems) => {
+    return menuItems
+        .filter(item => {
+            if (localStorage.getItem("loginUserRole") === "ADMIN") {
+                return true;
+            } else {
+                return !item.adminOnly;
+            }
+        })
+        .map(item => {
+            if (item.children) {
+                return {
+                    ...item,
+                    children: filterMenu(item.children)
+                };
+            }
+            return item;
+        });
 }
+
+const changeMenu = () => {
+    sidebarMenu.value = filterMenu(originMenu.value);
+};
+
 
 onMounted(()=>{
     changeMenu();

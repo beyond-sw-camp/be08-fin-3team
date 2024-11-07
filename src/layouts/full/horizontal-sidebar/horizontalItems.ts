@@ -216,7 +216,8 @@ const horizontalItems: menu[] = [
             {
                 title: '실적 매출 차트',
                 icon: CircleDotIcon,
-                to: '/apps/chart/status/performanceandsales'
+                to: '/apps/chart/status/performanceandsales',
+                adminOnly: true
             },
             {
                 title: '매출 차트',
@@ -231,7 +232,8 @@ const horizontalItems: menu[] = [
                     {
                         title: '목표 매출 차트',
                         icon: ChartAreaIcon,
-                        to: '/apps/chart/targetsales/status'
+                        to: '/apps/chart/targetsales/status',
+                        adminOnly: true
                     },
                     {
                         title: '매출 예측 차트',

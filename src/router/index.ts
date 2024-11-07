@@ -19,7 +19,7 @@ export const router = createRouter({
 router.beforeEach(async (to, from, next) => {
     // 로그인 필요 여부와 관리자 페이지 여부 확인
     const publicPages = ['/auth/login', '/auth/signup','/auth/find-password','/auth/change-password'];
-    const adminPages = ['/admin/departments', '/admin/products', '/admin/processes','/admin/targetsales'];
+    const adminPages = ['/admin/departments', '/admin/products', '/admin/processes','/admin/targetsales', '/apps/chart/targetsales/status', '/apps/chart/sales/pridictions'];
     const authRequired = !publicPages.includes(to.path);
     const checkPath = adminPages.includes(to.path);
     const userRole = localStorage.getItem('loginUserRole');
