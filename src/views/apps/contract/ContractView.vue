@@ -34,12 +34,12 @@ const filterCriteria = ref<FilterCriteria>({
 <template>
     <BaseBreadcrumb :title="page.title" />
     <v-row>
-        <v-col cols="12" md="2">
+        <v-col cols="12" md="3">
             <v-card>
                 <ContractFilterView v-model="filterCriteria" />
             </v-card>
         </v-col>
-        <v-col cols="12" md="10">
+        <v-col cols="12" md="9">
             <v-card style="padding: 20px;">
                 <ContractDetailView :filter="filterCriteria" />
                 
