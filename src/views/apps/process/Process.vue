@@ -201,9 +201,14 @@ async function confirmDelete() {
         const apiUrl = dialogMode.value.includes('parent')
             ? `/admin/processes/${editedItem.value.processNo}`
             : `/admin/subprocesses/${editedItem.value.subProcessNo}`;
-        const response = await api.delete(apiUrl);
-        console.log('Delete successful:', response.data);
-        triggerAlert('프로세스가 삭제되었습니다.', 'success', 2000);
+
+        if(editedItem.value.isDefault == true){
+            triggerAlert('기본 프로세스는 삭제가 불가합니다.', 'warning', 2000);
+        }else{
+            const response = await api.delete(apiUrl);
+            console.log('Delete successful:', response.data);
+            triggerAlert('프로세스가 삭제되었습니다.', 'success', 2000);
+        }
 
         if (dialogMode.value.includes('parent')) {
             selectedProcess.value = null;
