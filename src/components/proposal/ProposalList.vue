@@ -1,13 +1,16 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { onMounted, computed, ref, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/api/axiosinterceptor';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
 import { useAlert } from '@/utils/useAlert';
 import AlertComponent from '@/components/shared/AlertComponent.vue';
+import { useExcelDownloader } from '@/composables/useExcel';
 
 const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
+
+const { downloadExcel, getTableDataForExcel } = useExcelDownloader();
 
 const showConfirmDialogs = ref(false);
 
@@ -17,11 +20,39 @@ const breadcrumbs = ref([
     { text: '제안', disabled: true, href: '#' }
 ]);
 
-const formTitle = computed(() => (defaultItem.value === -1 ? '제안 추가' : '제안 수정'));
+const userRole = ref(localStorage.getItem('loginUserRole') !== 'ADMIN');
+const isMounted = ref(false);
 
 const proposals = ref([]);
 const dialogEdit = ref(false);
 const router = useRouter();
+
+const searchDates = reactive({
+    startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().substring(0, 10),
+    endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().substring(0, 10)
+});
+
+const state = reactive({
+    departments: [],
+    managers: [],
+    selected: {
+        submitDate: '',
+        propName: '',
+        dept: 0,
+        manager: 0
+    }
+});
+
+const searchCond = computed(() => ({
+    startDate: searchDates.startDate,
+    endDate: searchDates.endDate,
+    submitDate: state.selected.selsubmitDate,
+    propName: state.selected.propName,
+    deptNo: state.selected.dept,
+    userNo: state.selected.manager
+}));
+
+const dataSize = computed(() => proposals.value.length);
 
 const defaultItem = ref({
     propNo: null,
@@ -47,19 +78,51 @@ const headers = ref([
     { title: '', key: 'actions', sortable: false }
 ]);
 
-const dataSize = computed(() => proposals.value.length);
-
-async function initialize() {
+const fetchDept = async () => {
     try {
-        const response = await api.get('/proposals');
+        const response = await api.get(`/admin/departments/child`);
 
-        proposals.value = response.data;
+        state.departments = [{ no: 0, name: '전체' }, ...response.data.result];
 
-        console.log(proposals.value);
+        if (response.data.isSuccess) {
+            if (userRole.value) {
+                state.selected.dept = Number(localStorage.getItem('loginDeptNo')) || 0;
+            }
+
+            fetchUser(state.selected.dept);
+        } else {
+            triggerAlert(response.data.message, 'error');
+        }
     } catch (error) {
-        console.error('Failed to fetch proposals:', error);
+        console.error('부서 데이터를 불러오는 중 오류가 발생했습니다:', error);
+        triggerAlert('부서 정보 조회 중 오류가 발생했습니다', 'error');
     }
-}
+};
+
+const fetchUser = async (deptNo) => {
+    try {
+        const response = deptNo > 0 ? await api.get(`/users/by-dept/${deptNo}`) : null;
+        state.managers = response ? [{ userNo: 0, name: '전체' }, ...response.data.result] : [{ userNo: 0, name: '전체' }];
+        if (userRole.value) {
+            state.selected.manager = Number(localStorage.getItem('loginUserNo')) || 0;
+        }
+        if (!isMounted.value) search();
+        isMounted.value = true;
+    } catch (error) {
+        console.error('유저 데이터를 불러오는 중 오류:', error);
+    }
+};
+
+const search = async () => {
+    try {
+        const response = await api.post('/proposals/search', searchCond.value);
+
+        proposals.value = response.data.result;
+    } catch (error) {
+        console.error('Failed to search proposals:', error);
+        triggerAlert('검색에 실패했습니다.', 'error');
+    }
+};
 
 const deleteProposalApi = async () => {
     try {
@@ -75,6 +138,23 @@ const deleteProposalApi = async () => {
         triggerAlert('제안 삭제를 실패했습니다.', 'error', 2000);
     }
 };
+
+const excelDown = () => downloadExcel(getTableDataForExcel(proposals.value), '제안목록.xlsx');
+
+watch(
+    () => state.selected.dept,
+    (newDept) => {
+        state.selected.manager = 0;
+        fetchUser(newDept);
+    }
+);
+
+['submitDate', 'manager'].forEach((field) => {
+    watch(
+        () => state.selected[field],
+        (newValue) => (searchCond.value[field] = newValue)
+    );
+});
 
 const resetForm = () => {
     defaultItem.value = { ...defaultItem.value };
@@ -110,27 +190,11 @@ const goToDetailProposal = (propNo) => {
 
 const displayedProposals = computed(() => proposals.value);
 
-initialize();
-
 const alertDialog = ref(false);
 
-const propName = ref('');
-const reqDate = ref('');
-const startDate = ref('');
-
-const search = async () => {
-    try {
-        const response = await api.post('/proposals/search', {
-            propName: propName.value || undefined,
-            reqDate: reqDate.value || undefined,
-            startDate: startDate.value || undefined
-        });
-        proposals.value = response.data.result;
-    } catch (error) {
-        console.error('Failed to search proposals:', error);
-        triggerAlert('검색에 실패했습니다.', 'error');
-    }
-};
+onMounted(() => {
+    fetchDept();
+});
 </script>
 
 <template>
@@ -151,17 +215,38 @@ const search = async () => {
         <v-col cols="12" md="2">
             <v-card elevation="0" class="pa-4">
                 <v-card-title class="title font-weight-bold">검색 조건</v-card-title>
+                <v-text-field v-model="searchDates.startDate" label="시작일자" type="date" />
+                <v-text-field v-model="searchDates.endDate" label="종료일자" type="date" />
+                <v-text-field v-model="state.selected.submitDate" label="제출일자" type="date"></v-text-field>
                 <v-text-field
-                    v-model="propName"
+                    label="제안명"
+                    v-model="state.selected.propName"
                     color="primary"
                     variant="outlined"
                     type="text"
-                    placeholder="제안명"
                     hide-details
                     class="mb-4"
                 ></v-text-field>
-                <v-text-field v-model="reqDate" label="요청일" type="date"></v-text-field>
-                <v-text-field v-model="startDate" label="제안시작일" type="date"></v-text-field>
+                <v-select
+                    label="부서"
+                    v-model="state.selected.dept"
+                    :items="state.departments"
+                    item-props="true"
+                    item-title="name"
+                    item-value="no"
+                    outlined
+                    :disabled="userRole"
+                />
+                <v-select
+                    label="담당자"
+                    v-model="state.selected.manager"
+                    :items="state.managers"
+                    item-props="true"
+                    item-title="name"
+                    item-value="userNo"
+                    outlined
+                    :disabled="userRole"
+                />
                 <v-btn class="search_btn" variant="flat" color="primary" @click="search">
                     <v-icon left class="mr-1">mdi-search-web</v-icon>
                     검색
@@ -177,8 +262,13 @@ const search = async () => {
                         <v-card-title class="mb-0 custom-title">검색결과: {{ dataSize }}건</v-card-title>
                     </v-col>
                     <v-spacer></v-spacer>
-                    <v-col cols="auto"> </v-col>
-                    <v-btn color="primary" variant="tonal" class="mr-6" @click="navigateToCreate">제안 생성</v-btn>
+                    <v-col cols="auto">
+                        <v-btn variant="tonal" color="success" class="mr-2" @click="excelDown">
+                            <v-icon left>mdi-file-excel</v-icon>
+                            엑셀 다운
+                        </v-btn>
+                        <v-btn color="primary" variant="tonal" class="mr-6" @click="navigateToCreate">제안 생성</v-btn>
+                    </v-col>
                 </v-row>
 
                 <v-divider :thickness="3" class="border-opacity-50 thick-divider" color="info"></v-divider>
