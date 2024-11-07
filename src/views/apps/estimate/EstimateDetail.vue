@@ -529,7 +529,9 @@ onMounted(() => {
                             <v-col cols="12">
                                 <v-btn color="primary" class="mr-2" flat @click="saveEstimate">{{ saveBtn }}</v-btn>
                                 <v-btn v-if="saveBtn == '수정'" color="error" class="mr-2" @click="showConfirmDialogs = true">삭제</v-btn>
-                                <v-btn v-if="saveBtn == '수정'" color="secondary" class="mr-2" @click="generatePdf">PDF 다운</v-btn>
+                                <v-btn v-if="saveBtn == '수정'" color="secondary" class="mr-2" @click="generatePdf">
+                                    <v-icon left>mdi-file-export</v-icon>PDF 다운</v-btn
+                                >
                                 <v-btn class="ml-" variant="outlined" color="primary" @click="goToList">목록으로 돌아가기</v-btn>
                             </v-col>
                         </v-row>
