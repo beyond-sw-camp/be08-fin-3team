@@ -51,11 +51,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import { useTaskStore } from '@/stores/apps/todo/tasktodo';
 import TodoModal from '@/components/modal/TodoModal.vue';
 import api from '@/api/axiosinterceptor';
+import {useCalendarUserStore} from '@/stores/apps/calendar/calendarStore';
+
+const calendarStore = useCalendarUserStore();
 
 const page = ref({ title: '할 일 목록' });
 const breadcrumbs = ref([
@@ -84,21 +87,6 @@ const showSuccessAlert = ref(false);
 const showErrorAlert = ref(false);
 const alertMessage = ref('');
 
-const getCalendarNo = async () => {
-  try {
-    const response = await api.get('/calendars/user/data');
-    todo.value.calendarNo = response.data.result.calendarNo;
-  } catch (e) {
-    console.error(e);
-  }
-};
-
-onMounted(async () => {
-  await taskStore.fetchTasks();
-  tasks.value = taskStore.tasks;
-  await getCalendarNo();
-});
-
 const headers = [
   { text: '우선순위', value: 'priority' },
   { text: '이름', value: 'name' },
@@ -107,9 +95,27 @@ const headers = [
   { text: '마감일', value: 'dueDate' },
 ];
 
+onMounted(async () => {
+  await calendarStore.fetchUserCalendarNo();
+  if (calendarStore.calendarNo) {
+    await taskStore.fetchTasks();
+    tasks.value = taskStore.tasks.filter((task) => task.calendarNo === calendarStore.calendarNo);
+  }
+});
+
+watch(
+  () => calendarStore.calendarNo,
+  async (newCalendarNo) => {
+    if (newCalendarNo) {
+      await taskStore.fetchTasks();
+      tasks.value = taskStore.tasks.filter((task) => task.calendarNo === newCalendarNo);
+    }
+  }
+);
+
 function clearTodoForm() {
   todo.value = ref({
-    calendarNo: todo.value.calendarNo,
+    calendarNo: calendarStore.calendarNo,
     title: '',
     todoCls: '',
     priority: '',
@@ -140,7 +146,7 @@ async function addTask() {
   
   try {
     const response = await api.post('/todos', {
-      calendarNo: todo.value.calendarNo,
+      calendarNo: calendarStore.calendarNo,
       title: todo.value.title,
       todoCls: todo.value.todoCls,
       priority: todo.value.priority,

@@ -1,13 +1,30 @@
 import { defineStore } from 'pinia';
 import api from '@/api/axiosinterceptor';
 
-export const useCompanyCalendarStore = defineStore('companyCalendar', {
+export const useCalendarUserStore = defineStore('companyCalendar', {
   state: () => ({
     events: [],//todo + plan
     showCompanyEvents: false,
+    calendarNo: localStorage.getItem('calendarNo') || null, 
   }),
   
   actions: {
+    // calendarNo 가져오기
+    async fetchUserCalendarNo() {
+      try {
+        const response = await api.get('/calendars/user/data');
+        if (response.data.isSuccess) {
+          this.calendarNo = response.data.result.calendarNo;
+          localStorage.setItem('calendarNo', this.calendarNo);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    clearCalendarNo() {
+      this.calendarNo = null;
+      localStorage.removeItem('calendarNo');
+    },
     // 전사일정 가져오기
     async fetchCompanyEvents() {
       try {
@@ -36,7 +53,7 @@ export const useCompanyCalendarStore = defineStore('companyCalendar', {
           this.events = [...planEvents, ...todoEvents];
         }
       } catch (error) {
-        console.error('Failed to fetch company events:', error);
+        console.error(error);
       }
     },
     

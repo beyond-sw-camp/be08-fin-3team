@@ -5,6 +5,7 @@ import { Form } from 'vee-validate';
 import baseApi from '@/api/baseapi';
 import { useRouter } from 'vue-router';
 import PasswordResetModal from '../modal/PasswordResetModal.vue';
+import {useCalendarUserStore} from '@/stores/apps/calendar/calendarStore';
 
 const isEmployeeIdLogin = ref(false);
 const password = ref('');
@@ -63,6 +64,11 @@ const loginApi = async () => {
             console.log(result);
             authStore.setIsLogedIn();
             saveLocalStorage(result);
+
+            // calendarNo 초기화
+            const calendarStore = useCalendarUserStore();
+            await calendarStore.fetchUserCalendarNo();
+
             router.push('/');
         }
     } catch (err) {

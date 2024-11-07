@@ -54,7 +54,7 @@ const searchCond = computed(() => ({
 
 const fetchDept = async () => {
     try {
-        const response = await api.get(`/admin/departments`);
+        const response = await api.get(`/admin/departments/child`);
 
         state.departments = [{ no: 0, name: '전체' }, ...response.data.result];
 
@@ -75,7 +75,7 @@ const fetchDept = async () => {
 
 const fetchUser = async (deptNo) => {
     try {
-        const response = deptNo > 1 ? await api.get(`/users/by-dept/${deptNo}`) : null;
+        const response = deptNo > 0 ? await api.get(`/users/by-dept/${deptNo}`) : null;
         state.managers = response ? [{ userNo: 0, name: '전체' }, ...response.data.result] : [{ userNo: 0, name: '전체' }];
         if (userRole.value) {
             state.selected.manager = Number(localStorage.getItem('loginUserNo')) || 0;
@@ -270,7 +270,9 @@ onMounted(fetchDept);
                     </v-col>
                     <v-spacer></v-spacer>
                     <v-col cols="auto">
-                        <v-btn variant="tonal" color="success" class="mr-2" @click="excelDown">엑셀 다운</v-btn>
+                        <v-btn variant="tonal" color="success" class="mr-2" @click="excelDown"
+                            ><v-icon left>mdi-file-excel</v-icon>엑셀 다운</v-btn
+                        >
                         <v-btn color="primary" variant="tonal" class="mr-2" @click="navigateToCreate">견적 생성</v-btn>
                     </v-col>
                 </v-row>

@@ -25,27 +25,21 @@ const statuses = ref([
     { text: '보류', value: 'HOLD' }
 ]);
 
-const processes = ref([
-    { text: '전체', value: 0 },
-    { text: '기회인지', value: 1 },
-    { text: '상담', value: 2 },
-    { text: '제안', value: 3 },
-    { text: '협상', value: 4 },
-    { text: '계약', value: 5 }
-]);
-
 const searchDates = reactive({
     startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().substring(0, 10),
-    endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().substring(0, 10)
+    endDate: new Date(new Date().setMonth(new Date().getMonth() + 2)).toISOString().substring(0, 10)
 });
 
 const state = reactive({
     departments: [],
     managers: [],
+    processes: [],
+    subProcesses: [],
     leads: [],
     selected: {
         status: null,
         process: 0,
+        subProcess: 0,
         dept: 0,
         manager: 0
     },
@@ -55,7 +49,8 @@ const state = reactive({
 
 const searchCond = computed(() => ({
     status: state.selected.status,
-    subProcess: state.selected.process,
+    process: state.selected.process,
+    subProcess: state.selected.subProcess,
     startDate: searchDates.startDate,
     endDate: searchDates.endDate,
     deptNo: state.selected.dept,
@@ -64,9 +59,48 @@ const searchCond = computed(() => ({
 
 const dataSize = computed(() => state.leads.length);
 
+const fetchProcess = async () => {
+    try {
+        const response = await api.get(`/admin/processes`);
+
+        if (response.data.isSuccess) {
+            state.processes = [{ processNo: 0, processName: '전체' }, ...response.data.result];
+            state.subProcesses = [{ subProcessNo: 0, subProcessName: '전체' }];
+        } else {
+            triggerAlert(response.data.message, 'error');
+        }
+    } catch (error) {
+        console.error('부서 데이터를 불러오는 중 오류가 발생했습니다:', error);
+        triggerAlert('부서 정보 조회 중 오류가 발생했습니다', 'error');
+    }
+};
+
+const getProcessNameByNo = (processNo) => {
+    const process = state.processes.find((p) => p.processNo === processNo);
+    return process ? process.processName : '';
+};
+
+const fetchSubProcess = async () => {
+    try {
+        const processName = getProcessNameByNo(state.selected.process);
+        const response = await api.get(`/admin/subprocesses/${processName}`);
+
+        if (response.data.isSuccess) {
+            state.subProcesses = [{ subProcessNo: 0, subProcessName: '전체' }, ...response.data.result];
+        } else {
+            triggerAlert(response.data.message, 'error');
+        }
+
+        console.log(state.subProcesses);
+    } catch (error) {
+        console.error('진행단계(서브 프로세스) 데이터를 불러오는 중 오류가 발생했습니다:', error);
+        triggerAlert('진행단계 정보 조회 중 오류가 발생했습니다', 'error');
+    }
+};
+
 const fetchDept = async () => {
     try {
-        const response = await api.get(`/admin/departments`);
+        const response = await api.get(`/admin/departments/child`);
 
         state.departments = [{ no: 0, name: '전체' }, ...response.data.result];
 
@@ -87,7 +121,7 @@ const fetchDept = async () => {
 
 const fetchUser = async (deptNo) => {
     try {
-        const response = deptNo > 1 ? await api.get(`/users/by-dept/${deptNo}`) : null;
+        const response = deptNo > 0 ? await api.get(`/users/by-dept/${deptNo}`) : null;
         state.managers = response ? [{ userNo: 0, name: '전체' }, ...response.data.result] : [{ userNo: 0, name: '전체' }];
         if (userRole.value) {
             state.selected.manager = Number(localStorage.getItem('loginUserNo')) || 0;
@@ -102,6 +136,7 @@ const fetchUser = async (deptNo) => {
 const fetchData = async () => {
     state.loading = true;
     state.error = null;
+
     try {
         const response = await api.post('/leads/filter', searchCond.value);
         state.leads = response.data.result;
@@ -128,6 +163,18 @@ const getStepColor = (step) =>
 const excelDown = () => downloadExcel(getTableDataForExcel(state.leads), '영업기회.xlsx');
 
 watch(
+    () => state.selected.process,
+    (newProcess) => {
+        state.selected.subProcess = 0;
+        if (newProcess > 0) {
+            fetchSubProcess(newProcess);
+        } else {
+            state.subProcesses = [{ subProcessNo: 0, subProcessName: '전체' }];
+        }
+    }
+);
+
+watch(
     () => state.selected.dept,
     (newDept) => {
         state.selected.manager = 0;
@@ -135,14 +182,17 @@ watch(
     }
 );
 
-['status', 'process', 'manager'].forEach((field) => {
+['status', 'subProcess', 'manager'].forEach((field) => {
     watch(
         () => state.selected[field],
         (newValue) => (searchCond.value[field] = newValue)
     );
 });
 
-onMounted(fetchDept);
+onMounted(() => {
+    fetchProcess();
+    fetchDept();
+});
 </script>
 
 <template>
@@ -163,12 +213,22 @@ onMounted(fetchDept);
                         class="mt-4"
                     />
                     <v-select
+                        label="프로세스"
                         v-model="state.selected.process"
-                        :items="processes"
+                        :items="state.processes"
                         item-props="true"
-                        item-title="text"
-                        item-value="value"
+                        item-title="processName"
+                        item-value="processNo"
+                        outlined
+                    />
+                    <v-select
                         label="진행단계"
+                        v-model="state.selected.subProcess"
+                        :items="state.subProcesses"
+                        item-props="true"
+                        item-title="subProcessName"
+                        item-value="subProcessNo"
+                        outlined
                     />
                     <v-select
                         label="부서"
@@ -201,7 +261,10 @@ onMounted(fetchDept);
                         </v-col>
                         <v-spacer></v-spacer>
                         <v-col cols="auto">
-                            <v-btn variant="tonal" color="success" class="mr-2 mb-3" @click="excelDown">엑셀 다운</v-btn>
+                            <v-btn variant="tonal" color="success" class="mr-2 mb-3" @click="excelDown">
+                                <v-icon left>mdi-file-excel</v-icon>
+                                엑셀 다운
+                            </v-btn>
                             <v-btn variant="tonal" color="primary" to="/sales/lead/new" class="mb-3">영업기회 생성</v-btn>
                         </v-col>
                     </v-row>
