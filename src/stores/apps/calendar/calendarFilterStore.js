@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
-export const useCalendarStore = defineStore('calendar', () => {
+export const useCalendarFilterStore = defineStore('calendar', () => {
   const selectedCategory = ref([]);
   const selectedStatus = ref([]);
   const selectedCalendarCategory = ref([]);

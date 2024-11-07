@@ -7,8 +7,8 @@ import interactionPlugin from '@fullcalendar/interaction';
 import TodoModal from '@/components/modal/TodoModal.vue';
 import PlanModal from '@/components/modal/PlanModal.vue';
 import './calendar.css';
-import { useCalendarStore } from '@/stores/apps/calendar/calendar';
-import { useCompanyCalendarStore } from '@/stores/apps/calendar/calendarStore';
+import { useCalendarFilterStore } from '@/stores/apps/calendar/calendarFilterStore';
+import { useCalendarUserStore } from '@/stores/apps/calendar/calendarStore';
 import api from '@/api/axiosinterceptor';
 import { reverseActStatus, actStatus } from '@/utils/ActStatusMappings';
 import {categoryMapping, reversePlanCls} from '@/utils/PlanMappings'
@@ -92,8 +92,8 @@ export default defineComponent({
       }, 200);
     }
     this.checkCalendarExists();
-    const store = useCalendarStore();
-    const companyCalendarStore = useCompanyCalendarStore();
+    const store = useCalendarFilterStore();
+    const companyCalendarStore = useCalendarUserStore();
     
     watch(() => store.filteredData, (newEvents) => {
       this.applyFilter(newEvents);
@@ -189,7 +189,7 @@ export default defineComponent({
         if(data.code== 200){
           const calendarData = response.data.result;
           this.calendarNo = response.data.result.calendarNo;
-          const store = useCalendarStore();
+          const store = useCalendarFilterStore();
 
           const todos = calendarData.todos.map(todo => ({
           id: todo.todoNo,
