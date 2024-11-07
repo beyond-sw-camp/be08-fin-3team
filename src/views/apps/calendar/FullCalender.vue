@@ -67,7 +67,7 @@ export default defineComponent({
           right: 'dayGridMonth,timeGridWeek,timeGridDay',
         },
         initialView: 'dayGridMonth',
-        editable: true,
+        editable: false,
         selectable: false,
         selectMirror: true,
         dayMaxEvents: true,
