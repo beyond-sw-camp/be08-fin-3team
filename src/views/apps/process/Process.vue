@@ -74,6 +74,7 @@ async function fetchSubProcesses(processName) {
     } catch (error) {
         console.error('Error fetching Sub processes:', error.message || error);
         triggerAlert('하위 프로세스 가져오것을 실패했습니다.', 'error', 2000);
+        
     } finally {
         setTimeout(() => {
             isLoading.value = false;
@@ -196,7 +197,6 @@ function validateForm() {
 // 항목 삭제 확정
 async function confirmDelete() {
     try {
-        // dialogDelete.value = false;
         showConfirmDialog.value = false;
         const apiUrl = dialogMode.value.includes('parent')
             ? `/admin/processes/${editedItem.value.processNo}`
@@ -207,14 +207,18 @@ async function confirmDelete() {
 
         editedItem.value = null;
 
-        await fetchSubProcesses(selectedProcess.value.processName);
-        await fetchProcesses();
+        if (dialogMode.value.includes('parent')) {
+            selectedProcess.value = null;
+            subProcesses.value = [];
+        }
 
+        await fetchProcesses();
     } catch (error) {
         console.error('Error deleting item:', error.message || error);
         triggerAlert('프로세스 삭제에 실패했습니다.', 'error', 2000);
     }
 }
+
 
 // 항목 수정 함수
 function editItem(item, type) {
