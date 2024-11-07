@@ -96,22 +96,20 @@ const fetchContractData = async (year: number) => {
         const response = await api.get(`/contract/chart/count/monthly?year=${year}`);
         const data = response.data.result;
 
-        // Check if data exists and is an object
         if (data && typeof data === 'object') {
             const monthlyData = Array(12).fill(0);
             for (const [key, count] of Object.entries(data)) {
-                const month = parseInt(key.split('-')[1]) - 1; // Extract month from "YYYY-MM" format
+                const month = parseInt(key.split('-')[1]) - 1;
                 monthlyData[month] = count;
             }
             columnChart.value.series[0].data = monthlyData;
         } else {
-            // If data is undefined or null, initialize with empty data
             columnChart.value.series[0].data = Array(12).fill(0);
             console.warn('No data available for the selected year');
         }
     } catch (error) {
         console.error('Failed to fetch contract data:', error);
-        columnChart.value.series[0].data = Array(12).fill(0); // Display an empty chart in case of error
+        columnChart.value.series[0].data = Array(12).fill(0);
     }
 };
 
@@ -125,8 +123,10 @@ onMounted(() => {
 </script>
 
 <template>
-    <div>
-        <v-select v-model="selectedYear" :items="yearOptions" label="Select Year" @change="onYearChange" />
-        <apexchart id="column-chart" type="bar" height="300" :options="chartOptions" :series="columnChart.series" />
-    </div>
+    <v-row>
+        <v-col cols="12" md="4">
+            <v-select v-model="selectedYear" :items="yearOptions" label="년도 선택" @change="onYearChange" />
+        </v-col>
+    </v-row>
+    <apexchart id="column-chart" type="bar" height="300" :options="chartOptions" :series="columnChart.series" />
 </template>
