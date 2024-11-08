@@ -34,30 +34,31 @@ function formatNumberWithCommas(value) {
 
 
 
-const fetchSalesData = async (year: number, month: number) => {
+const fetchYearSalesData = async () => {
     try {
-        let url =`/sales/count/monthly?year=${year}`;
+        let url =`/sales/status/yearly`;
 
         console.log(url);
         const response = await api.get(url);
-        const data = response.data.result || {};
+        yearSales.value = response.data.result || {};
 
-        const allMonths = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
-        const salesData = allMonths.map(month => data[month] || 0);
 
-        // console.log(salesData);
+    } catch (error) {
+        console.error('데이터 로드 실패:', error);
+    }
 
-        for(var i = 0; i < 12; i++){
-            yearSales.value += salesData[i];
+};
 
-            if(i+1 == month){
-                monthSales.value = salesData[i];
-            }
-        }
+const fetchMonthSalesData = async () => {
+    try {
+        let url =`/sales/status/monthly`;
 
-        // console.log(monthSales);
-        // console.log(yearSales);
-        
+        console.log(url);
+        const response = await api.get(url);
+        monthSales.value = response.data.result || {};
+
+        console.log(monthSales.value);
+
 
     } catch (error) {
         console.error('데이터 로드 실패:', error);
@@ -100,7 +101,7 @@ const monthChartOptions = computed(() => {
             fontFamily: `inherit`,
             toolbar: { show: false }
         },
-        colors: [getLightPrimary.value, getPrimary.value],
+        colors: ['#B4B9BA', getPrimary.value],
         plotOptions: {
             pie: {
                 donut: {
@@ -130,13 +131,15 @@ const monthChartOptions = computed(() => {
         stroke: { show: false },
         legend: { show: false },
         tooltip: {
+            theme: "dark",
+            fillSeriesColor: false,
             y: {
                 formatter: function (val, { seriesIndex }) {
                     if (seriesIndex === 1) {
                         const percentage = (monthSales.value / monthTargetSales.value) * 100;
                         return `${percentage.toFixed(2)}% 달성`;
                     }
-                    return `${val.toFixed(2)}%`;
+                    return `${formatNumberWithCommas(monthTargetSales.value - monthSales.value)}원 남음`;
                 }
             }
         }
@@ -153,7 +156,7 @@ const yearChartOptions = computed(() => {
             fontFamily: `inherit`,
             toolbar: { show: false }
         },
-        colors: [getLightPrimary.value, getPrimary.value],
+        colors: ['#B4B9BA', getPrimary.value],
         plotOptions: {
             pie: {
                 donut: {
@@ -183,13 +186,15 @@ const yearChartOptions = computed(() => {
         stroke: { show: false },
         legend: { show: false },
         tooltip: {
+            theme: "dark",
+            fillSeriesColor: false,
             y: {
                 formatter: function (val, { seriesIndex }) {
                     if (seriesIndex === 1) {
                         const percentage = (yearSales.value / yearTargetSales.value) * 100;
                         return `${percentage.toFixed(2)}% 달성`;
                     }
-                    return `${val.toFixed(2)}%`;
+                    return `${formatNumberWithCommas(yearTargetSales.value - yearSales.value)}원 남음`;;
                 }
             }
         }
@@ -210,7 +215,8 @@ const yearSeries = computed(() => [
 
 
 onMounted(() => {
-    fetchSalesData(year, month);
+    fetchMonthSalesData();
+    fetchYearSalesData();
     fetchTargetSalesData(year, month);
 });
 
