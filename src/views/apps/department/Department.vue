@@ -57,7 +57,7 @@
                                         v-model="selected.upperDeptName"
                                         :items="departmentNames"
                                     ></v-select>
-                                    <v-text-field v-else>{{ selected ? selected.upperDeptName : '' }}</v-text-field>
+                                    <v-text-field v-else dense :value="selected ? selected.upperDeptName : ''"></v-text-field>
                                 </v-col>
                                 <v-col style="min-width: 200px;">
                                     <span class="font-weight-black">부서 코드</span>
@@ -66,7 +66,6 @@
                                         v-model="selected.deptCode"
                                         :readonly="isEdit"
                                     ></v-text-field>
-                                    
                                     <v-text-field v-else dense :value="selected ? selected.deptCode : ''"></v-text-field>
                                 </v-col>
                                 <v-col style="min-width: 200px;">
