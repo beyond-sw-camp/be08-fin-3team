@@ -37,3 +37,28 @@ jobs:
 
       - name: CloudFront cache invalid
         run: aws cloudfront create-invalidation --distribution-id E28LB1SP106HGL --path "/*"
+
+
+  notify-discord:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Push success
+        if: success()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d '{"content":"🟢 **Frontend CI/CD Pipeline Success**"}' \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Push fail
+        if: failure()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d '{"content":"🔴 **Frontend CI/CD Pipeline Fail**"}' \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
