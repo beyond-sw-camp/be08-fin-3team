@@ -102,7 +102,7 @@ const sidebarItem: menu[] = [
 			{
 					title: '견적',
 					icon: FilesIcon,
-					to: '/estimates'
+					to: '/sales/estimates'
 			},
 			{
 					title: '계약',
