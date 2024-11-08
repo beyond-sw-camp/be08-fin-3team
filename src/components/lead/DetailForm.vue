@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, onMounted, reactive, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import api from '@/api/axiosinterceptor';
 import ConfirmDialogs from '../shared/ConfirmDialogs.vue';
 import { useAlert } from '@/utils/useAlert';
@@ -9,8 +9,9 @@ import AlertComponent from '../shared/AlertComponent.vue';
 const showConfirmDialogs = ref(false);
 const { alertMessage, alertType, showAlert, triggerAlert } = useAlert();
 
+const userRole = ref(localStorage.getItem('loginUserRole') !== 'ADMIN');
+
 const route = useRoute();
-const router = useRouter();
 
 const isMounted = ref(false);
 
@@ -68,9 +69,7 @@ const expSalesDisplay = ref('0');
 const expProfitDisplay = ref('0');
 const expMarginDisplay = ref('0');
 
-const formatNumber = (value) => {
-    return new Intl.NumberFormat().format(value);
-};
+const formatNumber = (value) => new Intl.NumberFormat().format(value);
 
 const filterNumericInput = (value) => {
     return value.replace(/[^\d]/g, '');
@@ -88,7 +87,9 @@ leadResponseDto.endDate = today;
 const customerDialog = ref(false);
 const searchCond = reactive({
     selectedItem: '고객명',
-    searchQuery: null
+    searchQuery: null,
+    deptNo: userRole.value ? localStorage.getItem('loginDeptNo') : 0,
+    userNo: userRole.value ? localStorage.getItem('loginUserNo') : 0
 });
 const customerList = ref([]);
 const selectedCustomer = ref(null);
@@ -227,7 +228,7 @@ const submitForm = async () => {
                     custNo: leadResponseDto.customerNo
                 });
 
-                console.log('POST response:', response.data);
+                // console.log('POST response:', response.data);
 
                 if (response.data.isSuccess) {
                     leadResponseDto.leadNo = response.data.result.leadNo;
@@ -250,7 +251,7 @@ const submitForm = async () => {
                     custNo: leadResponseDto.customerNo
                 });
 
-                console.log('PATCH response:', response.data);
+                // console.log('PATCH response:', response.data);
 
                 if (response.data.isSuccess) {
                     triggerAlert('수정이 완료되었습니다.', 'success', 1500, '/sales/lead');
@@ -272,7 +273,7 @@ const deleteLead = async () => {
     if (leadNo) {
         try {
             await api.delete(`/leads/${leadNo}`);
-            console.log(`리드 ${leadNo}가 성공적으로 삭제되었습니다.`);
+            // console.log(`리드 ${leadNo}가 성공적으로 삭제되었습니다.`);
 
             triggerAlert('삭제가 완료되었습니다.', 'success', 1000, '/sales/lead');
         } catch (error) {

@@ -18,6 +18,8 @@ const breadcrumbs = ref([
     { text: '제안 등록', disabled: true, href: '/proposals/create' }
 ]);
 
+const userRole = ref(localStorage.getItem('loginUserRole') !== 'ADMIN');
+
 const valid = ref(false);
 
 const loading = ref(false);
@@ -67,8 +69,9 @@ const leads = ref([]);
 const leadModal = ref(false);
 const leadDialog = ref(false);
 const searchCond = reactive({
-    selectedItem: '영업기회명',
-    searchQuery: null
+    name: '',
+    deptNo: userRole.value ? localStorage.getItem('loginDeptNo') : 0,
+    userNo: userRole.value ? localStorage.getItem('loginUserNo') : 0
 });
 const headers = ref([
     { title: '영업기회명', key: 'leadName', sortable: false },
@@ -84,7 +87,7 @@ const handleRowClick = (lead) => {
 
 const handleRowDbClick = () => {
     if (selectedLead.value != null) {
-        console.log('Selected Lead:', selectedLead.value);
+        // console.log('Selected Lead:', selectedLead.value);
         selectLead(selectedLead.value);
     } else {
         alert('영업기회를 선택하지 않았습니다.');
@@ -94,34 +97,34 @@ const handleRowDbClick = () => {
 const selectLead = (lead) => {
     editedItem.leadNo = lead.leadNo;
     editedItem.leadName = lead.name;
-    console.log('Lead selected:', editedItem.leadNo);
+    // console.log('Lead selected:', editedItem.leadNo);
     leadDialog.value = false;
 };
 
-onMounted(async () => {
-    try {
-        const response = await api.get('/leads');
-        console.log('API response', response.data);
+// onMounted();
+//     async () => {
+//     try {
+//         const response = await api.get('/leads/filter', searchCond);
 
-        if (response.data.isSuccess && Array.isArray(response.data.result)) {
-            leads.value = response.data.result.map((lead) => ({
-                leadNo: lead.leadNo,
-                name: lead.name
-            }));
-        } else {
-            console.error('Expected an array but got:', response.data);
-        }
-    } catch (error) {
-        console.error('failed to fetch leads: ', error);
-    }
-});
+//         if (response.data.isSuccess && Array.isArray(response.data.result)) {
+//             leads.value = response.data.result.map((lead) => ({
+//                 leadNo: lead.leadNo,
+//                 name: lead.name
+//             }));
+//         } else {
+//             console.error('Expected an array but got:', response.data);
+//         }
+//     } catch (error) {
+//         console.error('failed to fetch leads: ', error);
+//     }
+// }
 watch(
     () => leadDialog.value,
     (newVal) => {
         if (newVal) {
             fetchLeads();
         } else {
-            searchCond.searchQuery = '';
+            searchCond.name = '';
             selectedLead.value = null;
         }
     }
@@ -142,7 +145,7 @@ const save = async () => {
         return;
     }
 
-    console.log('Edited Item before saving:', editedItem);
+    // console.log('Edited Item before saving:', editedItem);
 
     loading.value = true;
 
@@ -188,7 +191,7 @@ const cancel = () => {
                         <v-card-text>
                             <v-row>
                                 <v-col cols="10">
-                                    <v-text-field label="영업기회명" v-model="searchCond.searchQuery" clearable></v-text-field>
+                                    <v-text-field label="영업기회명" v-model="searchCond.name" clearable></v-text-field>
                                 </v-col>
                                 <v-col cols="2">
                                     <v-btn @click="fetchLeads" color="primary">검색</v-btn>

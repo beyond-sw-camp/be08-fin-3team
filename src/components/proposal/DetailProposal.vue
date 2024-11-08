@@ -276,8 +276,6 @@ const cancel = () => {
                         <v-text-field
                             v-model="editedItem.leadName"
                             :rules="[(v) => !!v || '영업기회를 선택해주세요']"
-                            append-inner-icon="mdi-magnify"
-                            @click:append-inner="leadDialog = true"
                             class="clickable-field"
                             readonly
                         ></v-text-field>

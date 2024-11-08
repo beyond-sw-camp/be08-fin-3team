@@ -44,13 +44,13 @@ export function useExcelDownloader() {
             const rowData = {};
             Object.keys(item).forEach((key) => {
                 const value = item[key];
-                // 값이 null이나 undefined인 경우 ''로 대체하고, object나 array 타입이 아닌 경우에만 추가
                 if (value != null && typeof value !== 'object') {
                     rowData[key] = value;
                 } else if (value == null) {
-                    rowData[key] = ''; // null 또는 undefined인 경우 빈 문자열로 대체
+                    rowData[key] = '';
                 }
             });
+
             return rowData;
         });
     };
