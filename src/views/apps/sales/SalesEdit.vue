@@ -91,7 +91,7 @@
           <v-col cols="12" sm="6">
             <v-text-field
               v-model="sales.productCount"
-              label="수량"
+              label="수량(EA)"
               type="text"
               @input="calculateTaxAndPrice"
             />
@@ -99,16 +99,16 @@
           <v-col cols="12" sm="6">
             <v-text-field
               v-model="sales.supplyPrice"
-              label="공급 가격"
+              label="공급 가격(원)"
               type="text"
               @input="calculateTaxAndPrice"
             />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="sales.tax" label="세금" type="text" readonly />
+            <v-text-field v-model="sales.tax" label="세금(원)" type="text" readonly />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="sales.price" label="총 가격" type="text" readonly />
+            <v-text-field v-model="sales.price" label="총 가격(원)" type="text" readonly />
           </v-col>
           <v-col cols="12" sm="6">
             <v-text-field v-model="sales.expArrivalDate" label="예상 도착 날짜" type="date" />
