@@ -110,7 +110,7 @@
 
     <v-dialog v-model="dialog" max-width="500px">
         <v-card>
-            <v-card-title class="text-h5">'부서 생성'</v-card-title>
+            <v-card-title class="text-h5">부서 등록</v-card-title>
             <v-card-text>
                 <v-container>
                     <v-row>
