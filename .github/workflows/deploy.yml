@@ -50,7 +50,7 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
             -X POST \
-            -d '{"content":"🟢 **Backend CI/CD Pipeline Success**"}' \
+            -d '{"content":"🟢 **Frontend CI/CD Pipeline Success**"}' \
             ${{ secrets.DISCORD_WEBHOOK_URL }}
 
       - name: Push fail
@@ -60,5 +60,5 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
             -X POST \
-            -d '{"content":"🔴 **Backend CI/CD Pipeline Fail**"}' \
+            -d '{"content":"🔴 **Frontend CI/CD Pipeline Fail**"}' \
             ${{ secrets.DISCORD_WEBHOOK_URL }}
